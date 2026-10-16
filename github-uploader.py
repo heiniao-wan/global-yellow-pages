@@ -198,6 +198,24 @@ def api_check_repo_anon(owner, repo):
     return None, "匿名查询失败（HTTP %s）" % st
 
 
+def api_list_repos(token, limit=300):
+    """列出当前账号名下所有仓库（含私有），返回 (名字列表, 错误)"""
+    names, page = [], 1
+    while len(names) < limit:
+        st, js, txt = http_json(
+            "%s/user/repos?per_page=100&page=%d&sort=updated" % (GITHUB_API, page),
+            headers={"Authorization": "Bearer " + token})
+        if st != 200 or not isinstance(js, list):
+            return names, ("读取仓库列表失败（HTTP %s）" % st) if not names else ""
+        if not js:
+            break
+        names += [r.get("name", "") for r in js]
+        if len(js) < 100:
+            break
+        page += 1
+    return names, ""
+
+
 def api_create_repo(token, repo, private, description):
     st, js, txt = http_json(GITHUB_API + "/user/repos",
                             data={"name": repo, "private": "true" if private else "false",
@@ -362,6 +380,7 @@ class UploaderWizard(tk.Tk):
             "email": "",
             "message": "feat: 全球黄页站点（335 站点 / 留言后台 / 四语）",
             "token": "",
+            "repo_ready": False,
             "step": 0,
         }
         self._load_repo_state()
@@ -660,6 +679,20 @@ class UploaderWizard(tk.Tk):
                                     % (st["owner"], st["repo"]))
                 return True
 
+        # 单查不到 → 用「列出名下仓库」兜底（私有仓库单查可能 404，但列表里能看到）
+        if not err:
+            names, lerr = api_list_repos(token)
+            if st["repo"] in names:
+                st["repo_ready"] = True
+                self.log("   ✅ 在账号 %s 的仓库列表里找到了 %s —— 直接用它" % (st["owner"], st["repo"]))
+                messagebox.showinfo("仓库已存在",
+                                    "你的账号下已经有 %s 这个仓库了。\n"
+                                    "不需要新建，稍后直接把文件推上去。"
+                                    % st["repo"])
+                return True
+            if lerr:
+                self.log("   ⚠️ %s" % lerr)
+
         # 仓库确实不存在 → 自动创建
         self.status.config(text="仓库不存在，正在自动创建…")
         self.update_idletasks()
@@ -715,13 +748,14 @@ class UploaderWizard(tk.Tk):
 
         summary = (
             "上传目标：github.com/%s/%s\n"
-            "可见性：%s    分支：%s\n"
+            "仓库状态：%s    可见性：%s    分支：%s\n"
             "登录方式：%s\n"
             "提交署名：%s <%s>\n"
             "提交说明：%s\n"
             "文件数量：%d 个\n\n"
             "确定开始上传吗？"
         ) % (self.state["owner"], self.state["repo"],
+             "已确认存在，直接推送" if self.state.get("repo_ready") else "推送时按需处理",
              "私有" if self.state["private"] else "公开", self.state["branch"],
              {"device": "网页授权登录", "pat": "个人令牌", "gcm": "凭据管理器"}[self.state["mode"]],
              self.state["username"], self.state["email"],
@@ -842,6 +876,10 @@ class UploaderWizard(tk.Tk):
             ok = step("7/7 推送到 GitHub", cmd, critical=True, sensitive=token)
             # token 不落盘：remote 始终是普通地址
             sh([GIT, "remote", "set-url", "origin", plain])
+            if not ok:
+                self._emit("out", "   提示：若提示 repository not found，说明远端还没有这个仓库，"
+                                  "去 github.com/new 建一个空的再重试；\n"
+                                  "         若提示权限不足，返回第 1 步改选「③ 凭据管理器」或「② 个人令牌」。")
         else:
             # 凭据管理器模式：先把 helper 修到本机可用的 GCM（旧配置可能指向已删除的路径）
             if GCM:
