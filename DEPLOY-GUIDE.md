@@ -211,3 +211,35 @@ Cloudflare KV，仅站长凭 ADMIN_KEY 在 `admin.html` 查看——**不会发�
 - KV 免费额度：每天 10 万次读 / 1000 次写，个人站绰绰有余
 - 本地测试：Functions 只在 Cloudflare 上运行；想本地体验完整流程用 `node tools/dev-server.js`（真实运行 /api，密钥 `gyp-admin-dev-2026`），普通静态服务器打开时表单会提示发送失败（属正常现象）
 - `tools/verify-functions.js`：Functions 逻辑的本地单测（21 项），改动这两个文件后跑一遍
+
+---
+
+## 附录 G · 推送报错速查（403 / not found）
+
+| 报错 | 真正的原因 | 怎么处理 |
+| --- | --- | --- |
+| `remote: Permission to 用户/仓库.git denied to 用户` + `403` | **仓库在，但令牌没有写权限**（最常见：网页授权拿到的是只读令牌） | 换「② 个人令牌 PAT」，生成时勾选 `repo`；或直接选「③ 凭据管理器」，用浏览器 OAuth 授权 |
+| `remote: Repository not found` | 远端还没有这个仓库，或令牌看不到它 | 去 `github.com/new` 建一个**空仓库**（别勾 README/.gitignore/license），名字必须一模一样 |
+| `Password authentication is no longer supported` | 用了账号密码，GitHub 早已停用 | 必须用令牌（PAT / OAuth），不能用登录密码 |
+| `src refspec main does not match any` | 本地还没有任何提交 | 先 `git add -A` + `git commit -m "..."` 再推送 |
+| `403 Resource not accessible by integration`（建仓时） | 借用的 OAuth 应用没有「创建仓库」权限 | 手动到 `github.com/new` 建仓，再回来推送；或改用 PAT |
+
+**授权体检（一眼看出令牌能不能写）**
+
+上传向导在授权成功后、推送前会自动做一次体检，日志里会打印：
+
+```
+令牌类型：经典个人令牌（classic PAT） / OAuth 网页授权令牌
+登录账号：heiniao-wan
+GitHub 回传权限：repo, workflow, read:user   ← 空 = 只读，必 403
+对 owner/repo 的权限：push=True admin=True pull=True
+```
+
+只要 `push=False`，向导会当场弹窗让你换成 PAT 或重新授权；推送阶段若仍被 403，也会弹一次「换令牌自动重试」，不用重走整个向导。
+
+**备用方案（不经向导）**：本机 Git 凭据管理器里若已存过 GitHub 凭据，可直接
+
+```powershell
+git config --global credential.helper '!"C:\Users\heini\.workbuddy\binaries\PortableGit\versions\1.3.0\mingw64\bin\git-credential-manager.exe"'
+git push -u origin main
+```
