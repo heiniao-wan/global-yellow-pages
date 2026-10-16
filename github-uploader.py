@@ -177,22 +177,36 @@ def api_get_user(token):
     return "", "读取账号失败（HTTP %s）" % st
 
 
-def api_ensure_repo(token, owner, repo, private, description):
-    """仓库存在则返回信息；不存在则创建。返回 (dict, 是否新建, 错误)"""
+def api_check_repo(token, owner, repo):
+    """用 token 查仓库。返回 (dict|None, 错误)——None 且无错表示不存在"""
     st, js, _ = http_json("%s/repos/%s/%s" % (GITHUB_API, owner, repo),
                           headers={"Authorization": "Bearer " + token})
     if st == 200 and js:
-        return js, False, ""
-    if st != 404:
-        return None, False, "查询仓库失败（HTTP %s）" % st
+        return js, ""
+    if st == 404:
+        return None, ""
+    return None, "查询仓库失败（HTTP %s）" % st
+
+
+def api_check_repo_anon(owner, repo):
+    """匿名查仓库（公开仓库不需要任何令牌）"""
+    st, js, _ = http_json("%s/repos/%s/%s" % (GITHUB_API, owner, repo))
+    if st == 200 and js:
+        return js, ""
+    if st == 404:
+        return None, ""
+    return None, "匿名查询失败（HTTP %s）" % st
+
+
+def api_create_repo(token, repo, private, description):
     st, js, txt = http_json(GITHUB_API + "/user/repos",
                             data={"name": repo, "private": "true" if private else "false",
                                   "description": description, "auto_init": "false"},
                             headers={"Authorization": "Bearer " + token})
     if st in (200, 201) and js:
-        return js, True, ""
+        return js, ""
     msg = (js or {}).get("message", txt[:200]) if js else txt[:200]
-    return None, False, "创建仓库失败（HTTP %s）：%s" % (st, msg)
+    return None, "创建仓库失败（HTTP %s）：%s" % (st, msg)
 
 
 # ─────────────────────────── 输入对话框 ───────────────────────────
@@ -590,7 +604,7 @@ class UploaderWizard(tk.Tk):
                                 % (login, login, self.state["repo"]))
         else:
             self.log("   ⚠️ 读取账号名失败：%s（沿用 %s）" % (uerr, self.state["owner"]))
-        return True
+        return self._prepare_repo()
 
     # ───────── 第 4 步（pat）：填令牌 ─────────
     def s_pat(self):
@@ -611,7 +625,84 @@ class UploaderWizard(tk.Tk):
             return False
         self.state["owner"] = login
         self.log("   ✅ 令牌有效，账号：%s" % login)
-        return True
+        return self._prepare_repo()
+
+    # ───────── 仓库准备（授权成功后、确认清单前）─────────
+    def _prepare_repo(self):
+        """检查仓库 → 不存在才创建 → 创建被拒则引导。全程在主线程，可弹框。"""
+        st = self.state
+        token = st.get("token")
+        if not token:
+            return True
+        self.status.config(text="正在检查远程仓库 %s/%s …" % (st["owner"], st["repo"]))
+        self.update_idletasks()
+
+        info, err = api_check_repo(token, st["owner"], st["repo"])
+        if info:
+            st["repo_ready"] = True
+            st["private"] = bool(info.get("private"))
+            self.log("   ✅ 仓库已存在：%s（%s）——直接用它"
+                     % (info.get("full_name"), "私有" if st["private"] else "公开"))
+            messagebox.showinfo("仓库已存在",
+                                "%s 已经存在（%s），\n不需要新建，稍后直接把文件推上去。"
+                                % (info.get("full_name"),
+                                   "私有" if st["private"] else "公开"))
+            return True
+
+        # token 查不到 → 试匿名（公开仓库不需要令牌）
+        if not err:
+            info2, _ = api_check_repo_anon(st["owner"], st["repo"])
+            if info2:
+                st["repo_ready"] = True
+                self.log("   ✅ 仓库已存在（公开）：%s/%s —— 直接用它" % (st["owner"], st["repo"]))
+                messagebox.showinfo("仓库已存在",
+                                    "%s/%s 已经存在（公开），\n不需要新建，稍后直接把文件推上去。"
+                                    % (st["owner"], st["repo"]))
+                return True
+
+        # 仓库确实不存在 → 自动创建
+        self.status.config(text="仓库不存在，正在自动创建…")
+        self.update_idletasks()
+        js, cerr = api_create_repo(token, st["repo"], st["private"], st["desc"])
+        if js:
+            st["repo_ready"] = True
+            self.log("   ✅ 已创建仓库：%s" % js.get("full_name"))
+            messagebox.showinfo("仓库已创建",
+                                "仓库 %s 已创建（%s）。"
+                                % (js.get("full_name"),
+                                   "私有" if st["private"] else "公开"))
+            return True
+
+        # 创建被拒（典型：网页授权的 App 无建仓权限）→ 引导用户
+        self.log("   ⚠️ %s" % cerr)
+        ans = messagebox.askyesno(
+            "无法自动创建仓库",
+            "%s\n\n"
+            "常见原因：\n"
+            "  1) 同名仓库你已经建过（私有仓库匿名查不到，工具看不到它）；\n"
+            "  2) 网页授权的应用没有「创建仓库」的权限（只能推代码）。\n\n"
+            "如果你的仓库已经建好了 → 点「是」，直接向它推送；\n"
+            "如果还没建 → 点「否」，我帮你打开建仓页面。" % cerr)
+        if ans:
+            st["repo_ready"] = True
+            self.log("   ✅ 按已有仓库处理，稍后直接推送")
+            return True
+        while True:
+            webbrowser.open("https://github.com/new")
+            messagebox.showinfo(
+                "去网页建仓库",
+                "已打开 github.com/new，请填写：\n"
+                "  · Repository name：%s\n"
+                "  · 可见性：随意（%s）\n"
+                "  · 不要勾选 README / .gitignore / license\n\n"
+                "建好后回到这里。" % (st["repo"],
+                                 "建议私有" if st["private"] else "建议公开"))
+            if messagebox.askyesno("等待确认", "仓库建好了吗？"):
+                st["repo_ready"] = True
+                self.log("   ✅ 用户已在网页创建仓库，稍后直接推送")
+                return True
+            self.log("   🛑 用户选择停止，可点「上一步」换登录方式再试")
+            return False
 
     # ───────── 第 5 步：确认 ─────────
     def s_confirm(self):
@@ -729,19 +820,9 @@ class UploaderWizard(tk.Tk):
                         [GIT, "commit", "-m", st["message"]]):
                 return
 
-        # 6) 远程仓库：有 token 就用 API 检查/创建
-        if token:
-            js, created, err = api_ensure_repo(token, owner, repo,
-                                               st["private"], st["desc"])
-            if err:
-                self._emit("bad", "5/7 仓库处理失败：" + err)
-                self._emit("stop", err)
-                return
-            self._emit("ok", "5/7 仓库%s：%s" % ("已创建" if created else "已存在",
-                                                 js.get("full_name", owner + "/" + repo)))
-            if created:
-                self._emit("ask", "仓库 %s/%s 已创建（%s）"
-                           % (owner, repo, "私有" if st["private"] else "公开"))
+        # 6) 远程仓库：第 4 步已备好则直接用；否则（凭据管理器模式）交给 git 自己处理
+        if st.get("repo_ready"):
+            self._emit("ok", "5/7 远程仓库已就绪：%s/%s" % (owner, repo))
         else:
             self._emit("ok", "5/7 不检查远端（凭据管理器模式，直接推送）")
 
