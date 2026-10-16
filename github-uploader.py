@@ -184,10 +184,14 @@ def http_json(url, data=None, method=None, headers=None, timeout=25):
 
 
 def device_start():
-    """Device Flow 第 1 步：申请设备码"""
+    """Device Flow 第 1 步：申请设备码
+
+    scope 一定要显式带上 repo，否则 GitHub 会发一个「只读」令牌，
+    能 ls-remote 但 push 时会被 403（Permission denied）。
+    """
     st, js, txt = http_json(
         "https://github.com/login/device/code",
-        data={"client_id": CLIENT_ID, "scope": "repo read:user"})
+        data={"client_id": CLIENT_ID, "scope": "repo,workflow,read:user"})
     if st != 200 or not js or "user_code" not in js:
         return None, "申请设备码失败（HTTP %s）：%s" % (st, (js or {}).get("error_description", txt[:200]))
     return js, ""
@@ -213,12 +217,88 @@ def device_poll(device_code, interval=5, timeout=600, should_stop=None):
     return None, "等待授权超时"
 
 
+def http_json_h(url, headers=None, timeout=25):
+    """与 http_json 相同，但额外返回响应头（要读 GitHub 回传的 X-OAuth-Scopes）"""
+    hdr = dict(UA)
+    if headers:
+        hdr.update(headers)
+    req = urllib.request.Request(url, headers=hdr, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            txt = decode_out(r.read())
+            try:
+                return r.status, json.loads(txt), txt, dict(r.headers)
+            except ValueError:
+                return r.status, None, txt, dict(r.headers)
+    except urllib.error.HTTPError as e:
+        txt = decode_out(e.read())
+        try:
+            return e.code, json.loads(txt), txt, dict(e.headers or {})
+        except ValueError:
+            return e.code, None, txt, dict(e.headers or {})
+    except Exception as e:  # noqa: BLE001
+        return -1, None, str(e), {}
+
+
 def api_get_user(token):
     st, js, _ = http_json(GITHUB_API + "/user",
                           headers={"Authorization": "Bearer " + token})
     if st == 200 and js:
         return js.get("login", ""), ""
     return "", "读取账号失败（HTTP %s）" % st
+
+
+def token_kind(tok):
+    """按前缀判断令牌类型，报错时好定位"""
+    t = (tok or "").strip()
+    if t.startswith("github_pat_"):
+        return "细粒度个人令牌（fine-grained PAT）"
+    if t.startswith("ghp_"):
+        return "经典个人令牌（classic PAT）"
+    if t.startswith("gho_"):
+        return "OAuth 网页授权令牌"
+    if t.startswith("ghs_"):
+        return "GitHub 服务端令牌"
+    if t.startswith("ghu_"):
+        return "OAuth 用户令牌（只读倾向）"
+    return "未知类型（长度 %d）" % len(t)
+
+
+def api_token_diag(token, owner, repo):
+    """授权体检：这个令牌到底能不能推送？
+
+    返回 dict：login / scopes / exists / private / push / admin / pull / err
+    说明：
+      · scopes 来自响应头 X-OAuth-Scopes（经典 PAT / OAuth 令牌才有）
+      · push=False 而仓库存在 → 就是「能读不能写」，推送必 403
+    """
+    d = {"login": "", "scopes": "", "exists": False, "private": None,
+         "push": None, "admin": None, "pull": None, "err": ""}
+    st, js, _, hdrs = http_json_h(GITHUB_API + "/user",
+                                  headers={"Authorization": "Bearer " + token})
+    if st == 200 and js:
+        d["login"] = js.get("login", "")
+        d["scopes"] = (hdrs.get("X-OAuth-Scopes") or "").strip()
+    else:
+        d["err"] = "读取账号失败（HTTP %s）" % st
+        return d
+
+    st2, js2, _, h2 = http_json_h("%s/repos/%s/%s" % (GITHUB_API, owner, repo),
+                                  headers={"Authorization": "Bearer " + token})
+    if not d["scopes"]:
+        d["scopes"] = (h2.get("X-OAuth-Scopes") or "").strip()
+    if st2 == 200 and js2:
+        d["exists"] = True
+        d["private"] = bool(js2.get("private"))
+        perm = js2.get("permissions") or {}
+        d["push"] = perm.get("push")
+        d["admin"] = perm.get("admin")
+        d["pull"] = perm.get("pull")
+    elif st2 == 404:
+        d["err"] = "仓库不存在（404），或令牌看不到它"
+    else:
+        d["err"] = "查询仓库失败（HTTP %s）" % st2
+    return d
 
 
 def api_check_repo(token, owner, repo):
@@ -428,6 +508,7 @@ class UploaderWizard(tk.Tk):
             "step": 0,
         }
         self._load_repo_state()
+        self._fix_credential_helper()
 
         self._build_ui()
         self.after(120, self._poll)
@@ -499,6 +580,25 @@ class UploaderWizard(tk.Tk):
                 self.state["owner"] = m.group(1)
                 self.state["repo"] = m.group(2)
 
+    def _fix_credential_helper(self):
+        """旧配置可能指向已被删除的 PortableGit 目录，导致凭据管理器根本起不来"""
+        if not GIT or not GCM:
+            return
+        code, out = sh([GIT, "config", "--global", "--get", "credential.helper"])
+        if code != 0:
+            return
+        cur = out.strip()
+        if not cur or "git-credential-manager" not in cur:
+            return
+        m = None
+        import re as _re
+        m = _re.search(r"([A-Za-z]:\\[^\"']*?git-credential-manager\.exe)", cur)
+        if m and os.path.isfile(m.group(1)):
+            return                      # 指向的文件还在，别动
+        sh([GIT, "config", "--global", "credential.helper", '!"%s"' % GCM])
+        sh([GIT, "config", "--global", "credential.https://github.com.provider", "github"])
+        self._helper_fixed = GCM   # 稍后进了第 1 步再打日志（此时日志框还没建好）
+
     # ───────── 步骤编排 ─────────
     def step_defs(self):
         """按当前选择动态生成步骤列表"""
@@ -554,11 +654,13 @@ class UploaderWizard(tk.Tk):
 
     # ───────── 第 1 步：登录方式 ─────────
     def s_auth(self):
+        if getattr(self, "_helper_fixed", ""):
+            self.log("   🔧 已把凭据管理器修到本机可用路径：%s" % self._helper_fixed)
         opts = [
             ("① 网页授权登录（推荐，不用管令牌）",
              "程序给你 8 位码 → 自动打开浏览器 → 你在已登录的 GitHub 页面粘贴码、点 Authorize → 自动完成上传"),
             ("② 我填个人令牌（PAT）",
-             "懂行的用：自己去 GitHub 生成过令牌，粘贴进来即可（只用于本次上传，不保存）"),
+             "最稳的一种：生成时勾选 repo（读写仓库）。推送报 403 权限不足时，选它就对了"),
             ("③ 凭据管理器（GCM）弹窗授权",
              "由 Git 凭据管理器弹浏览器 OAuth；若你之前弹窗报错过，优先选 ①"),
         ]
@@ -623,6 +725,10 @@ class UploaderWizard(tk.Tk):
 
     # ───────── 第 4 步（device）：网页授权 ─────────
     def s_device(self):
+        return self._device_flow() and self._prepare_repo() and self._ensure_push_rights()
+
+    def _device_flow(self):
+        """走一遍 Device Flow，拿到令牌写进 state['token']"""
         self.status.config(text="正在向 GitHub 申请设备码…")
         self.update_idletasks()
         js, err = device_start()
@@ -667,7 +773,7 @@ class UploaderWizard(tk.Tk):
                                 % (login, login, self.state["repo"]))
         else:
             self.log("   ⚠️ 读取账号名失败：%s（沿用 %s）" % (uerr, self.state["owner"]))
-        return self._prepare_repo()
+        return True
 
     # ───────── 第 4 步（pat）：填令牌 ─────────
     def s_pat(self):
@@ -680,15 +786,118 @@ class UploaderWizard(tk.Tk):
                  "本工具只在本次上传中使用它，不会保存到任何文件。")
         if not res or not res["token"]:
             return False
-        self.state["token"] = res["token"]
-        login, err = api_get_user(res["token"])
+        self.state["token"] = res["token"].strip()
+        login, err = api_get_user(self.state["token"])
         if not login:
             messagebox.showerror("令牌无效",
                                  "这个令牌连不上 GitHub：%s\n\n请确认已勾选 repo 权限且未过期。" % err)
             return False
         self.state["owner"] = login
         self.log("   ✅ 令牌有效，账号：%s" % login)
-        return self._prepare_repo()
+        return self._prepare_repo() and self._ensure_push_rights()
+
+    # ───────── 授权体检：确认令牌真的能写 ─────────
+    def _log_diag(self, d):
+        self.log("   ── 授权体检 ─────────────────────────────")
+        self.log("   令牌类型：%s" % token_kind(self.state.get("token")))
+        self.log("   登录账号：%s" % (d.get("login") or "(读取失败)"))
+        self.log("   GitHub 回传权限：%s" % (d.get("scopes") or "（空 —— 只读，推不上去）"))
+        if d.get("exists"):
+            self.log("   对 %s/%s 的权限：push=%s admin=%s pull=%s"
+                     % (self.state["owner"], self.state["repo"],
+                        d.get("push"), d.get("admin"), d.get("pull")))
+        else:
+            self.log("   仓库查询结果：%s" % (d.get("err") or "查不到该仓库"))
+        self.log("   ────────────────────────────────────────")
+
+    def _ensure_push_rights(self):
+        """推送前先确认令牌有写权限；没有就当场引导换 PAT / 重授权。返回是否继续。"""
+        st = self.state
+        token = st.get("token")
+        if not token:
+            return True
+        self.status.config(text="正在体检授权权限…")
+        self.update_idletasks()
+        d = api_token_diag(token, st["owner"], st["repo"])
+        self._log_diag(d)
+        if d.get("push") is not False:
+            return True
+
+        self.log("   ❌ 该令牌对 %s/%s 没有写权限（push=false），继续推送必然 403"
+                 % (st["owner"], st["repo"]))
+        pick = ask_choice(
+            self, "授权权限不足（只能读，不能写）",
+            "这个令牌能读到仓库，但 GitHub 不让它推送（典型报错 403 Permission denied）。\n"
+            "最常见原因：网页授权时拿到的是只读令牌（没有 repo 写权限）。\n\n"
+            "想怎么处理？",
+            [("① 改用个人令牌 PAT（最稳，推荐）",
+              "打开令牌生成页（权限已预勾 repo），生成后粘贴回来，立刻继续上传"),
+             ("② 撤销旧的网页授权，重新授权一次",
+              "打开 GitHub 授权管理页，Revoke 掉旧的授权，再重新走一遍网页授权"),
+             ("③ 不管它，强行推送",
+              "除非你确定是别的原因，否则多半还是 403")])
+        if pick is None:
+            return False
+        if pick == 0:
+            return self._switch_to_pat(st["repo"])
+        if pick == 1:
+            open_url("https://github.com/settings/applications")
+            messagebox.showinfo(
+                "撤销旧授权",
+                "请在打开的页面里：\n"
+                "  1) 点上方「Authorized OAuth Apps」标签\n"
+                "  2) 找到 GitHub CLI（本工具借用的官方应用）→ 点 Revoke\n"
+                "  3) 回来点「下一步」，我会重新发起一次网页授权")
+            if not self._device_flow():
+                return False
+            d2 = api_token_diag(st["token"], st["owner"], st["repo"])
+            self._log_diag(d2)
+            if d2.get("push") is False:
+                messagebox.showerror(
+                    "重新授权后仍然只读",
+                    "新令牌依旧没有写权限。建议改用「① 个人令牌」：\n"
+                    "GitHub → Settings → Developer settings → Personal access tokens "
+                    "→ Tokens (classic) → 勾选 repo。")
+                return False
+            self.log("   ✅ 重新授权后已具备写权限")
+            return True
+        self.log("   ⚠️ 用户选择强行推送")
+        return True
+
+    def _switch_to_pat(self, repo_for_check=None):
+        """引导用户生成一个带 repo 权限的 PAT 并替换当前令牌"""
+        open_url("https://github.com/settings/tokens/new?scopes=repo,workflow"
+                 "&description=global-yellow-pages-uploader")
+        res = ask_inputs(
+            self, "改用个人令牌（PAT）",
+            "已打开 GitHub 令牌生成页（repo 权限已预勾）。\n"
+            "网页上滚到最底部点「Generate token」，把生成的令牌粘贴进来：",
+            [("token", "PAT（ghp_ 或 github_pat_ 开头）：", "", True)],
+            note="令牌只在本次上传中使用，不会写入任何文件。\n"
+                 "若页面要求输入密码/二次验证，按提示完成即可。",
+            ok_text="用这个令牌")
+        if not res or not res["token"]:
+            return False
+        tok = res["token"].strip()
+        login, err = api_get_user(tok)
+        if not login:
+            messagebox.showerror("令牌无效", "这个令牌连不上 GitHub：%s" % err)
+            return False
+        owner = login
+        rp = repo_for_check or self.state["repo"]
+        d = api_token_diag(tok, owner, rp)
+        self._log_diag(d)
+        if d.get("push") is False:
+            messagebox.showerror(
+                "仍然没有写权限",
+                "令牌可用（账号 %s），但对 %s/%s 没有写权限。\n"
+                "请确认：令牌由本人账号生成、勾选了 repo（或该仓库的 Read and write）。"
+                % (owner, owner, rp))
+            return False
+        self.state["token"] = tok
+        self.state["owner"] = owner
+        self.log("   ✅ 已换成个人令牌（账号 %s），具备写权限" % owner)
+        return True
 
     # ───────── 仓库准备（授权成功后、确认清单前）─────────
     def _prepare_repo(self):
@@ -851,6 +1060,18 @@ class UploaderWizard(tk.Tk):
     def _emit(self, kind, payload):
         self.q.put((kind, payload))
 
+    def ask_main(self, kind, payload, timeout=1800):
+        """工作线程 → 主线程弹框取输入（返回用户输入或 None）
+
+        tkinter 只能在主线程弹窗，所以这里把请求丢进队列，
+        由 _poll 在主线程弹出对话框，再用 Event 把结果传回工作线程。
+        """
+        self._answer = None
+        self._answer_ev = threading.Event()
+        self.q.put((kind, payload))
+        self._answer_ev.wait(timeout)
+        return self._answer
+
     def _run_all(self):
         st = self.state
         token = st["token"]
@@ -938,16 +1159,44 @@ class UploaderWizard(tk.Tk):
 
         # 8) 推送
         if token:
-            # 凭据走请求头（GitHub Actions 同款），URL 保持干净，令牌不会串进地址
-            hdr, cred = auth_header(token)
-            cmd = [GIT, "-c", "credential.helper=", "-c", hdr, "push", "-u", plain, branch]
-            ok = step("7/7 推送到 GitHub", cmd, critical=True, sensitive=cred)
-            # token 不落盘：remote 始终是普通地址
-            sh([GIT, "remote", "set-url", "origin", plain])
+            def do_push(tok, title="7/7 推送到 GitHub"):
+                # 凭据走请求头（GitHub Actions 同款），URL 保持干净，令牌不会串进地址
+                hdr, cred = auth_header(tok)
+                cmd = [GIT, "-c", "credential.helper=", "-c", hdr,
+                       "push", "-u", plain, branch]
+                good = step(title, cmd, critical=False, sensitive=cred)
+                # token 不落盘：remote 始终是普通地址
+                sh([GIT, "remote", "set-url", "origin", plain])
+                return good
+
+            ok = do_push(token)
             if not ok:
-                self._emit("out", "   提示：若提示 repository not found，说明远端还没有这个仓库，"
-                                  "去 github.com/new 建一个空的再重试；\n"
-                                  "         若提示权限不足，返回第 1 步改选「③ 凭据管理器」或「② 个人令牌」。")
+                # 403 / denied → 当场体检，并给用户一次「换令牌重试」的机会
+                d = api_token_diag(token, owner, repo)
+                self._emit("out", "   ── 授权体检 ── 账号：%s｜权限：%s｜push=%s"
+                           % (d.get("login") or "?", d.get("scopes") or "（空）", d.get("push")))
+                newtok = self.ask_main("need_pat", (
+                    "推送被 GitHub 拒绝了（403 Permission denied）。\n\n"
+                    "账号：%s\n令牌类型：%s\nGitHub 回传权限：%s\n\n"
+                    "最快的解法：换一个带 repo 权限的个人令牌（PAT）。\n"
+                    "点「确定」→ 我会打开 GitHub 令牌生成页（权限已预勾），\n"
+                    "生成后粘贴回来，立刻自动重试，不用重走整个向导。"
+                    % (d.get("login") or "?", token_kind(token),
+                       d.get("scopes") or "（空 = 只读）")))
+                if newtok:
+                    login, err = api_get_user(newtok)
+                    if not login:
+                        self._emit("out", "   ❌ 新令牌无效：%s" % err)
+                    else:
+                        self._emit("out", "   ✅ 已换成个人令牌（账号 %s），重试推送…" % login)
+                        ok = do_push(newtok, "7/7 推送到 GitHub（换 PAT 重试）")
+            if not ok:
+                self._emit("out",
+                           "   提示：403 denied = 令牌没有写权限，换一个勾选了 repo 的个人令牌最省事；\n"
+                           "         repository not found = 远端还没有这个仓库，去 github.com/new 建一个空的。")
+                self._emit("stop", "7/7 推送失败，已中止。\n"
+                                   "可点「上一步」回到第 1 步改选「② 个人令牌」。")
+                return
         else:
             # 凭据管理器模式：先把 helper 修到本机可用的 GCM（旧配置可能指向已删除的路径）
             if GCM:
@@ -978,6 +1227,18 @@ class UploaderWizard(tk.Tk):
                     self.log("   ❌ " + payload)
                 elif kind == "ask":
                     messagebox.showinfo("已处理", payload)
+                elif kind == "need_pat":
+                    # 主线程：开令牌页 → 弹输入框 → 结果回传工作线程
+                    open_url("https://github.com/settings/tokens/new?scopes=repo,workflow"
+                             "&description=global-yellow-pages-uploader")
+                    res = ask_inputs(
+                        self, "推送被拒绝 · 换一个令牌", payload,
+                        [("token", "个人令牌（PAT）：", "", True)],
+                        note="网页上滚到最底部点「Generate token」，粘贴回这里。\n"
+                             "留空或取消 = 放弃重试。",
+                        ok_text="确定，自动重试")
+                    self._answer = (res["token"].strip() if res and res["token"] else None)
+                    self._answer_ev.set()
                 elif kind == "stop":
                     self.log("   🛑 " + payload)
                     messagebox.showerror("上传中止", payload)
