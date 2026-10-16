@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>留言后台 · 全球黄页</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --line:#e4e6eb; --text:#1d1d1f; --muted:#86868b; --accent:#0071e3; --danger:#ff3b30; --ok:#34c759; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:32px 16px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  h1 { font-size:22px; margin-bottom:4px; }
+  .sub { font-size:13px; color:var(--muted); margin-bottom:20px; }
+  .login { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; display:flex; gap:10px; }
+  .login input { flex:1; height:40px; padding:0 14px; font-size:14px; border:1px solid var(--line); border-radius:10px; outline:none; }
+  .login input:focus { border-color:var(--accent); }
+  button { font-family:inherit; cursor:pointer; border:none; border-radius:10px; font-size:13.5px; font-weight:600; }
+  .btn-main { height:40px; padding:0 20px; color:#fff; background:var(--accent); }
+  .btn-main:active { transform:scale(.97); }
+  .msg { font-size:13px; margin:12px 2px; }
+  .msg.err { color:var(--danger); }
+  .msg.ok { color:var(--ok); }
+  .toolbar { display:flex; justify-content:space-between; align-items:center; margin:20px 2px 12px; }
+  .toolbar b { font-size:15px; }
+  .btn-ghost { height:32px; padding:0 14px; background:#fff; border:1px solid var(--line); color:var(--text); }
+  .btn-del { height:26px; padding:0 12px; font-size:12px; color:var(--danger); background:rgba(255,59,48,.08); }
+  .list { display:flex; flex-direction:column; gap:12px; }
+  .item { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+  .item-top { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .item-site { font-size:15px; font-weight:700; }
+  .item-cat { font-size:12px; color:var(--accent); background:rgba(0,113,227,.09); padding:2px 8px; border-radius:99px; margin-left:8px; vertical-align:2px; }
+  .item-time { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .item-msg { margin:10px 0; font-size:13.5px; line-height:1.65; white-space:pre-wrap; word-break:break-word; }
+  .item-meta { font-size:12px; color:var(--muted); line-height:1.7; word-break:break-all; }
+  .item-meta b { color:var(--text); font-weight:600; }
+  .empty { text-align:center; color:var(--muted); font-size:14px; padding:48px 0; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📬 留言后台</h1>
+  <p class="sub">仅管理员可见。密钥 = Cloudflare 环境变量 ADMIN_KEY（登录状态保存在本页会话内，关闭标签页即失效）</p>
+
+  <div class="login" id="loginBox">
+    <input type="password" id="keyInput" placeholder="输入管理员密钥 ADMIN_KEY" autocomplete="off">
+    <button class="btn-main" id="loginBtn">查看留言</button>
+  </div>
+  <p class="msg err" id="msg" hidden></p>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <b>留言记录 <span id="count"></span></b>
+    <button class="btn-ghost" id="refreshBtn">刷新</button>
+  </div>
+  <div class="list" id="list" hidden></div>
+  <p class="empty" id="empty" hidden>暂无留言</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var KEY_STORE = 'gyp:admin:key';
+  var key = '';
+
+  function showMsg(text, kind) {
+    var m = $('#msg');
+    m.textContent = text;
+    m.className = 'msg ' + (kind || 'err');
+    m.hidden = !text;
+  }
+
+  function fmtTime(ts) {
+    var d = new Date(ts);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function render(items) {
+    $('#count').textContent = '（' + items.length + ' 条）';
+    $('#list').innerHTML = items.map(function (r) {
+      var contact = [];
+      if (r.phone) contact.push('📞 <b>' + esc(r.phone) + '</b>');
+      if (r.email) contact.push('✉️ <b>' + esc(r.email) + '</b>');
+      if (!contact.length) contact.push('（未留联系方式）');
+      return '<div class="item" data-id="' + esc(r.id) + '">' +
+        '<div class="item-top"><div><span class="item-site">' + esc(r.site) + '</span>' +
+        (r.cat ? '<span class="item-cat">' + esc(r.cat) + '</span>' : '') + '</div>' +
+        '<span class="item-time">' + fmtTime(r.ts) + '</span></div>' +
+        '<p class="item-msg">' + esc(r.msg || '—') + '</p>' +
+        '<p class="item-meta">' + contact.join('　') + '<br>IP ' + esc(r.ip) + ' · ' + esc(r.ua || '') + '</p>' +
+        '<div style="text-align:right;margin-top:8px"><button class="btn-del">删除</button></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function load() {
+    showMsg('');
+    $('#empty').hidden = true;
+    fetch('/api/messages', { headers: { 'Authorization': 'Bearer ' + key } })
+      .then(function (r) {
+        if (r.status === 401) { showMsg('密钥不正确，或服务器未配置 ADMIN_KEY'); throw 0; }
+        if (r.status === 404) { showMsg('留言后台尚未部署（需 Cloudflare Pages Functions，见部署指南附录 F）'); throw 0; }
+        if (r.status === 503) { showMsg('服务器尚未绑定 KV（MESSAGES），见部署指南附录 F'); throw 0; }
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || !j.ok) { showMsg('读取失败'); throw 0; }
+        $('#toolbar').hidden = false;
+        $('#list').hidden = false;
+        if (!j.messages.length) { $('#empty').hidden = false; }
+        render(j.messages);
+      })
+      .catch(function () { if (!($('#msg').textContent)) showMsg('网络错误，请重试'); });
+  }
+
+  function enter() {
+    key = $('#keyInput').value.trim();
+    if (!key) { showMsg('请先输入密钥'); return; }
+    try { sessionStorage.setItem(KEY_STORE, key); } catch (e) { /* 忽略 */ }
+    $('#loginBox').hidden = true;
+    load();
+  }
+
+  $('#loginBtn').addEventListener('click', enter);
+  $('#keyInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  $('#refreshBtn').addEventListener('click', load);
+
+  // 删除（事件委托）
+  $('#list').addEventListener('click', function (e) {
+    var btn = e.target.closest('.btn-del');
+    if (!btn) return;
+    if (!window.confirm('确定删除这条留言？')) return;
+    var id = btn.closest('.item').dataset.id;
+    fetch('/api/messages?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + key }
+    }).then(function (r) {
+      if (r.ok) { btn.closest('.item').remove(); showMsg('已删除', 'ok'); }
+      else { showMsg('删除失败（' + r.status + '）'); }
+    }).catch(function () { showMsg('网络错误'); });
+  });
+
+  // 会话内记住密钥，免得每次刷新重输
+  try {
+    var saved = sessionStorage.getItem(KEY_STORE);
+    if (saved) { $('#keyInput').value = saved; enter(); }
+  } catch (e) { /* 忽略 */ }
+})();
+</script>
+</body>
+</html>

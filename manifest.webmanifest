@@ -1,0 +1,19 @@
+{
+  "name": "全球黄页 · 优质网站导航与口碑库",
+  "short_name": "全球黄页",
+  "description": "按行业分类收录全球知名站点，自动首页截图与真实用户投票。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#f5f5f7",
+  "icons": [
+    {
+      "src": "assets/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

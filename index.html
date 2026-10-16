@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="全球优质黄页导航 — 收录全球最新最热的知名网站，按行业分类，提供首页截图与真实用户口碑评价。">
+<meta name="theme-color" content="#f5f5f7">
+<title>全球黄页 · 优质网站导航与口碑库</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+
+<!-- ── 顶部导航 ── -->
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">🧭</span>
+      <div class="brand-text">
+        <strong>全球黄页</strong>
+        <span>优质网站导航与口碑库</span>
+      </div>
+    </div>
+
+    <form class="search-wrap" id="searchForm" role="search">
+      <span class="search-icon">🔍</span>
+      <input id="search" type="search" placeholder="搜索网站名称、域名或用途…" autocomplete="off" spellcheck="false">
+      <kbd>/</kbd>
+      <button type="submit" class="search-btn">搜索</button>
+    </form>
+
+    <nav class="topnav">
+      <a href="#results">网站目录</a>
+      <a href="#stats">数据统计</a>
+      <a href="#protection">防刷机制</a>
+      <a href="#feedback">网站反馈</a>
+    </nav>
+
+    <select id="langSel" class="lang-sel" aria-label="Language / 语言"></select>
+    <button id="themeToggle" class="theme-btn" aria-label="切换暗色主题" aria-pressed="false">🌙</button>
+  </div>
+</header>
+
+<!-- ── 左侧竖向分类导航（滚过首屏后浮现） ── -->
+<aside class="side-cats" id="sideCats" aria-label="分类导航"></aside>
+
+<!-- ── 首屏 ── -->
+<section class="hero">
+  <div class="wrap">
+    <p class="hero-kicker">已收录 <b id="statSites">0</b> 个全球站点</p>
+    <h1 class="hero-title">找到值得信赖的<br><span class="grad">那一个网站</span></h1>
+    <p class="hero-sub">按行业分类整理全球知名黄页与导航站点，自动抓取首页截图，配合同一 IP 一次性真实用户投票，让好网站被看见。</p>
+
+    <div class="hero-metrics">
+      <div class="metric">
+        <span class="metric-num" id="metricCats">17</span>
+        <span class="metric-label">行业分类</span>
+      </div>
+      <div class="metric">
+        <span class="metric-num" id="metricRegions">7</span>
+        <span class="metric-label">覆盖地区</span>
+      </div>
+      <div class="metric">
+        <span class="metric-num" id="statLike">0</span>
+        <span class="metric-label">累计点赞</span>
+      </div>
+      <div class="metric">
+        <span class="metric-num" id="healthPct">100%</span>
+        <span class="metric-label">整体好评率</span>
+      </div>
+    </div>
+
+    <button id="luckyBtn" class="lucky-btn" type="button">🎲 手气不错</button>
+  </div>
+</section>
+
+<!-- ── 分类栏 ── -->
+<section class="cat-section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>按行业浏览</h2>
+      <span class="section-note">点击分类筛选，点击下方卡片按钮参与评价</span>
+    </div>
+    <div class="cat-bar" id="catBar"></div>
+  </div>
+</section>
+
+<!-- ── 结果区 ── -->
+<section class="results" id="results">
+  <div class="wrap">
+    <div class="results-bar">
+      <div class="results-count"><b id="resultCount">0</b> 个网站</div>
+      <div class="results-filters">
+        <select id="regionSel" aria-label="按地区筛选"></select>
+        <select id="sortSel" aria-label="排序方式"></select>
+        <button id="brokenSel" class="filter-toggle" type="button">⚠ 仅看问题站点</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="empty" id="emptyState" hidden>
+      <span class="empty-icon">🔍</span>
+      <p>没有找到匹配的网站</p>
+      <p class="muted">换个关键词，或把筛选条件放宽试试</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 数据统计 ── -->
+<section class="stats" id="stats">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>投票数据统计</h2>
+      <span class="section-note">每个 IP / 设备对同一站点仅可评价一次</span>
+    </div>
+
+    <div class="stat-cards">
+      <div class="stat-card sc-like">
+        <span class="sc-icon">👍</span>
+        <b class="sc-num" id="statLikeNum">0</b>
+        <span class="sc-label">点赞</span>
+      </div>
+      <div class="stat-card sc-dislike">
+        <span class="sc-icon">👎</span>
+        <b class="sc-num" id="statDislikeNum">0</b>
+        <span class="sc-label">不喜欢</span>
+      </div>
+      <div class="stat-card sc-broken">
+        <span class="sc-icon">🚫</span>
+        <b class="sc-num" id="statBrokenNum">0</b>
+        <span class="sc-label">无法访问</span>
+      </div>
+      <div class="stat-card sc-health">
+        <span class="sc-icon">📈</span>
+        <b class="sc-num" id="healthPctNum">100%</b>
+        <span class="sc-label">整体好评率</span>
+      </div>
+    </div>
+
+    <div class="health-line">
+      <div class="health-track"><i id="healthBar" style="width:100%"></i></div>
+      <span class="health-note" id="healthNote">暂无投票数据</span>
+    </div>
+
+    <div class="charts">
+      <div class="chart-panel">
+        <h3>投票构成</h3>
+        <div class="ring-wrap" id="ringChart"></div>
+      </div>
+
+      <div class="chart-panel">
+        <h3>分类投票分布</h3>
+        <div class="cat-chart" id="catChart"></div>
+        <div class="chart-legend">
+          <span><i style="background:#34c759"></i>点赞</span>
+          <span><i style="background:#ff3b30"></i>不喜欢</span>
+          <span><i style="background:#ff9f0a"></i>无法访问</span>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <h3>口碑榜 TOP 8</h3>
+        <div class="rank-list" id="rankList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 防刷机制 ── -->
+<section class="protection" id="protection">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>防恶意点击机制</h2>
+      <span class="section-note">参考 Google AdSense 的无效流量识别思路，多信号叠加判定</span>
+    </div>
+
+    <div class="protect-body">
+      <div class="layer-grid" id="layerGrid"></div>
+
+      <aside class="protect-note">
+        <h4>为什么不能只靠 IP？</h4>
+        <p>家庭宽带、公司网络和校园网共用同一个出口 IP，单纯按 IP 限一次，会把一整屋子的真实用户误伤；而专业刷票方换代理 IP 即可轻松绕过。</p>
+        <p>所以本站采用 <b>指纹为主、IP 为辅</b> 的复合判定：设备换了、IP 没换照样认得；IP 换了、设备没换一样认得。</p>
+
+        <h4>当前指纹标识</h4>
+        <code class="fp" id="fpLabel">—</code>
+
+        <h4>数据存放在哪？</h4>
+        <p>当前版本为纯静态站点，投票数据保存在<b>本机浏览器</b>，仅用于你自己查看统计效果。接入云数据库后，票数将全站共享并永久保存。</p>
+
+        <p class="disclaimer">⚠️ 说明：前端校验逻辑对访问者可见，理论上可被绕过。真正的强制去重必须在服务端完成——接入数据库后，相同校验会在服务端强制执行，前端拦截只是第一道过滤。</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ── 网站反馈 ── -->
+<section class="feedback" id="feedback">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>网站反馈</h2>
+      <span class="section-note">发现值得收录的网站？留言告诉我们，核实后加入目录</span>
+    </div>
+
+    <div class="fb-grid">
+      <form class="fb-form" id="fbForm" novalidate>
+        <div class="fb-field req">
+          <label for="fbSite">网站名称或网址</label>
+          <input id="fbSite" type="text" placeholder="例：example.com" autocomplete="off">
+        </div>
+        <div class="fb-field">
+          <label for="fbCat">建议分类</label>
+          <select id="fbCat"></select>
+        </div>
+        <div class="fb-field fb-wide">
+          <label for="fbMsg">补充说明</label>
+          <textarea id="fbMsg" rows="3" placeholder="为什么值得收录？（选填）"></textarea>
+        </div>
+        <div class="fb-field">
+          <label for="fbPhone">电话</label>
+          <input id="fbPhone" type="tel" placeholder="+86 138 0000 0000" autocomplete="off">
+        </div>
+        <div class="fb-field">
+          <label for="fbEmail">邮箱</label>
+          <input id="fbEmail" type="email" placeholder="you@example.com" autocomplete="off">
+        </div>
+        <p class="fb-err" id="fbErr" hidden></p>
+        <p class="fb-status" id="fbStatus" hidden></p>
+        <button type="submit" class="fb-submit">发送反馈</button>
+      </form>
+
+      <aside class="fb-side">
+        <h4>联系方式与去向</h4>
+        <p>电话与邮箱至少填写一项，用于核实网站信息，不会用于其他用途。</p>
+        <p>留言将发送至站长邮箱 <b>Huoyld@163.com</b>。</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ── 页脚 ── -->
+<footer class="footer">
+  <div class="wrap">
+    <p>全球黄页 · 优质网站导航与口碑库</p>
+    <p class="muted">共收录 <b id="year">—</b> 站点数据 · 分类体系参考主流流量分析平台通用行业分类</p>
+    <p class="muted small">所有网站版权归各自所有者所有 · 本页仅作导航索引与用户评价参考</p>
+    <nav class="foot-links">
+      <a href="legal.html#about">关于本站</a>
+      <a href="legal.html#privacy">隐私政策</a>
+      <a href="legal.html#terms">使用条款</a>
+      <a href="legal.html#disclaimer">免责声明</a>
+      <a href="legal.html#contact">联系我们</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- Cookie / 本地存储同意条 -->
+<div class="consent" id="consentBar" hidden>
+  <span class="consent-text"></span>
+  <button id="consentOk" class="consent-btn"></button>
+</div>
+
+<!-- 回到顶部 -->
+<button id="backTop" aria-label="回到顶部" title="回到顶部">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M8 13V3M8 3L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/antiabuse.js"></script>
+<script src="assets/js/vault.js"></script>
+<script src="assets/js/thumbs.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  /* PWA：注册 Service Worker（离线可用 + 可安装到主屏） */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* 不支持则静默 */ });
+    });
+  }
+</script>
+</body>
+</html>

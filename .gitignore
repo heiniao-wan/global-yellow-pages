@@ -1,0 +1,16 @@
+# 本地工作数据，不公开
+.workbuddy/
+
+# 临时产物
+.shots/
+*.log
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+
+# 本地开发服务器留言数据（不上传）
+.local-kv.json
+
+# Python 缓存
+__pycache__/
