@@ -23,6 +23,7 @@ GitHub 上传向导 · 全球黄页站点
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import queue
@@ -85,6 +86,29 @@ if GIT:
         GCM = _gcm
 
 
+def open_url(url):
+    """在独立线程里打开浏览器。
+
+    坑：Python 3.12 + Windows 下，在 tkinter 主线程里直接 webbrowser.open()
+    会触发 GIL 相关的致命错误导致整个进程崩溃，所以必须挪到子线程，
+    并且失败时退回命令方式。
+    """
+    def _go():
+        # 先用系统命令打开（不经过 webbrowser 模块，最稳），失败再退回 webbrowser
+        try:
+            subprocess.Popen(["cmd", "/c", "start", "", url],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             creationflags=0x08000000)  # CREATE_NO_WINDOW，不闪黑框
+            return
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            webbrowser.open(url)
+        except Exception:  # noqa: BLE001
+            pass
+    threading.Thread(target=_go, daemon=True).start()
+
+
 def decode_out(raw: bytes) -> str:
     """git 在中文 Windows 上可能输出 GBK，逐个编码尝试"""
     if raw is None:
@@ -107,6 +131,26 @@ def sh(args, cwd=ROOT, timeout=600):
         return -1, "[超时] 命令执行超过 %d 秒" % timeout
     except Exception as e:  # noqa: BLE001
         return -2, "[无法执行] %s" % e
+
+
+def auth_header(token):
+    """GitHub 官方做法（Actions 同款）：凭据走请求头，URL 保持干净"""
+    cred = base64.b64encode(("x-access-token:%s" % token).encode("utf-8")).decode("ascii")
+    return "http.extraHeader=Authorization: Basic %s" % cred, cred
+
+
+def git_ls_remote(token, owner, repo, timeout=90):
+    """用 git 亲自探一下远端仓库在不在、有没有权限——比 API 更贴近真实推送能力"""
+    if not GIT:
+        return False, "未找到 git.exe"
+    url = "https://github.com/%s/%s.git" % (owner.strip("/"), repo.strip("/"))
+    if token:
+        hdr, _cred = auth_header(token)
+        args = [GIT, "-c", "credential.helper=", "-c", hdr, "ls-remote", url, "HEAD"]
+    else:
+        args = [GIT, "ls-remote", url, "HEAD"]
+    code, out = sh(args, timeout=timeout)
+    return code == 0, out.strip()
 
 
 # ─────────────────────────── 网络：Device Flow / API ───────────────────────────
@@ -589,7 +633,7 @@ class UploaderWizard(tk.Tk):
 
         user_code = js["user_code"]
         verify = js.get("verification_uri", "https://github.com/login/device")
-        webbrowser.open(verify)
+        open_url(verify)
 
         d = InputDialog(
             self, "第 4 步 · 网页授权登录",
@@ -706,36 +750,59 @@ class UploaderWizard(tk.Tk):
                                    "私有" if st["private"] else "公开"))
             return True
 
-        # 创建被拒（典型：网页授权的 App 无建仓权限）→ 引导用户
+        # 创建被拒（典型：网页授权的 App 无建仓权限）→ 让 git 亲自探一下
         self.log("   ⚠️ %s" % cerr)
+        self.status.config(text="用 git 探测远端仓库是否可达…")
+        self.update_idletasks()
+        ok, out = git_ls_remote(token, st["owner"], st["repo"])
+        if ok:
+            st["repo_ready"] = True
+            self.log("   ✅ git 能访问 %s/%s —— 仓库确实存在，稍后直接推送" % (st["owner"], st["repo"]))
+            messagebox.showinfo("仓库可访问",
+                                "git 已确认能访问 %s/%s，\n稍后直接把文件推上去。" % (st["owner"], st["repo"]))
+            return True
+
+        # git 也访问不到 → 基本可以确定：远端还没有这个仓库（或账号/权限对不上）
+        self.log("   ❌ git 也访问不到该仓库：%s" % (out or "无输出"))
         ans = messagebox.askyesno(
-            "无法自动创建仓库",
-            "%s\n\n"
-            "常见原因：\n"
-            "  1) 同名仓库你已经建过（私有仓库匿名查不到，工具看不到它）；\n"
-            "  2) 网页授权的应用没有「创建仓库」的权限（只能推代码）。\n\n"
-            "如果你的仓库已经建好了 → 点「是」，直接向它推送；\n"
-            "如果还没建 → 点「否」，我帮你打开建仓页面。" % cerr)
+            "远端没有这个仓库",
+            "自动创建失败：%s\n"
+            "git 探测也访问不到 %s/%s。\n\n"
+            "说明 GitHub 上还没有这个仓库（或你登录的账号不是 %s）。\n\n"
+            "点「否」→ 我帮你打开建仓页面，建好后再继续（推荐）；\n"
+            "点「是」→ 认为仓库已存在，强行尝试推送（多半仍会失败）。"
+            % (cerr, st["owner"], st["repo"], st["owner"]))
         if ans:
             st["repo_ready"] = True
-            self.log("   ✅ 按已有仓库处理，稍后直接推送")
+            self.log("   ⚠️ 用户选择强行推送")
             return True
-        while True:
-            webbrowser.open("https://github.com/new")
-            messagebox.showinfo(
-                "去网页建仓库",
-                "已打开 github.com/new，请填写：\n"
-                "  · Repository name：%s\n"
-                "  · 可见性：随意（%s）\n"
-                "  · 不要勾选 README / .gitignore / license\n\n"
-                "建好后回到这里。" % (st["repo"],
-                                 "建议私有" if st["private"] else "建议公开"))
-            if messagebox.askyesno("等待确认", "仓库建好了吗？"):
-                st["repo_ready"] = True
-                self.log("   ✅ 用户已在网页创建仓库，稍后直接推送")
-                return True
-            self.log("   🛑 用户选择停止，可点「上一步」换登录方式再试")
+
+        open_url("https://github.com/new")
+        messagebox.showinfo(
+            "去网页建仓库",
+            "已打开 github.com/new，请这样填：\n"
+            "  · Repository name：%s（必须一模一样）\n"
+            "  · 可见性：%s\n"
+            "  · 【重要】不要勾选 README / .gitignore / license（保持空仓库）\n\n"
+            "建好后回到这里点确定。" % (st["repo"], "Private 或 Public 都行"))
+        if not messagebox.askyesno("等待确认", "仓库建好了吗？（建好后点「是」）"):
+            self.log("   🛑 用户取消，可点「上一步」换登录方式再试")
             return False
+        # 建好后二次验证，避免再白跑一趟
+        self.status.config(text="验证刚创建的仓库…")
+        self.update_idletasks()
+        ok2, out2 = git_ls_remote(token, st["owner"], st["repo"])
+        if ok2:
+            st["repo_ready"] = True
+            self.log("   ✅ 已确认仓库 %s/%s 可访问" % (st["owner"], st["repo"]))
+            return True
+        messagebox.showerror(
+            "仍然访问不到",
+            "git 还是访问不到 %s/%s：\n%s\n\n"
+            "请确认：仓库名完全一致、账号是 %s、以及授权时勾选了仓库权限。\n"
+            "也可以点「上一步」改选「③ 凭据管理器」再试。"
+            % (st["owner"], st["repo"], out2 or "无输出", st["owner"]))
+        return False
 
     # ───────── 第 5 步：确认 ─────────
     def s_confirm(self):
@@ -861,7 +928,7 @@ class UploaderWizard(tk.Tk):
             self._emit("ok", "5/7 不检查远端（凭据管理器模式，直接推送）")
 
         # 7) 设置远程地址
-        plain = "https://github.com/%s/%s.git" % (owner, repo)
+        plain = "https://github.com/%s/%s.git" % (owner.strip("/"), repo.strip("/"))
         code, _ = sh([GIT, "remote", "get-url", "origin"])
         if code == 0:
             sh([GIT, "remote", "set-url", "origin", plain])
@@ -871,9 +938,10 @@ class UploaderWizard(tk.Tk):
 
         # 8) 推送
         if token:
-            push_url = "https://x-access-token:%s@github.com/%s/%s.git" % (token, owner, repo)
-            cmd = [GIT, "-c", "credential.helper=", "push", "-u", push_url, branch]
-            ok = step("7/7 推送到 GitHub", cmd, critical=True, sensitive=token)
+            # 凭据走请求头（GitHub Actions 同款），URL 保持干净，令牌不会串进地址
+            hdr, cred = auth_header(token)
+            cmd = [GIT, "-c", "credential.helper=", "-c", hdr, "push", "-u", plain, branch]
+            ok = step("7/7 推送到 GitHub", cmd, critical=True, sensitive=cred)
             # token 不落盘：remote 始终是普通地址
             sh([GIT, "remote", "set-url", "origin", plain])
             if not ok:
@@ -926,7 +994,7 @@ class UploaderWizard(tk.Tk):
                     if messagebox.askyesno("上传完成 🎉",
                                            "代码已上传到：\n%s\n\n"
                                            "现在打开仓库页面查看吗？" % payload):
-                        webbrowser.open(payload)
+                        open_url(payload)
         except queue.Empty:
             pass
         self.after(150, self._poll)
