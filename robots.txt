@@ -1,0 +1,9 @@
+# 全球黄页 · 让所有搜索引擎放心抓取
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /functions/
+Disallow: /tools/
+
+# 纯静态、零 JS 的全站索引页（335 条真实链接，优先抓这里）
+Sitemap: https://ypage.ccwu.cc/sitemap.xml
