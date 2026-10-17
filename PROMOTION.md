@@ -48,8 +48,48 @@
 
 ### 🇺🇸 English · Twitter / X
 
-> 🧭 Global Yellow Pages — 335 hand-picked websites across 17 industries, with homepage screenshots and community voting. 4 languages, no tracking, no ads.
-> https://ypage.ccwu.cc/
+**① 推荐版（258 字符，含链接，未超限）**
+
+```
+🧭 Global Yellow Pages — 335 hand-picked websites across 17 industries.
+
+Every entry shows a live homepage screenshot, so you see it before you click. Vote 👍 / 👎 / ⚠️ broken to push the good ones up.
+
+4 languages. No ads. No tracking.
+
+https://ypage.ccwu.cc/
+```
+
+**② 痛点型（278 字符，适合带个人故事的账号）**
+
+```
+My bookmark bar stopped being usable, so I built a yellow pages instead: 335 curated sites in 17 categories — Search, AI & LLMs, Dev Tools, Finance, Travel, Machinery — each with a screenshot and a 3-way vote.
+
+Free, no ads, no tracking, works as a PWA.
+
+https://ypage.ccwu.cc/
+```
+
+**③ 极简型（167 字符）**
+
+```
+335 of the world's most useful websites, sorted into 17 industries — with screenshots and community voting.
+
+No ads. No tracking. 4 languages.
+
+https://ypage.ccwu.cc/
+```
+
+**④ 建议追加的第一条回复（自顶帖，159 字符，能显著提高互动）**
+
+```
+Two extras worth knowing:
+
+• Works without JS: full 335-link index → https://ypage.ccwu.cc/sites.html
+• Missing a site or a category? Tell me and I'll add it.
+```
+
+> 发布提示：X 上链接按 23 字符计，上面三条都留了余量；带 1–2 个话题标签即可（如 #webdev #buildinpublic），超过 2 个会压互动率。发完自己先点开链接确认卡片图（og-cover.png）正常渲染。
 
 ### 🇺🇸 English · Show HN（Hacker News）
 
