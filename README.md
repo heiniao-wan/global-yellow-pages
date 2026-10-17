@@ -15,7 +15,7 @@
 | | |
 |---|---|
 | 官网 Live site | https://ypage.ccwu.cc/ |
-| 无 JS 全站索引（337 条真实链接） | https://ypage.ccwu.cc/sites.html |
+| 无 JS 全站索引（335 站全量链接，零 JS） | https://ypage.ccwu.cc/sites.html |
 | V2 科技风版本 | https://ypage.ccwu.cc/index-v2.html |
 
 ## 功能
