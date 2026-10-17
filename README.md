@@ -1,17 +1,45 @@
-# 全球黄页 · 优质网站导航与口碑库
+# 🧭 全球黄页 · Global Yellow Pages
 
-一个收录全球知名黄页、导航站与工具站的中文导航平台。每个站点提供首页截图、官网直达链接，并支持真实用户投票（点赞 / 不喜欢 / 无法访问）。
+> **🌐 线上站点：https://ypage.ccwu.cc/**
+
+**中文**：收录全球优质网站的多行业导航与口碑库。每个站点都有首页截图（点开前先看清楚）、官网直达按钮，以及真实用户的三向投票（点赞 / 不喜欢 / 无法访问）。17 个行业、335 个站点，四语界面，无广告、无第三方追踪。
+
+**English**: A curated directory of **335 of the world's most useful websites**, organized into **17 industries** — Search, AI & LLMs, Developer & Tech, Finance, Travel, Machinery and more. Every entry shows a **live homepage screenshot** so you know what you're opening, and you can vote **👍 good / 👎 dislike / ⚠️ broken** to surface what's actually worth visiting. Four languages (zh / en / ja / ko), installs as a PWA, no ads and no tracking.
+
+```
+🧭 Global Yellow Pages — 335 hand-picked websites across 17 industries.
+   Homepage screenshots · community voting · 4 languages · no ads, no tracking
+   → https://ypage.ccwu.cc/
+```
+
+| | |
+|---|---|
+| 官网 Live site | https://ypage.ccwu.cc/ |
+| 无 JS 全站索引（337 条真实链接） | https://ypage.ccwu.cc/sites.html |
+| V2 科技风版本 | https://ypage.ccwu.cc/index-v2.html |
 
 ## 功能
 
 | 需求 | 实现 |
 |---|---|
-| 全球黄页收录，按行业分类 | 16 个一级分类，303 个真实站点，覆盖中国 / 日本 / 韩国 / 欧美 / 东南亚 |
+| 全球黄页收录，按行业分类 | 17 个一级分类，335 个真实站点，覆盖中国 / 日本 / 韩国 / 欧美 / 东南亚 |
 | 按钮式控件，点击直达官网 | 卡片内「访问网站」按钮，`target="_blank"` + `rel="noopener noreferrer nofollow"` |
 | 三个投票按钮 + 数据图表 | 点赞 / 不喜欢 / 无法访问，环形图 + 分类分布条形图 + 口碑榜 |
 | 同一 IP 只许投一次（防恶意点击） | 六层信号叠加防护，详见下方 |
 | 首页自动截图 | 三级降级：mShots → Microlink → favicon → 占位卡 |
 | 苹果风格简洁美观 | 毛玻璃导航、大留白、柔和圆角、克制的系统色 |
+| 两套皮肤 | V1 苹果风（`index.html`，含暗色模式）、V2 未来科技风（`index-v2.html`） |
+| 四语切换 | 简体中文 / English / 日本語 / 한국어（`assets/js/i18n.js`） |
+| 收藏与口碑榜 | 星标收藏常驻胶囊；口碑榜按好评率排序，动态 TOP n |
+| 本地数据加密 | 票数与收藏经 `vault.js` 加密后落 `localStorage`，键前缀 `gyp:` |
+| 安装到桌面 | PWA：`manifest.webmanifest` + `sw.js` |
+| 站长留言后台 | Cloudflare Pages Functions + KV（`functions/api/*`、`admin.html`） |
+| SEO / 社交卡片 | `robots.txt`、`sitemap.xml`、静态索引 `sites.html`、OG 封面 `og-cover.png`、IndexNow 已提交 |
+
+## 快速开始（访客视角）
+
+打开 https://ypage.ccwu.cc/ → 选行业 → 看截图 → 点「访问网站」→ 回来投一票 → 顺手收藏。
+不启用 JavaScript 也能看全量列表：https://ypage.ccwu.cc/sites.html
 
 ## 防刷机制
 
@@ -41,13 +69,17 @@
 
 ## 数据存放
 
-当前版本投票数据存在浏览器 `localStorage`，**仅本机可见**，用于查看统计效果。接入数据库后票数全站共享。
+投票数据与收藏存在浏览器 `localStorage`，**经 `vault.js` 加密**后落盘，**仅本机可见**，用于查看统计效果。接入数据库后票数全站共享。
 
-存储键：
+存储键（全部以 `gyp:` 开头）：
 - `gyp:counts` — 各站点累计票数
+- `gyp:favs` — 我的收藏
 - `gyp:voted:<指纹>:<站点ID>` — 一票定终身的锁
 - `gyp:rate:<指纹>` — 滑动窗口计数
 - `gyp:visitor` — 本机访客标识
+- `gyp:theme` / `gyp:lang` / `gyp:consent` — 界面偏好
+
+访客留言则走服务端：Cloudflare Pages Functions → KV `MESSAGES`，仅站长凭 `ADMIN_KEY` 在 `admin.html` 查看，**不发送任何邮件、不公开**。
 
 ## 本地运行
 
@@ -73,24 +105,47 @@ python -m http.server 8899
 ## 目录结构
 
 ```
-├── index.html                  页面骨架
+├── index.html                  V1 页面（苹果风，含暗色模式）
+├── index-v2.html               V2 页面（未来科技风）
+├── admin.html                  站长留言后台（需 ADMIN_KEY，已 noindex）
+├── sites.html                  纯静态全站索引（335 条链接，零 JS，供爬虫/无 JS 访客）
+├── robots.txt / sitemap.xml    SEO 基建
 ├── assets/
-│   ├── css/style.css           视觉系统（苹果风格）
+│   ├── css/style.css           视觉系统（V1 苹果风）
+│   ├── css/style-v2.css        视觉系统（V2 科技风）
+│   ├── img/og-cover.png        1200×630 社交分享封面
 │   └── js/
-│       ├── data.js             303 个站点的种子数据 + 品牌色派生
+│       ├── data.js             335 个站点的种子数据 + 分类定义 + 品牌色派生
+│       ├── i18n.js             四语词条
+│       ├── vault.js            本地数据加密存储
 │       ├── antiabuse.js        六层防刷引擎
 │       ├── thumbs.js           首页截图三级降级
-│       └── app.js              渲染 / 搜索 / 投票 / 图表
-└── tools/verify-data.js        数据完整性校验脚本
+│       ├── app.js / app-v2.js  渲染 / 搜索 / 投票 / 图表
+│       └── sw.js               PWA Service Worker
+├── functions/api/              Cloudflare Pages Functions（留言入库 / 列表 / 删除）
+├── tools/
+│   ├── verify-data.js          数据完整性校验
+│   ├── verify-antiabuse.js     防刷逻辑单测（14 项）
+│   ├── verify-storage.js       存储层单测（11 项）
+│   ├── verify-functions.js     Functions 单测（21 项）
+│   ├── verify-remote.py        外网可达性检测（38 文件逐个拉取）
+│   ├── gen-seo.py              生成 robots / sitemap / sites.html / OG 封面
+│   ├── promote-submit.py       IndexNow / Yandex 搜索引擎提交
+│   ├── gh-api-commit.py        通过 GitHub API 提交文件（git 协议不通时的备用通道）
+│   └── dev-server.js           本地联调服务器（:8901，模拟 KV）
+├── github-uploader.py          图形化上传向导（Tkinter）
+└── 上传GitHub.bat              双击即可运行上传向导
 ```
 
 ## 数据校验
 
 ```bash
-node tools/verify-data.js
+node tools/verify-data.js         # 数据完整性
+node tools/verify-antiabuse.js    # 防刷 14 项
+node tools/verify-storage.js      # 存储 11 项
+node tools/verify-functions.js    # 留言后台 21 项
+python tools/verify-remote.py     # 外网可达性（38 文件逐个拉）
 ```
-
-检查分类归属、ID 唯一性、URL 格式、域名去重、简介完整性、每分类站点数量下限。
 
 ## 扩充站点
 
@@ -101,3 +156,15 @@ node tools/verify-data.js
 ```
 
 `category` 必须是 `SITE_CATEGORIES` 里已定义的 key。`region` 限定 `中国 / 日本 / 韩国 / 欧美 / 全球 / 东南亚 / 其他`，`lang` 限定 `中文 / 英文 / 日文 / 韩文 / 多语言`。
+
+## 宣传与收录
+
+- 对外文案（中 / 英 / 日 / 韩四语，含 X、Show HN、Product Hunt 版本）见 [`PROMOTION.md`](PROMOTION.md)
+- 部署与运维手册见 [`DEPLOY-GUIDE.md`](DEPLOY-GUIDE.md)
+- 搜索引擎已通过 IndexNow 提交（覆盖 Bing / Yandex / Seznam / Naver / Yep）；Google 需在 Search Console 手动提交 `sitemap.xml`
+
+觉得缺了哪个站点或哪个行业？在 https://ypage.ccwu.cc/ 底部「网站反馈」留一句即可，会持续补充。
+
+## 许可与合规
+
+站点已配置隐私政策与条款页（`legal.html`），未启用广告前不加载 Cookie 提示；所有外链均带 `rel="noopener noreferrer nofollow"`。内容数据仅作导航索引之用，版权归各站点所有。
