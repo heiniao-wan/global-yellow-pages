@@ -121,7 +121,8 @@ python -m http.server 8899
 │       ├── antiabuse.js        六层防刷引擎
 │       ├── thumbs.js           首页截图三级降级
 │       ├── app.js / app-v2.js  渲染 / 搜索 / 投票 / 图表
-│       └── sw.js               PWA Service Worker
+│       ├── share.js            V1↔V2 与多标签页的数据共享层（统一读写 + 历史键合并 + 广播同步）
+│       └── sw.js               PWA Service Worker（JS/CSS 网络优先，离线可用）
 ├── functions/api/              Cloudflare Pages Functions（留言入库 / 列表 / 删除）
 ├── tools/
 │   ├── verify-data.js          数据完整性校验
@@ -132,7 +133,8 @@ python -m http.server 8899
 │   ├── gen-seo.py              生成 robots / sitemap / sites.html / OG 封面
 │   ├── promote-submit.py       IndexNow / Yandex 搜索引擎提交
 │   ├── gh-api-commit.py        通过 GitHub API 提交文件（git 协议不通时的备用通道）
-│   └── dev-server.js           本地联调服务器（:8901，模拟 KV）
+│   ├── dev-server.js           本地联调服务器（:8901，模拟 KV）
+│   └── e2e-vote-share.js       无头 Chrome 实测 V1/V2 数据共享（`node tools/e2e-vote-share.js [--live]`）
 ├── github-uploader.py          图形化上传向导（Tkinter）
 └── 上传GitHub.bat              双击即可运行上传向导
 ```
