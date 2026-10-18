@@ -2,12 +2,12 @@
 
 > **🌐 线上站点：https://ypage.ccwu.cc/**
 
-**中文**：收录全球优质网站的多行业导航与口碑库。每个站点都有首页截图（点开前先看清楚）、官网直达按钮，以及真实用户的三向投票（点赞 / 不喜欢 / 无法访问）。17 个行业、335 个站点，四语界面，无广告、无第三方追踪。
+**中文**：收录全球优质网站的多行业导航与口碑库。每个站点都有首页截图（点开前先看清楚）、官网直达按钮，以及真实用户的三向投票（点赞 / 不喜欢 / 无法访问）。17 个行业、381 个站点，四语界面，无广告、无第三方追踪。
 
-**English**: A curated directory of **335 of the world's most useful websites**, organized into **17 industries** — Search, AI & LLMs, Developer & Tech, Finance, Travel, Machinery and more. Every entry shows a **live homepage screenshot** so you know what you're opening, and you can vote **👍 good / 👎 dislike / ⚠️ broken** to surface what's actually worth visiting. Four languages (zh / en / ja / ko), installs as a PWA, no ads and no tracking.
+**English**: A curated directory of **381 of the world's most useful websites**, organized into **17 industries** — Search, AI & LLMs, Developer & Tech, Finance, Travel, Machinery and more. Every entry shows a **live homepage screenshot** so you know what you're opening, and you can vote **👍 good / 👎 dislike / ⚠️ broken** to surface what's actually worth visiting. Four languages (zh / en / ja / ko), installs as a PWA, no ads and no tracking.
 
 ```
-🧭 Global Yellow Pages — 335 hand-picked websites across 17 industries.
+🧭 Global Yellow Pages — 381 hand-picked websites across 17 industries.
    Homepage screenshots · community voting · 4 languages · no ads, no tracking
    → https://ypage.ccwu.cc/
 ```
@@ -15,14 +15,14 @@
 | | |
 |---|---|
 | 官网 Live site | https://ypage.ccwu.cc/ |
-| 无 JS 全站索引（335 站全量链接，零 JS） | https://ypage.ccwu.cc/sites.html |
+| 无 JS 全站索引（381 站全量链接，零 JS） | https://ypage.ccwu.cc/sites.html |
 | V2 科技风版本 | https://ypage.ccwu.cc/index-v2.html |
 
 ## 功能
 
 | 需求 | 实现 |
 |---|---|
-| 全球黄页收录，按行业分类 | 17 个一级分类，335 个真实站点，覆盖中国 / 日本 / 韩国 / 欧美 / 东南亚 |
+| 全球黄页收录，按行业分类 | 17 个一级分类，381 个真实站点，覆盖中国 / 日本 / 韩国 / 欧美 / 东南亚 |
 | 按钮式控件，点击直达官网 | 卡片内「访问网站」按钮，`target="_blank"` + `rel="noopener noreferrer nofollow"` |
 | 三个投票按钮 + 数据图表 | 点赞 / 不喜欢 / 无法访问，环形图 + 分类分布条形图 + 口碑榜 |
 | 同一 IP 只许投一次（防恶意点击） | 六层信号叠加防护，详见下方 |
@@ -108,14 +108,14 @@ python -m http.server 8899
 ├── index.html                  V1 页面（苹果风，含暗色模式）
 ├── index-v2.html               V2 页面（未来科技风）
 ├── admin.html                  站长留言后台（需 ADMIN_KEY，已 noindex）
-├── sites.html                  纯静态全站索引（335 条链接，零 JS，供爬虫/无 JS 访客）
+├── sites.html                  纯静态全站索引（381 条链接，零 JS，供爬虫/无 JS 访客）
 ├── robots.txt / sitemap.xml    SEO 基建
 ├── assets/
 │   ├── css/style.css           视觉系统（V1 苹果风）
 │   ├── css/style-v2.css        视觉系统（V2 科技风）
 │   ├── img/og-cover.png        1200×630 社交分享封面
 │   └── js/
-│       ├── data.js             335 个站点的种子数据 + 分类定义 + 品牌色派生
+│       ├── data.js             381 个站点的种子数据 + 分类定义 + 品牌色派生
 │       ├── i18n.js             四语词条
 │       ├── vault.js            本地数据加密存储
 │       ├── antiabuse.js        六层防刷引擎
