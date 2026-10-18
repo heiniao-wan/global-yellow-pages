@@ -264,6 +264,8 @@ def inject_meta(base, nsites, ncats):
                     '</div></noscript>' % (base, nsites))
         if "</head>" in t:
             t = t.replace("</head>", inject + "\n</head>", 1)
+        # 幂等：先删掉历史遗留的同类 noscript（否则每跑一次就多一块）
+        t = re.sub(r"\s*<noscript><div[^>]*>本站列表需要 JavaScript 渲染.*?</noscript>", "", t, flags=re.S)
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
         io.open(path, "w", encoding="utf-8", newline="\n").write(t)
