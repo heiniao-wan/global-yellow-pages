@@ -4,5 +4,19 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
+# 通用静态资源缓存 1 小时（原来是 24 小时，导致改完数据要等一天才生效）
 /assets/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/*.html
+  Cache-Control: public, max-age=600, must-revalidate
+
+/sitemap.xml
+  Cache-Control: public, max-age=0, must-revalidate
+
+/sites.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 站点数据源：每次都回源校验，改完立刻可见
+/assets/js/data.js
+  Cache-Control: public, max-age=0, must-revalidate
