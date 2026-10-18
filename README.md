@@ -113,6 +113,7 @@ python -m http.server 8899
 ├── assets/
 │   ├── css/style.css           视觉系统（V1 苹果风）
 │   ├── css/style-v2.css        视觉系统（V2 科技风）
+│   ├── css/rail.css            左侧竖向分类导航（V1/V2 共用；单独成文件以便穿透 CDN 缓存）
 │   ├── img/og-cover.png        1200×630 社交分享封面
 │   └── js/
 │       ├── data.js             381 个站点的种子数据 + 分类定义 + 品牌色派生
@@ -134,7 +135,8 @@ python -m http.server 8899
 │   ├── promote-submit.py       IndexNow / Yandex 搜索引擎提交
 │   ├── gh-api-commit.py        通过 GitHub API 提交文件（git 协议不通时的备用通道）
 │   ├── dev-server.js           本地联调服务器（:8901，模拟 KV）
-│   └── e2e-vote-share.js       无头 Chrome 实测 V1/V2 数据共享（`node tools/e2e-vote-share.js [--live]`）
+│   ├── e2e-vote-share.js       无头 Chrome 实测 V1/V2 数据共享（`node tools/e2e-vote-share.js [--live]`）
+│   └── e2e-nav-rail.js         实测导航锚点定位与左侧目录（`node tools/e2e-nav-rail.js [--live]`，12 项）
 ├── github-uploader.py          图形化上传向导（Tkinter）
 └── 上传GitHub.bat              双击即可运行上传向导
 ```
