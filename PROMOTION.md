@@ -11,7 +11,7 @@
 | --- | --- |
 | `robots.txt` 实体文件（原来被 SPA 回退成首页 HTML，等于没有） | ✅ 已修复上线 |
 | `sitemap.xml`（4 个页面，含 sitemap 声明） | ✅ 已上线 |
-| `sites.html` 纯静态全站索引（**335 条真实外链**、17 类、零 JS） | ✅ 已上线（337 个 https 链接） |
+| `sites.html` 纯静态全站索引（**381 条真实外链**、17 类、零 JS） | ✅ 已上线（383 个 https 链接） |
 | OG / Twitter Card 社交卡片元信息 + canonical + hreflang | ✅ 注入首页与 V2 |
 | `og-cover.png` 1200×630 分享封面（中英文标题） | ✅ 已上线 |
 | IndexNow 提交 → **Bing / Yandex / Seznam / Naver / Yep** | ✅ HTTP 202 已接收 |
@@ -26,16 +26,16 @@
 
 ### 🇨🇳 中文 · 短版（微博 / 即刻 / 小红书 / 朋友圈）
 
-> 做了一个「全球黄页」：335 个精选网站，17 个行业分类，带首页截图和真实口碑投票，中英日韩四语。
+> 做了一个「全球黄页」：381 个精选网站，17 个行业分类，带首页截图和真实口碑投票，中英日韩四语。
 > 找工具不用再翻收藏夹了 👉 https://ypage.ccwu.cc/
 
 ### 🇨🇳 中文 · 长版（知乎 / 掘金 / 少数派）
 
-> **标题**：我整理了一份 335 个网站的全球黄页，带截图和口碑投票
+> **标题**：我整理了一份 381 个网站的全球黄页，带截图和口碑投票
 >
 > 起因是自己找工具站每次都要翻半天收藏夹，于是干脆做了一份全球黄页：
 >
-> - 335 个站点，17 个行业分类（搜索、AI、开发、设计、电商、视频、机械…）
+> - 381 个站点，17 个行业分类（搜索、AI、开发、设计、电商、视频、机械…）
 > - 每个站点带首页截图，打不开的会自动标注
 > - 三档投票（好评 / 不喜欢 / 打不开），数据本地加密存储，每站每 IP 限一票
 > - 支持中 / 英 / 日 / 韩四语切换，PWA 可装到桌面
@@ -51,7 +51,7 @@
 **① 推荐版（258 字符，含链接，未超限）**
 
 ```
-🧭 Global Yellow Pages — 335 hand-picked websites across 17 industries.
+🧭 Global Yellow Pages — 381 hand-picked websites across 17 industries.
 
 Every entry shows a live homepage screenshot, so you see it before you click. Vote 👍 / 👎 / ⚠️ broken to push the good ones up.
 
@@ -63,7 +63,7 @@ https://ypage.ccwu.cc/
 **② 痛点型（278 字符，适合带个人故事的账号）**
 
 ```
-My bookmark bar stopped being usable, so I built a yellow pages instead: 335 curated sites in 17 categories — Search, AI & LLMs, Dev Tools, Finance, Travel, Machinery — each with a screenshot and a 3-way vote.
+My bookmark bar stopped being usable, so I built a yellow pages instead: 381 curated sites in 17 categories — Search, AI & LLMs, Dev Tools, Finance, Travel, Machinery — each with a screenshot and a 3-way vote.
 
 Free, no ads, no tracking, works as a PWA.
 
@@ -73,7 +73,7 @@ https://ypage.ccwu.cc/
 **③ 极简型（167 字符）**
 
 ```
-335 of the world's most useful websites, sorted into 17 industries — with screenshots and community voting.
+381 of the world's most useful websites, sorted into 17 industries — with screenshots and community voting.
 
 No ads. No tracking. 4 languages.
 
@@ -85,7 +85,7 @@ https://ypage.ccwu.cc/
 ```
 Two extras worth knowing:
 
-• Works without JS: full 335-link index → https://ypage.ccwu.cc/sites.html
+• Works without JS: full 381-link index → https://ypage.ccwu.cc/sites.html
 • Missing a site or a category? Tell me and I'll add it.
 ```
 
@@ -93,18 +93,18 @@ Two extras worth knowing:
 
 ### 🇺🇸 English · Show HN（Hacker News）
 
-> Show HN: Global Yellow Pages – 335 curated sites with screenshots and reputation voting
+> Show HN: Global Yellow Pages – 381 curated sites with screenshots and reputation voting
 >
-> I kept losing track of useful sites in my bookmarks, so I built a yellow pages: 335 sites in 17 categories, each with a homepage screenshot and three-way voting (good / dislike / broken). Votes are stored encrypted in the browser, one per site per IP. Supports zh/en/ja/ko, installs as a PWA, no ads and no third-party trackers.
-> There's also a no-JS index with all 335 links: https://ypage.ccwu.cc/sites.html
+> I kept losing track of useful sites in my bookmarks, so I built a yellow pages: 381 sites in 17 categories, each with a homepage screenshot and three-way voting (good / dislike / broken). Votes are stored encrypted in the browser, one per site per IP. Supports zh/en/ja/ko, installs as a PWA, no ads and no third-party trackers.
+> There's also a no-JS index with all 381 links: https://ypage.ccwu.cc/sites.html
 > Feedback on missing categories welcome.
 
 ### 🇺🇸 English · Product Hunt
 
-> **Tagline**（≤60 字符）：Global Yellow Pages — 335 curated sites, screenshots, votes
+> **Tagline**（≤60 字符）：Global Yellow Pages — 381 curated sites, screenshots, votes
 >
 > **Description**：
-> A curated directory of 335 of the world's most useful websites, organized into 17 industries.
+> A curated directory of 381 of the world's most useful websites, organized into 17 industries.
 > Every entry shows a homepage screenshot so you know what you're opening, and you can vote
 > good / dislike / broken to surface what's actually worth visiting. Four languages (zh/en/ja/ko),
 > installs as a PWA, no ads and no tracking.
@@ -117,13 +117,13 @@ Two extras worth knowing:
 
 ### 🇯🇵 日本語（Twitter / note）
 
-> 🧭 世界の厳選サイト 335 件を 17 業種に整理した「グローバル・イエローページ」を作りました。
+> 🧭 世界の厳選サイト 381 件を 17 業種に整理した「グローバル・イエローページ」を作りました。
 > 各サイトのスクリーンショット付き、評価投票もできます。中英日韓の4言語対応。
 > https://ypage.ccwu.cc/
 
 ### 🇰🇷 한국어（Twitter / 블로그）
 
-> 🧭 전 세계 엄선 사이트 335개를 17개 업종으로 정리한 글로벌 옐로페이지를 만들었습니다.
+> 🧭 전 세계 엄선 사이트 381개를 17개 업종으로 정리한 글로벌 옐로페이지를 만들었습니다.
 > 스크린샷 + 평가 투표, 중·영·일·한 4개 언어 지원, 광고·추적 없음.
 > https://ypage.ccwu.cc/
 
