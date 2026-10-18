@@ -140,6 +140,16 @@
     '</button>';
   }
 
+  /**
+   * 滚动到分类栏（「网站目录」锚点 + 点击分类共用）
+   * html 上已设 scroll-padding-top，浏览器会自动把分类栏停在吸顶导航下方，
+   * 因此这里只需 block:'start'，分类栏与紧跟其后的结果区开头能同屏看到。
+   */
+  function scrollToCatSection() {
+    var target = document.getElementById('catSection') || document.querySelector('.cat-section');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   /** 选中分类：两处分类栏（顶部横排 + 左侧竖排）同步高亮 */
   function selectCategory(key) {
     state.category = key;
@@ -151,7 +161,10 @@
     $('#regionSel').value = 'all';
     $$('.cat-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === key); });
     renderGrid();
-    document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 定位到「分类栏」而不是结果列表顶部：
+    // 结果区上方就是分类栏，若直接跳 #results 会把分类栏顶出视口，
+    // 用户点「网站目录」看到的是一堆卡片、却看不到刚点的分类按钮。
+    scrollToCatSection();
   }
 
   function renderCategories() {
@@ -169,14 +182,36 @@
   }
 
   /* ───────────────────── 左侧竖向分类导航 ───────────────────── */
+  /** 侧栏是否处于「手动固定展开」状态（跨会话记住） */
+  function railPinned() {
+    try { return localStorage.getItem('gyp:railPin') === '1'; } catch (e) { return false; }
+  }
+
   function renderSideCats() {
     const rail = $('#sideCats');
     if (!rail) return;
-    rail.innerHTML = categoryItems().map(chipHtml).join('');
+    const pin = railPinned();
+    rail.classList.toggle('pinned', pin);
+    // 顶部开关：宽度不够时侧栏默认只留图标，点这里可强制展开看完整分类名
+    rail.innerHTML =
+      '<button type="button" class="side-cats-toggle" aria-expanded="' + (pin ? 'true' : 'false') +
+        '" title="' + esc(t('rail_cats')) + '">' +
+        '<span class="tl">' + esc(t('rail_cats')) + '</span>' +
+        '<span class="tw" aria-hidden="true">▲</span>' +
+      '</button>' +
+      categoryItems().map(chipHtml).join('');
 
     if (!rail._bound) {
       rail._bound = true;
       rail.addEventListener('click', function (e) {
+        const tog = e.target.closest('.side-cats-toggle');
+        if (tog) {
+          const next = !rail.classList.contains('pinned');
+          rail.classList.toggle('pinned', next);
+          tog.setAttribute('aria-expanded', next ? 'true' : 'false');
+          try { localStorage.setItem('gyp:railPin', next ? '1' : '0'); } catch (err) { /* 隐私模式忽略 */ }
+          return;
+        }
         const btn = e.target.closest('.cat-chip');
         if (!btn) return;
         selectCategory(btn.dataset.cat);
