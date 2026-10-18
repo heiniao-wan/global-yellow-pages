@@ -32,6 +32,7 @@ window.I18N = (function () {
       hero_sub: '按行业分类整理全球知名黄页与导航站点，自动抓取首页截图，配合同一 IP 一次性真实用户投票，让好网站被看见。',
       hero_sub_neo: '深空之上的全球黄页：按行业分类收录知名站点，自动抓取首页截图，同一设备一次性真实投票，让好网站被看见。',
       m_cats: '行业分类', m_regions: '覆盖地区', m_likes: '累计点赞', m_health: '整体好评率',
+      rail_cats: '分类导航',
       sec_browse: '按行业浏览', sec_browse_note: '点击分类筛选，点击下方卡片按钮参与评价',
       sec_stats: '投票数据统计', sec_stats_note: '每个 IP / 设备对同一站点仅可评价一次',
       sec_prot: '防恶意点击机制', sec_prot_note: '参考 Google AdSense 的无效流量识别思路，多信号叠加判定',
@@ -119,6 +120,7 @@ window.I18N = (function () {
       hero_sub: 'A curated directory of the world\u2019s leading portals and yellow-page sites, with auto-captured homepage screenshots and one-vote-per-device reviews \u2014 so good sites get seen.',
       hero_sub_neo: 'A yellow pages above deep space: renowned sites organized by industry, homepage screenshots auto-captured, one genuine vote per device \u2014 so good sites get seen.',
       m_cats: 'Categories', m_regions: 'Regions', m_likes: 'Total likes', m_health: 'Overall approval',
+      rail_cats: 'Categories',
       sec_browse: 'Browse by Industry', sec_browse_note: 'Click a category to filter; vote with the buttons on each card',
       sec_stats: 'Voting Statistics', sec_stats_note: 'One review per IP / device per site',
       sec_prot: 'Anti-abuse Protection', sec_prot_note: 'Inspired by Google AdSense invalid-traffic detection, multiple signals combined',
@@ -206,6 +208,7 @@ window.I18N = (function () {
       hero_sub: '世界中の有名ポータル・イエローページを業界別に整理し、トップページのスクリーンショットを自動取得。同一端末からの投票は1回限りで、良いサイトが見えるように。',
       hero_sub_neo: '深宇宙の上のイエローページ：業界別に有名サイトを収録し、スクリーンショットを自動取得。同一端末1回の正直な投票で、良いサイトが見えるように。',
       m_cats: '業界カテゴリ', m_regions: '対応地域', m_likes: '累計いいね', m_health: '総合好評価率',
+      rail_cats: 'カテゴリ',
       sec_browse: '業界から探す', sec_browse_note: 'カテゴリで絞り込み、カードのボタンで評価できます',
       sec_stats: '投票データ統計', sec_stats_note: '同一 IP / 端末につき各サイト1回のみ評価可能',
       sec_prot: '不正クリック防止', sec_prot_note: 'Google AdSense の無効トラフィック判定を参考に、多層シグナルで判定',
@@ -293,6 +296,7 @@ window.I18N = (function () {
       hero_sub: '세계 유명 포털과 옐로페이지를 업종별로 정리하고, 홈페이지 스크린샷을 자동 수집하며, 같은 기기에서 한 번만 투표할 수 있어 좋은 사이트가 드러납니다.',
       hero_sub_neo: '딥 스페이스 위의 옐로페이지: 업종별로 유명 사이트를 수록하고 스크린샷을 자동 수집하며, 기기당 한 번의 정직한 투표로 좋은 사이트를 드러냅니다.',
       m_cats: '업종 분류', m_regions: '지역', m_likes: '누적 좋아요', m_health: '전체 호평율',
+      rail_cats: '카테고리',
       sec_browse: '업종별 탐색', sec_browse_note: '분류를 눌러 필터링하고 카드의 버튼으로 평가에 참여하세요',
       sec_stats: '투표 데이터 통계', sec_stats_note: 'IP / 기기당 사이트 하나에 한 번만 평가 가능',
       sec_prot: '악성 클릭 방지', sec_prot_note: 'Google AdSense 무효 트래픽 판정을 참고한 다중 신호 판정',
@@ -423,7 +427,7 @@ window.I18N = (function () {
     setEl(document.querySelector('.hero-sub'), IS_NEO ? 'hero_sub_neo' : 'hero_sub');
 
     var MAP = [
-      ['.topnav a[href="#results"]', 'nav_dir'],
+      ['.topnav a[href="#catSection"]', 'nav_dir'],
       ['.topnav a[href="#stats"]', 'nav_stats'],
       ['.topnav a[href="#protection"]', 'nav_prot'],
       ['#search', 'search_ph', 'ph'],
