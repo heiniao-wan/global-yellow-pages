@@ -266,6 +266,8 @@ def inject_meta(base, nsites, ncats):
             t = t.replace("</head>", inject + "\n</head>", 1)
         # 幂等：先删掉历史遗留的同类 noscript（否则每跑一次就多一块）
         t = re.sub(r"\s*<noscript><div[^>]*>本站列表需要 JavaScript 渲染.*?</noscript>", "", t, flags=re.S)
+        # 数据源带版本号（站点数）：改数据后 URL 变化，边缘缓存立即失效，不用等 24 小时
+        t = re.sub(r"assets/js/data\.js(\?v=\d+)?", "assets/js/data.js?v=%d" % nsites, t)
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
         io.open(path, "w", encoding="utf-8", newline="\n").write(t)
