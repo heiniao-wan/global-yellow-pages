@@ -42,14 +42,18 @@
     favs: loadFavs()
   };
 
-  /** 各站点累计票数：经 Vault 加密+校验存于本地，被篡改/损坏时自动作废重置 */
+  /** 各站点累计票数：经 Vault 加密+校验存于本地，被篡改/损坏时自动作废重置
+      读写统一收口到 GYPShare —— V1/V2 两个皮肤、以及多个标签页共用同一份数据，
+      并且会自动把历史/变体键里的老票合并回来（同一站点各分项取最大值） */
   function loadCounts() {
+    if (window.GYPShare) {
+      try { return window.GYPShare.readCounts(); } catch (e) { /* 继续走兜底 */ }
+    }
     try {
       var raw = localStorage.getItem(VOTE_KEY);
       if (!raw) return {};
       var data = window.Vault.open(raw);
       if (data && typeof data === 'object') return data;
-      // 兼容旧版明文 JSON：读入迁移，下次保存时自动转为密文
       if (raw.charAt(0) === '{') {
         try { return JSON.parse(raw) || {}; } catch (e) { /* 损坏，重置 */ }
       }
@@ -57,11 +61,21 @@
     return {};
   }
   function saveCounts() {
-    try { localStorage.setItem(VOTE_KEY, window.Vault.seal(state.counts)); } catch (e) { /* 忽略 */ }
+    try {
+      if (window.GYPShare) {
+        window.GYPShare.writeCounts(state.counts);
+        window.GYPShare.announce(state.counts, null);
+        return;
+      }
+      localStorage.setItem(VOTE_KEY, window.Vault.seal(state.counts));
+    } catch (e) { /* 忽略 */ }
   }
 
   /** 收藏夹：站点 id → true，同样加密存储 */
   function loadFavs() {
+    if (window.GYPShare) {
+      try { return window.GYPShare.readFavs(); } catch (e) { /* 继续走兜底 */ }
+    }
     try {
       var raw = localStorage.getItem(FAV_KEY);
       if (!raw) return {};
@@ -74,7 +88,14 @@
     return {};
   }
   function saveFavs() {
-    try { localStorage.setItem(FAV_KEY, window.Vault.seal(state.favs)); } catch (e) { /* 忽略 */ }
+    try {
+      if (window.GYPShare) {
+        window.GYPShare.writeFavs(state.favs);
+        window.GYPShare.announce(null, state.favs);
+        return;
+      }
+      localStorage.setItem(FAV_KEY, window.Vault.seal(state.favs));
+    } catch (e) { /* 忽略 */ }
   }
   function toggleFav(siteId) {
     if (state.favs[siteId]) delete state.favs[siteId];
@@ -816,6 +837,26 @@
     document.body.appendChild(hp);
 
     state.voted = window.AntiAbuse.votedMap();
+
+    // ── 跨皮肤 / 跨标签页数据同步 ──
+    // V1(index.html) 与 V2(index-v2.html) 共用同一份投票与收藏数据；
+    // 首次加载会把历史键里的老数据合并回规范键，之后任一页面的变动实时同步到另一页面。
+    try {
+      if (window.GYPShare) {
+        window.GYPShare.migrate();                 // 合并历史/变体键 → 规范键
+        state.counts = loadCounts();
+        state.favs = loadFavs();
+        window.GYPShare.onChange(function (counts, favs) {
+          state.counts = counts;
+          state.favs = favs;
+          state.voted = window.AntiAbuse.votedMap();
+          Object.keys(state.voted).forEach(function (id) { markVotedUI(id); });
+          renderGrid();
+          renderStats();
+          updateFavChip();
+        });
+      }
+    } catch (e) { /* 同步层不可用时不影响基本使用 */ }
 
     // 语言切换时由 i18n 调用：重渲染所有含文案的动态区块
     // （分类栏/筛选器的监听器已有 _bound 守卫，不会重复绑定）
