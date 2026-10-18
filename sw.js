@@ -11,7 +11,7 @@
  *
  * 升级方式：改动本文件时把 CACHE 版本号 +1，旧缓存自动清理。
  */
-const CACHE = 'gyp-v3';
+const CACHE = 'gyp-v4';
 
 const PRECACHE = [
   './',
