@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import html
 import io
 import os
@@ -227,6 +228,28 @@ def write_og_image(nsites, ncats):
 
 # ─────────────────────────── 首页元信息注入 ───────────────────────────
 
+def bump_asset_versions(text):
+    """给 HTML 里的本地 css/js 引用加 ?v=<内容短哈希>。
+
+    Cloudflare 边缘对静态资源有缓存，改了 JS/CSS 但 URL 没变的话用户要等缓存过期才看到。
+    用文件内容哈希做版本号：内容不变 → URL 不变（继续吃缓存）；内容一改 → URL 变（立即生效）。
+    """
+    def repl(m):
+        rel = m.group(1)
+        if rel.endswith("data.js"):
+            return m.group(0)  # data.js 的版本号由调用方用站点数指定，这里不动
+        fpath = os.path.join(ROOT, rel.replace("/", os.sep))
+        if not os.path.exists(fpath):
+            return m.group(0)
+        with open(fpath, "rb") as fh:
+            h = hashlib.md5(fh.read()).hexdigest()[:8]
+        return '%s="%s?v=%s"' % (m.group(0).split("=")[0], rel, h)
+
+    # 匹配 href="assets/..." 与 src="assets/..."，先把旧版本号剥掉再重新算
+    text = re.sub(r'(?:href|src)="(assets/[^"]+?)(?:\?v=[^"]*)?"', repl, text)
+    return text
+
+
 def inject_meta(base, nsites, ncats):
     block = [
         START,
@@ -266,8 +289,10 @@ def inject_meta(base, nsites, ncats):
             t = t.replace("</head>", inject + "\n</head>", 1)
         # 幂等：先删掉历史遗留的同类 noscript（否则每跑一次就多一块）
         t = re.sub(r"\s*<noscript><div[^>]*>本站列表需要 JavaScript 渲染.*?</noscript>", "", t, flags=re.S)
-        # 数据源带版本号（站点数）：改数据后 URL 变化，边缘缓存立即失效，不用等 24 小时
-        t = re.sub(r"assets/js/data\.js(\?v=\d+)?", "assets/js/data.js?v=%d" % nsites, t)
+        # 静态资源全部带版本号：URL 一变边缘缓存立即失效，改完不用等缓存过期
+        # data.js 用站点数（直观）；其余 css/js 用内容短哈希（只有真改了才换 URL）
+        t = re.sub(r"assets/js/data\.js(\?v=[^'\"]*)?", "assets/js/data.js?v=%d" % nsites, t)
+        t = bump_asset_versions(t)
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
         io.open(path, "w", encoding="utf-8", newline="\n").write(t)
