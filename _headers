@@ -11,6 +11,15 @@
 /*.html
   Cache-Control: public, max-age=600, must-revalidate
 
+# CSS / JS：Cloudflare 缓存静态资源时默认「忽略查询字符串」，
+# 所以 ?v=hash 版本号对边缘缓存无效（实测改了 CSS 却仍返回旧文件）。
+# 这两个目录直接每次回源校验（命中 ETag 走 304，几乎不耗流量），改完立刻可见。
+/assets/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/assets/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /sitemap.xml
   Cache-Control: public, max-age=0, must-revalidate
 
