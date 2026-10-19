@@ -683,22 +683,37 @@ body {
 .site-card.has-voted .vote-btn.mine.v-dislike { background: rgba(255, 59, 48, .12);  color: #c92a20; }
 .site-card.has-voted .vote-btn.mine.v-broken  { background: rgba(255, 159, 10, .15); color: #b36b00; }
 
-/* 「取消」角标：明确告诉用户再点一次会撤回
-   底色用 currentColor 跟随按钮语义色，文字用白色保证对比度 */
+/* 「取消」角标：明确告诉用户再点一次会撤回。
+   注意不能用 background: currentColor —— .mine 类会给按钮设 color，
+   两者一叠加就成了「白底白字」：浅色背景下看不见文字，
+   深色背景下只剩一个白椭圆。改为固定用中性灰底 + 白字，
+   任何主题、任何语义色下都清晰可读。 */
 .vote-btn .vb-flag {
   position: absolute;
-  top: -7px;
-  right: -5px;
-  padding: 1px 5px;
+  top: -8px;
+  right: -4px;
+  padding: 1.5px 6px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 500;
-  line-height: 1.5;
+  font-weight: 600;
+  line-height: 1.45;
   color: #fff;
-  background: currentColor;
-  opacity: .92;
+  background: rgba(60, 60, 67, .92);
+  border: 1px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .22);
+  white-space: nowrap;
+  letter-spacing: .02em;
   pointer-events: none;
 }
+/* 深色主题下用浅底深字，反差更清晰 */
+:root[data-theme="dark"] .vote-btn .vb-flag,
+[data-skin="neo"] .vote-btn .vb-flag {
+  color: #1d1d1f;
+  background: rgba(255, 255, 255, .94);
+  border-color: rgba(0, 0, 0, .12);
+}
+/* 给按钮留出角标空间，避免角标被卡片边缘裁掉 */
+.vote-btn.mine { padding-top: 6px; }
 
 /* 请求在途：轻微禁用反馈，防止连点产生竞态 */
 .vote-btn[data-busy="1"] { opacity: .55; cursor: progress; }

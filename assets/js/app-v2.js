@@ -330,11 +330,16 @@
     const cat = CATS.find(function (x) { return x.key === s.category; }) || { zh: '', icon: '' };
     const voted = state.voted[s.id];
 
+    // 按钮不禁用：我投过的那一项高亮并标注「取消」，其余保持可点（用于改票）
     const buttons = VOTE_TYPES.map(function (v) {
-      return '<button class="vote-btn v-' + v.key + '" data-vote="' + v.key + '" data-id="' + esc(s.id) + '"' +
-        (voted ? ' disabled' : '') + ' title="' + esc(t(v.i18n)) + '" aria-label="' + esc(t(v.i18n)) + '">' +
+      const mine = (voted === v.key);
+      const title = mine ? t('vote_cancel') : t(v.i18n);
+      return '<button class="vote-btn v-' + v.key + (mine ? ' mine' : '') + '" data-vote="' + v.key + '" data-id="' + esc(s.id) + '"' +
+        ' title="' + esc(title) + '" aria-label="' + esc(title) + '"' +
+        (mine ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
         '<span class="vb-icon">' + v.icon + '</span>' +
         '<span class="vb-num" data-count="' + v.key + '">' + c[v.key] + '</span>' +
+        (mine ? '<span class="vb-flag">' + esc(t('vote_cancel')) + '</span>' : '') +
       '</button>';
     }).join('');
 
@@ -539,18 +544,15 @@
     /** 服务端成功后统一走这里：更新数字、刷新按钮态、刷新图表 */
     const applyServer = function (counts) {
       if (counts) {
+        // 直接采信服务端返回的票数，不要再叠加本地增量。
+        //
+        // 曾经的 bug：这里先 mergeCounts（拿到服务端已含本次变更的快照），
+        // 又按 isCancel/isChange 手动加减一次，导致「点一次 +2、再点只 -1」。
+        //
+        // KV 最终一致性确实可能返回旧快照，但那种情况下偏差是 ±1 的短暂抖动，
+        // 下次操作或下次进页面就会自愈；而在快照上叠加增量会造成永久性错账，
+        // 两害相权取其轻。服务端返回 null（网络失败）时才走本地兜底。
         state.counts = mergeCounts(state.counts, counts);
-        // KV 最终一致性：服务端刚返回的可能还是自己写入前的旧快照。
-        // 若直接采信，用户会看到「明明取消了，数字却没变回去」。
-        // 所以本次操作的增量/减量在本地先行落实，服务端值只用于补齐其他站点。
-        const c = state.counts[siteId] || { like: 0, dislike: 0, broken: 0 };
-        if (isCancel) {
-          c[action] = Math.max(0, c[action] - 1);
-        } else {
-          if (isChange && myVote) c[myVote] = Math.max(0, c[myVote] - 1);
-          c[action] += 1;
-        }
-        state.counts[siteId] = c;
         saveCounts();
       }
       if (isCancel) {
@@ -611,17 +613,31 @@
     });
   }
 
-  /** 服务端票数并入本地（本地可能有离线期间的增量，取两者较大值避免回退） */
+  /**
+   * 合并票数：**服务端优先**。
+   *
+   * 不能用 Math.max：那样一旦服务端数字变小（取消投票后归零），
+   * 本地的旧值会一直把它顶回去，显示永远降不下来。
+   * 也不能无条件覆盖：服务端还没传播时的旧快照会把刚做的操作抹掉。
+   *
+   * 折中：服务端该站点有记录就以服务端为准（保证可增可减），
+   * 服务端没有才保留本地值（保留离线期间的增量，不丢数据）。
+   */
   function mergeCounts(local, remote) {
     const out = {};
     const keys = new Set(Object.keys(local || {}).concat(Object.keys(remote || {})));
     keys.forEach(function (id) {
       const a = (local && local[id]) || {};
-      const b = (remote && remote[id]) || {};
+      const b = (remote || {})[id];
+      const hasRemote = !!(remote && Object.prototype.hasOwnProperty.call(remote, id) && b);
+      const pick = function (key) {
+        if (hasRemote) return Number(b[key]) || 0;
+        return Number(a[key]) || 0;
+      };
       out[id] = {
-        like: Math.max(Number(a.like) || 0, Number(b.like) || 0),
-        dislike: Math.max(Number(a.dislike) || 0, Number(b.dislike) || 0),
-        broken: Math.max(Number(a.broken) || 0, Number(b.broken) || 0)
+        like: pick('like'),
+        dislike: pick('dislike'),
+        broken: pick('broken')
       };
     });
     return out;
