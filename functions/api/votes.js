@@ -192,6 +192,19 @@ export async function onRequestGet(context) {
 
   const url = new URL(request.url);
 
+  // 诊断：只回报「配没配」与配置项是否齐全，绝不回传密钥本身。
+  // 用途是让站长在控制台外确认绑定状态，避免反复猜。
+  if (url.searchParams.get('diag') === '1') {
+    const secret = String(env.VOTE_KEY || '');
+    return json(200, {
+      ok: true,
+      votesKvBound: !!kv,
+      voteKeyConfigured: secret.length > 0,
+      voteKeyLength: secret.length,          // 只给长度，便于确认是否被截断
+      note: '本接口不会返回 VOTE_KEY 的内容'
+    });
+  }
+
   if (url.searchParams.get('mine') === '1') {
     const fp = request.headers.get('X-Gyp-Fp') || '';
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
