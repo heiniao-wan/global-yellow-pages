@@ -47,8 +47,20 @@ def load_data():
     src = io.open(DATA, encoding="utf-8").read()
 
     cats = []
-    for m in re.finditer(r"\{\s*key:\s*'([^']+)'\s*,\s*zh:\s*'([^']*)'\s*,\s*en:\s*'([^']*)'", src):
-        cats.append({"key": m.group(1), "zh": m.group(2), "en": m.group(3)})
+    for m in re.finditer(r"^\s*\{\s*key:\s*'([^']+)'(.*)$", src, re.M):
+        tail = m.group(2)
+        cats.append({
+            "key": m.group(1),
+            # 分类定义都是单行，剩余部分直接取 zh/en/icon/desc，避免逐个字段另写正则
+            "zh": (re.search(r"zh:\s*'([^']*)'", tail).group(1)
+                   if re.search(r"zh:\s*'([^']*)'", tail) else ""),
+            "en": (re.search(r"en:\s*'([^']*)'", tail).group(1)
+                   if re.search(r"en:\s*'([^']*)'", tail) else ""),
+            "icon": (re.search(r"icon:\s*'([^']*)'", tail).group(1)
+                     if re.search(r"icon:\s*'([^']*)'", tail) else ""),
+            "desc": (re.search(r"desc:\s*'([^']*)'", tail).group(1)
+                     if re.search(r"desc:\s*'([^']*)'", tail) else ""),
+        })
 
     # 逐行解析：字段顺序 / 引号风格可能有出入，单独取每个字段最稳
     def field(line, key):
@@ -83,7 +95,7 @@ def write_robots(base):
         "Disallow: /functions/\n"
         "Disallow: /tools/\n"
         "\n"
-        "# 纯静态、零 JS 的全站索引页（335 条真实链接，优先抓这里）\n"
+        "# 纯静态、零 JS：sites.html 全站索引 + cat/<分类>.html 分类页（优先抓这里，首页是 JS 渲染，爬虫拿不到外链）\n"
         "Sitemap: %s/sitemap.xml\n" % base
     )
     io.open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8", newline="\n").write(txt)
@@ -140,6 +152,8 @@ def write_sites_html(base, cats, sites):
          '.back{display:inline-block;margin:14px 0 26px;padding:8px 16px;border-radius:999px;'
          'background:#0071e3;color:#fff;text-decoration:none;font-size:14px}',
          'h2{font-size:19px;margin:32px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e5ea}',
+        'a.cat-page{float:right;font-size:12px;font-weight:400;color:#0071e3;text-decoration:none}',
+        'a.cat-page:hover{text-decoration:underline}',
          '.cat-en{font-size:12px;color:#8e8e93;font-weight:400;margin-left:8px}',
          'ul{list-style:none;padding:0;margin:0}',
          'li{padding:10px 0;border-bottom:1px solid #f2f2f7}',
@@ -161,8 +175,11 @@ def write_sites_html(base, cats, sites):
         items = by.get(c["key"], [])
         if not items:
             continue
-        p.append('<h2>%s %s<span class="cat-en">%s · %d 个</span></h2>'
-                 % (html.escape(c["zh"]), "", html.escape(c["en"]), len(items)))
+        # 独立分类页的内链入口：爬虫靠这些链接发现 17 个新页面
+        p.append('<h2>%s %s<span class="cat-en">%s · %d 个</span>'
+                 '<a class="cat-page" href="%s/cat/%s.html">独立页 ↗</a></h2>'
+                 % (html.escape(c["zh"]), "", html.escape(c["en"]), len(items),
+                    base, c["key"]))
         p.append("<ul>")
         for s in items:
             p.append("<li>")
@@ -183,6 +200,96 @@ def write_sites_html(base, cats, sites):
     io.open(os.path.join(ROOT, "sites.html"), "w", encoding="utf-8",
             newline="\n").write("\n".join(p))
     return "sites.html（%d 条链接）" % len(sites)
+
+
+# ───────────────────── 分类独立页（Bing/Yandex 收录专用） ─────────────────────
+# 为什么需要：首页是 JS 渲染，爬虫拿到的原始 HTML 里一个外链都没有；
+# sites.html 虽然有全部链接，但只有一个 URL，Bing 往往不知从何拆页。
+# 给每个分类生成一个独立静态页 = 给爬虫 17 个明确的抓取入口。
+
+CAT_CSS = (
+    '*{box-sizing:border-box}body{margin:0;font:15px/1.7 -apple-system,"Microsoft YaHei UI",sans-serif;'
+    'color:#1d1d1f;background:#fff}'
+    '.wrap{max-width:860px;margin:0 auto;padding:28px 20px 60px}'
+    'h1{font-size:25px;margin:0 0 8px}.sub{color:#6e6e73;margin:0 0 4px}'
+    '.en{font-size:12px;color:#8e8e93;margin-left:8px}'
+    '.back{display:inline-block;margin:14px 0 8px;padding:8px 16px;border-radius:999px;'
+    'background:#0071e3;color:#fff;text-decoration:none;font-size:14px}'
+    'ul{list-style:none;padding:0;margin:18px 0 0}'
+    'li{padding:11px 0;border-bottom:1px solid #f2f2f7}'
+    'a.site{font-weight:600;color:#0071e3;text-decoration:none}a.site:hover{text-decoration:underline}'
+    '.desc{color:#48484a;margin:2px 0}.meta{font-size:12px;color:#8e8e93;margin:0}'
+    'footer{margin-top:44px;padding-top:16px;border-top:1px solid #e5e5ea;color:#8e8e93;font-size:13px}'
+    '@media (prefers-color-scheme:dark){body{background:#1c1c1e;color:#f5f5f7}'
+    'li{border-color:#2c2c2e}.desc{color:#c7c7cc}.sub,.meta,.en{color:#98989d}footer{border-color:#3a3a3c}}'
+)
+
+
+def write_cat_pages(base, cats, sites):
+    """为每个分类生成 cat/<key>.html，返回 [(相对URL, 站点数), ...]"""
+    out_dir = os.path.join(ROOT, "cat")
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+
+    by = {}
+    for s in sites:
+        by.setdefault(s["category"], []).append(s)
+
+    made = []
+    today = datetime.date.today().isoformat()
+
+    for c in cats:
+        items = by.get(c["key"], [])
+        if not items:
+            continue
+        rel = "cat/%s.html" % c["key"]
+        url = base + "/" + rel
+
+        p = ['<!DOCTYPE html>', '<html lang="zh-CN">', '<head>',
+             '<meta charset="UTF-8">',
+             '<meta name="viewport" content="width=device-width, initial-scale=1">',
+             '<title>%s · %d 个精选网站 — 全球黄页</title>'
+             % (html.escape(c["zh"]), len(items)),
+             '<meta name="description" content="全球黄页「%s」分类：%d 个精选网站官网直达，'
+             '含中文简介、地区与语言标注。%s">'
+             % (html.escape(c["zh"]), len(items), html.escape(c["desc"][:60])),
+             '<link rel="canonical" href="%s">' % url,
+             '<meta name="robots" content="index,follow">',
+             '<meta property="og:type" content="website">',
+             '<meta property="og:site_name" content="全球黄页">',
+             '<meta property="og:title" content="%s · %d 个精选网站">' % (html.escape(c["zh"]), len(items)),
+             '<meta property="og:description" content="%s">' % html.escape(c["desc"]),
+             '<meta property="og:url" content="%s">' % url,
+             '<meta property="og:image" content="%s/assets/img/og-cover.png">' % base,
+             '<meta name="twitter:card" content="summary_large_image">',
+             '<style>', CAT_CSS, '</style>', '</head>', '<body>', '<div class="wrap">',
+             '<h1>%s %s<span class="en">%s · %d 个网站</span></h1>'
+             % (c["icon"], html.escape(c["zh"]), html.escape(c["en"]), len(items)),
+             '<p class="sub">%s</p>' % html.escape(c["desc"]),
+             '<a class="back" href="%s/sites.html">← 全站索引（%d 个网站）</a>' % (base, len(sites)),
+             '<a class="back" href="%s/" style="background:#f5f5f7;color:#1d1d1f">回到主站看截图与投票</a>'
+             % base,
+             '<ul>']
+
+        for s in items:
+            p.append("<li>")
+            p.append('<a class="site" href="%s" target="_blank" rel="noopener">%s</a>'
+                     % (html.escape(s["url"]), html.escape(s["name"])))
+            p.append('<p class="desc">%s</p>' % html.escape(s["desc"]))
+            p.append('<p class="meta">%s · %s</p>' % (html.escape(s["region"]), html.escape(s["lang"])))
+            p.append("</li>")
+
+        p.append("</ul>")
+        p.append('<footer>%s 分类共 %d 个网站 · 最后更新 %s<br>'
+                 '© 全球黄页 %s — 收录均为各站点官方首页链接</footer>'
+                 % (html.escape(c["zh"]), len(items), today, datetime.date.today().year))
+        p.append("</div></body></html>")
+
+        io.open(os.path.join(out_dir, "%s.html" % c["key"]), "w", encoding="utf-8",
+                newline="\n").write("\n".join(p))
+        made.append((rel, len(items)))
+
+    return made
 
 
 # ─────────────────────────── 社交封面图 ───────────────────────────
@@ -313,12 +420,19 @@ def main():
     print("读到 %d 个分类、%d 个站点\n" % (len(cats), len(sites)))
 
     print("  生成", write_robots(base))
-    print("  生成", write_sitemap(base, [
+    cat_pages = write_cat_pages(base, cats, sites)
+    print("  生成 分类独立页 cat/*.html（%d 个）" % len(cat_pages))
+
+    sm = [
         (base + "/", 1.0, "daily"),
         (base + "/sites.html", 0.9, "weekly"),
         (base + "/index-v2.html", 0.6, "monthly"),
         (base + "/legal.html", 0.3, "yearly"),
-    ]))
+    ]
+    # 分类页排在大站索引之后、全站索引之前，作为抓取主入口
+    for rel, _n in cat_pages:
+        sm.append((base + "/" + rel, 0.8, "weekly"))
+    print("  生成", write_sitemap(base, sm))
     print("  生成", write_sites_html(base, cats, sites))
     print("  生成", write_og_image(len(sites), len(cats)))
     print("  改写", inject_meta(base, len(sites), len(cats)))

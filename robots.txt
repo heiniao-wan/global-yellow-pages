@@ -5,5 +5,5 @@ Disallow: /admin.html
 Disallow: /functions/
 Disallow: /tools/
 
-# 纯静态、零 JS 的全站索引页（335 条真实链接，优先抓这里）
+# 纯静态、零 JS：sites.html 全站索引 + cat/<分类>.html 分类页（优先抓这里，首页是 JS 渲染，爬虫拿不到外链）
 Sitemap: https://ypage.ccwu.cc/sitemap.xml
