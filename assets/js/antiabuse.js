@@ -9,7 +9,9 @@
  *   ② 交互时序校验  —— 页面加载到点击的间隔，快于人类反应极限即判机器
  *   ③ 浏览器指纹   —— Canvas 指纹 + 硬件特征，识别改 IP 换设备的专业刷票
  *   ④ 速率限制     —— 滑动窗口内限制单指纹的投票频次
- *   ⑤ 一次性投票   —— 站点指纹 × 站点ID 联合唯一键，一票定终身不可改
+ *   ⑤ 一站一票     —— 站点指纹 × 站点ID 联合唯一键：同站只保留一票，
+ *                    可取消、可改票（2026-10-19 起；原为「一票定终身不可改」，
+ *                    与「点赞后能取消」的需求直接冲突，故改为可撤销）
  *   ⑥ 存活性检测   —— 页面是否真的在前台可见且有真实焦点交互
  *
  * 重要说明（务必知情）：
@@ -227,6 +229,21 @@ const AntiAbuse = (function () {
     }));
   }
 
+  /** 我在这个站投了什么（like/dislike/broken），没投过返回 null */
+  function currentVote(siteId) {
+    try {
+      const raw = store.get(voteKey(siteId));
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      return (o && o.action) ? o.action : null;
+    } catch (e) { return null; }
+  }
+
+  /** 取消投票：清掉本机记录 */
+  function clearVoted(siteId) {
+    store.del(voteKey(siteId));
+  }
+
   /** 取出用户已投过的全部站点 → 用于页面初始化时置灰按钮 */
   function votedMap() {
     const out = {};
@@ -235,7 +252,14 @@ const AntiAbuse = (function () {
         const k = localStorage.key(i);
         if (k && k.indexOf(VOTE_KEY) === 0) {
           const siteId = k.slice((VOTE_KEY + fingerprint() + ':').length);
-          if (siteId) out[siteId] = true;
+          if (!siteId) continue;
+          // 值里带的是投了哪一项，UI 据此判断「再点一次 = 取消」
+          try {
+            const o = JSON.parse(localStorage.getItem(k) || '{}');
+            out[siteId] = o && o.action ? o.action : true;
+          } catch (e) {
+            out[siteId] = true;
+          }
         }
       }
     } catch (e) { /* 忽略 */ }
@@ -262,11 +286,10 @@ const AntiAbuse = (function () {
       }
     }
 
-    if (hasVoted(siteId)) {
-      return { pass: false, reason: 'already-voted', message: '你已经评价过这个站点了，每个站点只能评价一次。' };
-    }
-
-    return { pass: true, fingerprint: fingerprint() };
+    // 注意：这里不再因「已投过」而拒绝。
+    // 一站一票的约束由服务端强制（v:<hash>:<siteId> 一个键），
+    // 前端拦截只是第一道过滤，允许重复点击才能支持改票与取消。
+    return { pass: true, fingerprint: fingerprint(), alreadyVoted: currentVote(siteId) };
   }
 
   /** 记一次成功投票（仅在 canVote 通过后调用） */
@@ -289,7 +312,7 @@ const AntiAbuse = (function () {
         { icon: '⏱️', title: '交互时序', desc: '点击快于人类反应极限直接拦下' },
         { icon: '🧬', title: '浏览器指纹', desc: '换 IP 也认得出同一台设备' },
         { icon: '🚦', title: '速率限制', desc: '每分钟最多 20 次，超出即拦截' },
-        { icon: '🔒', title: '一票定终身', desc: '每站仅可评价一次，不可修改' },
+        { icon: '🔒', title: '一站一票', desc: '每站只保留一票，可取消可改票' },
         { icon: '👁️', title: '存活性检测', desc: '后台标签页的投票不予采信' }
       ]
     };
@@ -307,6 +330,8 @@ const AntiAbuse = (function () {
   return {
     canVote: canVote,
     commitVote: commitVote,
+    clearVoted: clearVoted,
+    currentVote: currentVote,
     hasVoted: hasVoted,
     votedMap: votedMap,
     fingerprint: fingerprint,

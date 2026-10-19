@@ -20,3 +20,4 @@ tools/.*-ud*/
 
 # WorkBuddy 会话产物
 *.genie
+.local-votes.json

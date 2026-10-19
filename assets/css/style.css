@@ -637,6 +637,7 @@ body {
 .vote-group { display: flex; gap: 5px; }
 
 .vote-btn {
+  position: relative;      /* 「取消」角标要相对按钮定位 */
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -667,9 +668,40 @@ body {
 .vote-btn.v-dislike:hover:not(:disabled) { background: rgba(255, 59, 48, .14);  color: #c92a20; }
 .vote-btn.v-broken:hover:not(:disabled)  { background: rgba(255, 159, 10, .18); color: #b36b00; }
 
-/* 已投过票的整卡状态 */
+/* ── 已投票态：可取消、可改票（2026-10-19 起） ──
+   旧规则是整组按钮 disabled + 变灰（"一票定终身"），
+   现改为：只把我投的那一项高亮并标注「取消」，其余保持可点用于改票。 */
 .site-card.has-voted .vote-group { position: relative; }
-.site-card.has-voted .vote-btn { opacity: .32; filter: grayscale(.5); }
+.site-card.has-voted .vote-btn { opacity: .5; filter: grayscale(.35); }
+.site-card.has-voted .vote-btn.mine {
+  opacity: 1;
+  filter: none;
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.site-card.has-voted .vote-btn.mine.v-like    { background: rgba(52, 199, 89, .14);  color: #1d8f3c; }
+.site-card.has-voted .vote-btn.mine.v-dislike { background: rgba(255, 59, 48, .12);  color: #c92a20; }
+.site-card.has-voted .vote-btn.mine.v-broken  { background: rgba(255, 159, 10, .15); color: #b36b00; }
+
+/* 「取消」角标：明确告诉用户再点一次会撤回
+   底色用 currentColor 跟随按钮语义色，文字用白色保证对比度 */
+.vote-btn .vb-flag {
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #fff;
+  background: currentColor;
+  opacity: .92;
+  pointer-events: none;
+}
+
+/* 请求在途：轻微禁用反馈，防止连点产生竞态 */
+.vote-btn[data-busy="1"] { opacity: .55; cursor: progress; }
 
 /* 投票结果提示条 */
 .vote-flash {

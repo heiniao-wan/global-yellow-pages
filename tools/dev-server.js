@@ -18,6 +18,7 @@ const ROOT = path.join(__dirname, '..');
 const PORT = Number(process.env.PORT || 8901);
 const ADMIN_KEY = process.env.ADMIN_KEY || 'gyp-admin-dev-2026';
 const KV_FILE = path.join(ROOT, '.local-kv.json');
+const VOTES_FILE = path.join(ROOT, '.local-votes.json');
 
 /* ── 文件版 KV：模拟 Cloudflare KV 的最小接口 ── */
 const kv = {
@@ -26,6 +27,24 @@ const kv = {
     catch (e) { return {}; }
   },
   _save(map) { fs.writeFileSync(KV_FILE, JSON.stringify(map, null, 2)); },
+  async get(k) { const m = this._load(); return k in m ? m[k] : null; },
+  async put(k, v, opt) { const m = this._load(); m[k] = String(v); this._save(m); },
+  async delete(k) { const m = this._load(); delete m[k]; this._save(m); },
+  async list(opt) {
+    const o = opt || {};
+    const keys = Object.keys(this._load())
+      .filter((k) => k.startsWith(o.prefix || ''))
+      .slice(0, o.limit || 1000);
+    return { keys: keys.map((name) => ({ name })) };
+  }
+};
+// VOTES 用独立命名空间，与留言数据互不干扰（生产环境也是两个 KV）
+const votesKv = {
+  _load() {
+    try { return JSON.parse(fs.readFileSync(VOTES_FILE, 'utf8')); }
+    catch (e) { return {}; }
+  },
+  _save(map) { fs.writeFileSync(VOTES_FILE, JSON.stringify(map, null, 2)); },
   async get(k) { const m = this._load(); return k in m ? m[k] : null; },
   async put(k, v) { const m = this._load(); m[k] = String(v); this._save(m); },
   async delete(k) { const m = this._load(); delete m[k]; this._save(m); },
@@ -37,7 +56,15 @@ const kv = {
     return { keys: keys.map((name) => ({ name })) };
   }
 };
-const env = { MESSAGES: kv, ADMIN_KEY: ADMIN_KEY };
+
+const env = {
+  MESSAGES: kv,
+  VOTES: votesKv,
+  ADMIN_KEY: ADMIN_KEY,
+  // 本地固定值，仅用于让「换设备仍能找回自己的票」这条路径可测；
+  // 生产环境请在 Cloudflare 配同名 Secret
+  VOTE_KEY: process.env.VOTE_KEY || 'gyp-local-vote-key-dev'
+};
 
 /* ── MIME 表 ── */
 const MIME = {
@@ -86,6 +113,7 @@ async function main() {
   // Functions 是 ESM，动态加载
   const feedback = await import(pathToFileURL(path.join(ROOT, 'functions/api/feedback.js')).href);
   const messages = await import(pathToFileURL(path.join(ROOT, 'functions/api/messages.js')).href);
+  const votes = await import(pathToFileURL(path.join(ROOT, 'functions/api/votes.js')).href);
 
   const server = http.createServer((req, res) => {
     const pathname = new URL(req.url, 'http://x').pathname;
@@ -105,6 +133,18 @@ async function main() {
         }
         if (pathname === '/api/messages' && req.method === 'DELETE') {
           const resp = await messages.onRequestDelete({ request: toRequest(req), env });
+          return sendJson(res, resp);
+        }
+        if (pathname === '/api/votes' && req.method === 'GET') {
+          const resp = await votes.onRequestGet({ request: toRequest(req), env });
+          return sendJson(res, resp);
+        }
+        if (pathname === '/api/votes' && req.method === 'POST') {
+          const resp = await votes.onRequestPost({ request: toRequest(req, Buffer.concat(chunks)), env });
+          return sendJson(res, resp);
+        }
+        if (pathname === '/api/votes' && req.method === 'DELETE') {
+          const resp = await votes.onRequestDelete({ request: toRequest(req), env });
           return sendJson(res, resp);
         }
         if (pathname.startsWith('/api/')) {

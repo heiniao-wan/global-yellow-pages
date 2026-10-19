@@ -155,8 +155,8 @@ t('后台标签页投票 → 拒绝', () => {
   expect(!r.pass && r.reason === 'hidden-tab', '应拒绝隐藏标签页，实际: ' + JSON.stringify(r));
 });
 
-/* ⑤ 一票定终身 —— 本次验证的核心 */
-t('首次投票放行，且投完后同站不可再投', () => {
+/* ⑤ 一站一票（可取消、可改票）—— 2026-10-19 规则变更后的核心验证 */
+t('首次投票放行，投完后记录了投了哪一项', () => {
   const env = buildEnv({ elapsed: 3000 });
   const A = env.window.AntiAbuse;
   const first = A.canVote('site-a', 'like');
@@ -164,9 +164,45 @@ t('首次投票放行，且投完后同站不可再投', () => {
 
   A.commitVote('site-a', 'like');
   expect(A.hasVoted('site-a') === true, '投票后应标记为已投');
+  expect(A.currentVote('site-a') === 'like', '应能读回投的是哪一项');
+});
 
-  const r = A.canVote('site-a', 'dislike');
-  expect(!r.pass && r.reason === 'already-voted', '同站第二次投票必须被拒，实际: ' + JSON.stringify(r));
+t('已投过后再次操作仍放行（改票与取消的前提）', () => {
+  const env = buildEnv({ elapsed: 3000 });
+  const A = env.window.AntiAbuse;
+  A.commitVote('site-a', 'like');
+
+  const r1 = A.canVote('site-a', 'like');       // 再点同一项 = 取消
+  expect(r1.pass === true, '再点已投项应放行（取消）: ' + JSON.stringify(r1));
+  expect(r1.alreadyVoted === 'like', '应告知之前投的是 like');
+
+  const r2 = A.canVote('site-a', 'dislike');    // 点其他项 = 改票
+  expect(r2.pass === true, '点其他项应放行（改票）: ' + JSON.stringify(r2));
+  expect(r2.alreadyVoted === 'like', '改票时也应告知原选项');
+});
+
+t('取消投票后 hasVoted 转 false，且可重新投', () => {
+  const env = buildEnv({ elapsed: 3000 });
+  const A = env.window.AntiAbuse;
+  A.commitVote('site-a', 'broken');
+  expect(A.hasVoted('site-a') === true, '投过后应为已投');
+
+  A.clearVoted('site-a');
+  expect(A.hasVoted('site-a') === false, 'clearVoted 后应回到未投');
+  expect(A.currentVote('site-a') === null, 'clearVoted 后 currentVote 应为 null');
+
+  A.commitVote('site-a', 'like');
+  expect(A.currentVote('site-a') === 'like', '取消后应能重新投票');
+});
+
+t('votedMap 带上具体选项，供 UI 判断「再点=取消」', () => {
+  const env = buildEnv();
+  const A = env.window.AntiAbuse;
+  A.commitVote('site-a', 'like');
+  A.commitVote('site-b', 'broken');
+  const map = A.votedMap();
+  expect(map['site-a'] === 'like', 'site-a 应记为 like，实际 ' + JSON.stringify(map['site-a']));
+  expect(map['site-b'] === 'broken', 'site-b 应记为 broken，实际 ' + JSON.stringify(map['site-b']));
 });
 
 t('已投 A 不影响投 B', () => {

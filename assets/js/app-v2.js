@@ -377,6 +377,29 @@
     '</article>';
   }
 
+  /**
+   * 启动时从服务端同步：全站票数 + 我的投票记录。
+   * 任何一步失败都静默降级——页面照常工作，只是数据停留在本机。
+   */
+  function syncFromServer() {
+    if (!window.VotesSync) return;
+    window.VotesSync.fetchCounts().then(function (remote) {
+      if (!remote) return;
+      state.counts = mergeCounts(state.counts, remote);
+      saveCounts();
+      renderGrid();
+      renderStats();
+    });
+
+    // 服务端记录优先于本机：这样换设备后仍知道自己投过什么
+    window.VotesSync.fetchMine().then(function (mine) {
+      if (!mine) return;
+      state.voted = mine;
+      saveCounts();
+      Object.keys(mine).forEach(function (id) { markVotedUI(id); });
+    });
+  }
+
   /** 把站点挂到一个卡片上；滚动进视口时才真正去请求截图 */
   function loadCard(card) {
     const site = SITES.find(function (s) { return s.id === card.dataset.id; });
@@ -491,66 +514,138 @@
     }
 
     const btn = e.target.closest('.vote-btn');
-    if (!btn || btn.disabled) return;
+    if (!btn) return;
+    // 请求在途时忽略连点，避免快速连击产生竞态
+    if (btn.dataset.busy === '1') return;
 
     const siteId = btn.dataset.id;
     const action = btn.dataset.vote;
+    const myVote = state.voted[siteId];
 
+    // 先过本地防刷（自动化特征、蜜罐、时序、速率）
     const verdict = window.AntiAbuse.canVote(siteId, action);
     if (!verdict.pass) {
-      if (verdict.reason === 'already-voted') {
-        markVotedUI(siteId);
-      }
       flash(btn, flashMsg(verdict), 'warn');
       return;
     }
 
-    window.AntiAbuse.commitVote(siteId, action);
+    // 语义判定：再点已投的那一项 = 取消；点其他项 = 改票；全新 = 投票
+    const isCancel = (myVote === action);
+    const isChange = (!!myVote && !isCancel);
 
-    // 累加计数
-    const c = state.counts[siteId] || { like: 0, dislike: 0, broken: 0 };
-    c[action] += 1;
-    state.counts[siteId] = c;
-    saveCounts();
+    btn.dataset.busy = '1';
+    const done = function () { delete btn.dataset.busy; };
 
-    state.voted = window.AntiAbuse.votedMap();
-    markVotedUI(siteId);
-
-    // 更新该卡三个数字
-    const card = btn.closest('.site-card');
-    VOTE_TYPES.forEach(function (v) {
-      const num = card.querySelector('[data-count="' + v.key + '"]');
-      if (num) num.textContent = c[v.key];
-    });
-
-    // 「无法访问」投票即时刷新卡片角标（否则要等下次重渲染才出现）
-    if (action === 'broken') {
-      const old = card.querySelector('.tag-broken');
-      if (old) old.remove();
-      const meta = card.querySelector('.site-meta');
-      if (meta && c.broken > 0) {
-        const tag = document.createElement('span');
-        tag.className = 'tag tag-broken';
-        tag.textContent = '⚠ ' + t('badge_broken').replace('{n}', c.broken);
-        meta.appendChild(tag);
+    /** 服务端成功后统一走这里：更新数字、刷新按钮态、刷新图表 */
+    const applyServer = function (counts) {
+      if (counts) {
+        state.counts = mergeCounts(state.counts, counts);
+        saveCounts();
       }
+      if (isCancel) {
+        window.AntiAbuse.clearVoted(siteId);
+        delete state.voted[siteId];
+      } else {
+        window.AntiAbuse.commitVote(siteId, action);
+        state.voted[siteId] = action;
+      }
+      renderGrid();
+      renderStats();
+    };
+
+    /** 服务端不可用时的降级：本地加减，保证功能不中断 */
+    const applyLocal = function () {
+      const c = state.counts[siteId] || { like: 0, dislike: 0, broken: 0 };
+      if (isCancel) {
+        c[action] = Math.max(0, c[action] - 1);
+        state.voted[siteId] = null;
+        window.AntiAbuse.clearVoted(siteId);
+      } else {
+        if (isChange && myVote) c[myVote] = Math.max(0, c[myVote] - 1);
+        c[action] += 1;
+        state.voted[siteId] = action;
+        window.AntiAbuse.commitVote(siteId, action);
+      }
+      state.counts[siteId] = c;
+      saveCounts();
+      renderGrid();
+      renderStats();
+    };
+
+    // ── 取消 ──
+    if (isCancel) {
+      window.VotesSync.unvote(siteId).then(function (r) {
+        if (r) { applyServer(r.counts); }
+        else { applyLocal(); }
+        done();
+      }).catch(function () {
+        applyLocal();
+        done();
+      });
+      return;
     }
 
-    const label = t(VOTE_TYPES.find(function (v) { return v.key === action; }).i18n);
-    flash(btn, t('flash_ok').replace('{type}', label), 'ok');
-
-    scheduleChartRefresh();
+    // ── 投票 / 改票 ──
+    window.VotesSync.vote(siteId, action).then(function (r) {
+      if (r) { applyServer(r.counts); }
+      else { applyLocal(); }
+      done();
+    }).catch(function (e) {
+      if (e && e.status === 429) {
+        flash(btn, t('flash_rate'), 'warn');
+      } else {
+        flash(btn, t('flash_fail'), 'warn');
+      }
+      done();
+    });
   }
 
-  /** 整卡投票按钮置灰，标记「已评价」 */
+  /** 服务端票数并入本地（本地可能有离线期间的增量，取两者较大值避免回退） */
+  function mergeCounts(local, remote) {
+    const out = {};
+    const keys = new Set(Object.keys(local || {}).concat(Object.keys(remote || {})));
+    keys.forEach(function (id) {
+      const a = (local && local[id]) || {};
+      const b = (remote && remote[id]) || {};
+      out[id] = {
+        like: Math.max(Number(a.like) || 0, Number(b.like) || 0),
+        dislike: Math.max(Number(a.dislike) || 0, Number(b.dislike) || 0),
+        broken: Math.max(Number(a.broken) || 0, Number(b.broken) || 0)
+      };
+    });
+    return out;
+  }
+
+  /**
+   * 标记「我投过」：高亮对应按钮并显示「取消」角标，其余按钮保持可点（用于改票）。
+   * value 可以是 true（旧数据无 action）或具体 action 字符串。
+   */
   function markVotedUI(siteId) {
     const card = document.querySelector('.site-card[data-id="' + CSS.escape(siteId) + '"]');
     if (!card) return;
+    const mine = state.voted[siteId];
     $$('.vote-btn', card).forEach(function (b) {
-      b.disabled = true;
-      b.classList.add('voted');
+      var isMine = (typeof mine === 'string') ? (b.dataset.vote === mine) : !!mine;
+      b.classList.toggle('mine', isMine);
+      b.classList.toggle('voted', !!mine);
+      b.disabled = false;
+      var label = isMine ? t('vote_cancel') : t((VOTE_TYPES.find(function (v) {
+        return v.key === b.dataset.vote;
+      }) || {}).i18n || 'label_like');
+      b.title = label;
+      b.setAttribute('aria-label', label);
+      b.setAttribute('aria-pressed', isMine ? 'true' : 'false');
+      var flag = b.querySelector('.vb-flag');
+      if (isMine && !flag) {
+        flag = document.createElement('span');
+        flag.className = 'vb-flag';
+        flag.textContent = t('vote_cancel');
+        b.appendChild(flag);
+      } else if (!isMine && flag) {
+        flag.remove();
+      }
     });
-    card.classList.add('has-voted');
+    card.classList.toggle('has-voted', !!mine);
   }
 
   function flash(btn, msg, kind) {
@@ -633,9 +728,9 @@
         '<div class="catbar-name">' + r.cat.icon + ' ' + esc(catName(r.cat)) + '</div>' +
         '<div class="catbar-track" title="' + esc(t('bar_tip').replace('{l}', r.d.like).replace('{d}', r.d.dislike).replace('{b}', r.d.broken)) + '">' +
           '<div class="catbar-fill" style="width:' + Math.max(wpx, 3) + '%">' +
-            '<i style="width:' + wl + '%;background:#00e5a0"></i>' +
-            '<i style="width:' + wd + '%;background:#ff4d6d"></i>' +
-            '<i style="width:' + wb + '%;background:#ffb340"></i>' +
+            '<i style="width:' + wl + '%;background:#34c759"></i>' +
+            '<i style="width:' + wd + '%;background:#ff3b30"></i>' +
+            '<i style="width:' + wb + '%;background:#ff9f0a"></i>' +
           '</div>' +
         '</div>' +
         '<div class="catbar-num">' + (r.d.like + r.d.dislike + r.d.broken) + '</div>' +
@@ -646,9 +741,9 @@
     $('#ringChart').innerHTML =
       ring(voteAll, total.like, total.dislike, total.broken) +
       '<div class="ring-legend">' +
-        legend('#00e5a0', t('label_like'), total.like) +
-        legend('#ff4d6d', t('label_dislike'), total.dislike) +
-        legend('#ffb340', t('label_broken'), total.broken) +
+        legend('#34c759', t('label_like'), total.like) +
+        legend('#ff3b30', t('label_dislike'), total.dislike) +
+        legend('#ff9f0a', t('label_broken'), total.broken) +
       '</div>';
 
     // 榜单：按好评率排序（同分比总票数，再比站点热度），而不是按总票数
@@ -1037,8 +1132,11 @@
     renderProtection();
     renderFaq();
 
-    // 回填：把本机已投过的卡片置灰
+    // 回填：把本机已投过的卡片标记为已投票
     Object.keys(state.voted).forEach(function (id) { markVotedUI(id); });
+
+    // 从服务端拉全站票数与「我投过什么」，让数据在所有人之间共享
+    syncFromServer();
 
     $('#year').textContent = new Date().getFullYear();
   }
