@@ -872,6 +872,53 @@ body {
   opacity: .01;
 }
 
+/* ═══════════════ 常见问题 FAQ ═══════════════ */
+.faq { padding: 80px 0; background: var(--bg-alt); }
+.faq .section-head { margin-bottom: 26px; }
+
+.faq-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.faq-tab {
+  padding: 8px 18px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--bg-elevated);
+  color: var(--text-2); font-size: 14px; cursor: pointer;
+  font-family: inherit; transition: all .18s;
+}
+.faq-tab:hover { border-color: var(--accent); color: var(--accent); }
+.faq-tab.on {
+  background: var(--accent); border-color: var(--accent);
+  color: #fff; font-weight: 500;
+}
+
+.faq-list { max-width: 780px; margin: 0 auto; }
+.faq-item {
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--bg-elevated); margin-bottom: 10px; overflow: hidden;
+}
+.faq-q {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; background: none; border: 0; cursor: pointer;
+  font-family: inherit; font-size: 15px; color: var(--text);
+  text-align: left; line-height: 1.5;
+}
+.faq-q:hover { color: var(--accent); }
+.faq-q .faq-arrow {
+  margin-left: auto; flex: none; color: var(--text-3);
+  transition: transform .22s; font-size: 12px;
+}
+.faq-item.open .faq-q .faq-arrow { transform: rotate(90deg); }
+.faq-a {
+  display: none; padding: 0 20px 18px;
+  font-size: 14px; color: var(--text-2); line-height: 1.75;
+}
+.faq-item.open .faq-a { display: block; }
+.faq-a code {
+  padding: 2px 6px; border-radius: 5px; background: var(--bg-alt);
+  font-size: 13px; color: var(--accent);
+}
+
 /* ═══════════════ 页脚 ═══════════════ */
 .footer {
   padding: 44px 0 52px;

@@ -39,7 +39,8 @@
     onlyBroken: false,
     counts: loadCounts(),
     voted: {},
-    favs: loadFavs()
+    favs: loadFavs(),
+    faqGroup: null
   };
 
   /** 各站点累计票数：经 Vault 加密+校验存于本地，被篡改/损坏时自动作废重置
@@ -646,6 +647,58 @@
     }).join('');
   }
 
+  /* ───────────────────── 常见问题 FAQ（分组手风琴） ───────────────────── */
+  function renderFaq() {
+    var host = $('#faqList');
+    if (!host || !window.SITE_FAQ) return;
+    var G = window.SITE_FAQ.GROUPS, I = window.SITE_FAQ.ITEMS;
+
+    // 已展开项按分组记忆，切 Tab 回来不丢
+    var opened = window.__faqOpen || (window.__faqOpen = {});
+    var cur = state.faqGroup;
+    if (!cur || !G.some(function (g) { return g.id === cur; })) cur = G[0].id;
+    state.faqGroup = cur;
+
+    var tabs = $('#faqTabs');
+    if (tabs) {
+      tabs.innerHTML = G.map(function (g) {
+        return '<button class="faq-tab' + (g.id === cur ? ' on' : '') + '" data-g="' + g.id + '" type="button">' +
+          esc(t(g.labelKey)) + '</button>';
+      }).join('');
+      tabs.onclick = function (e) {
+        var b = e.target.closest('.faq-tab');
+        if (!b) return;
+        state.faqGroup = b.dataset.g;
+        renderFaq();
+      };
+    }
+
+    // i18n 用 faq_q{n} / faq_a{n} 覆盖，缺失时回落 faq-data.js 里的中文原文
+    host.innerHTML = I.filter(function (it) { return it.g === cur; }).map(function (it) {
+      var n = I.indexOf(it) + 1;
+      var open = opened[cur + ':' + n];
+      // i18n 未提供该条翻译时回落 faq-data.js 里的中文原文
+      var qk = 'faq_q' + n, ak = 'faq_a' + n;
+      return '<div class="faq-item' + (open ? ' open' : '') + '">' +
+        '<button class="faq-q" type="button" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+          '<span>' + esc(t(qk) === qk ? it.q : t(qk)) + '</span><span class="faq-arrow">▶</span>' +
+        '</button>' +
+        '<div class="faq-a">' + (t(ak) === ak ? it.a : t(ak)) + '</div>' +
+      '</div>';
+    }).join('');
+
+    host.onclick = function (e) {
+      var q = e.target.closest('.faq-q');
+      if (!q) return;
+      var item = q.parentNode;
+      var n = Array.prototype.indexOf.call(host.children, item) + 1;
+      var key = cur + ':' + n;
+      opened[key] = !item.classList.contains('open');
+      item.classList.toggle('open', opened[key]);
+      q.setAttribute('aria-expanded', opened[key] ? 'true' : 'false');
+    };
+  }
+
   /* ───────────────────── 搜索 ───────────────────── */
   function bindSearch() {
     var input = $('#search');
@@ -903,6 +956,7 @@
       renderGrid();
       renderStats();
       renderProtection();
+      renderFaq();
     };
 
     renderCategories();
@@ -919,6 +973,7 @@
     renderGrid();
     renderStats();
     renderProtection();
+    renderFaq();
 
     // 回填：把本机已投过的卡片置灰
     Object.keys(state.voted).forEach(function (id) { markVotedUI(id); });

@@ -14,3 +14,9 @@ Desktop.ini
 
 # Python 缓存
 __pycache__/
+
+# Chrome 无头测试用户数据目录
+tools/.*-ud*/
+
+# WorkBuddy 会话产物
+*.genie
