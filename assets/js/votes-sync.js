@@ -7,7 +7,7 @@
  * 为什么单独一个文件：投票链路同时涉及 API 交互、本地降级、状态合并，
  * 放进 app.js 会让那个已经很长的文件更难读。
  */
-(function () {
+window.VotesSync = (function () {
   'use strict';
 
   var ENDPOINT = '/api/votes';
