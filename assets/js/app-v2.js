@@ -362,9 +362,14 @@
           (c.broken > 0 ? '<span class="tag tag-broken">⚠ ' + esc(t('badge_broken').replace('{n}', c.broken)) + '</span>' : '') +
         '</div>' +
         '<div class="site-actions">' +
-          '<a class="open-btn" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer nofollow">' +
-            esc(t('open_site')) + ' <span class="arrow">↗</span>' +
-          '</a>' +
+          '<div class="site-cta">' +
+            '<a class="open-btn" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer nofollow">' +
+              esc(t('open_site')) + ' <span class="arrow">↗</span>' +
+            '</a>' +
+            '<button class="copy-btn" data-copy="' + esc(s.url) + '" title="' + esc(t('copy_link')) + '" aria-label="' + esc(t('copy_link')) + '">' +
+              '<span class="cb-ico">⧉</span><span class="cb-txt">' + esc(t('copy_link')) + '</span>' +
+            '</button>' +
+          '</div>' +
           '<div class="vote-group">' + buttons + '</div>' +
         '</div>' +
         '<div class="vote-flash" hidden></div>' +
@@ -387,6 +392,7 @@
     if (!grid._bound) {
       grid._bound = true;
       grid.addEventListener('click', onVoteClick);
+      grid.addEventListener('click', onCopyClick);
     }
     $$('.site-card', grid).forEach(function (card) {
       if (!('IntersectionObserver' in window)) { loadCard(card); return; }
@@ -406,6 +412,62 @@
     var key = 'flash_' + String(verdict.reason || '').replace(/-/g, '_');
     var txt = t(key);
     return txt === key ? verdict.message : txt;
+  }
+
+  /* ───────────────────── 复制链接 ───────────────────── */
+  /** 优先用 Clipboard API；非 HTTPS 或旧浏览器回退到临时 textarea + execCommand */
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    });
+  }
+
+  function onCopyClick(e) {
+    var btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    var url = btn.dataset.copy;
+    var txtEl = btn.querySelector('.cb-txt');
+    var icoEl = btn.querySelector('.cb-ico');
+    var old = txtEl ? txtEl.textContent : '';
+    copyText(url).then(function () {
+      btn.classList.add('done');
+      if (txtEl) txtEl.textContent = t('copied');
+      if (icoEl) icoEl.textContent = '✓';
+      showToast(t('copied'));
+      setTimeout(function () {
+        btn.classList.remove('done');
+        if (txtEl) txtEl.textContent = old;
+        if (icoEl) icoEl.textContent = '⧉';
+      }, 1800);
+    }).catch(function () {
+      showToast(t('copy_fail'));
+    });
+  }
+
+  /** 轻提示：复用投票闪烁条的做法，定时自动消失 */
+  var toastEl = null, toastTimer = null;
+  function showToast(text) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.className = 'gyp-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = text;
+    toastEl.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, 1800);
   }
 
   /* ───────────────────── 投票交互 ───────────────────── */
