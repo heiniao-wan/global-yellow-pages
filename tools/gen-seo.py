@@ -95,6 +95,9 @@ def write_robots(base):
         "Disallow: /functions/\n"
         "Disallow: /tools/\n"
         "\n"
+        "# Bing 站长验证文件：必须允许抓取，否则无法完成所有权验证\n"
+        "Allow: /BingSiteAuth.xml\n"
+        "\n"
         "# 纯静态、零 JS：sites.html 全站索引 + cat/<分类>.html 分类页（优先抓这里，首页是 JS 渲染，爬虫拿不到外链）\n"
         "Sitemap: %s/sitemap.xml\n" % base
     )

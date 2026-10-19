@@ -5,5 +5,8 @@ Disallow: /admin.html
 Disallow: /functions/
 Disallow: /tools/
 
+# Bing 站长验证文件：必须允许抓取，否则无法完成所有权验证
+Allow: /BingSiteAuth.xml
+
 # 纯静态、零 JS：sites.html 全站索引 + cat/<分类>.html 分类页（优先抓这里，首页是 JS 渲染，爬虫拿不到外链）
 Sitemap: https://ypage.ccwu.cc/sitemap.xml
