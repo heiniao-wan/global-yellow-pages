@@ -82,6 +82,12 @@ def main():
     urls = ["https://%s/" % host,
             "https://%s/sites.html" % host,
             "https://%s/index-v2.html" % host]
+    # 分类独立页：Bing 零收录时靠主动推送能显著加快抓取
+    cat_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cat")
+    if os.path.isdir(cat_dir):
+        for fn in sorted(os.listdir(cat_dir)):
+            if fn.endswith(".html"):
+                urls.append("https://%s/cat/%s" % (host, fn))
 
     print("目标站点：https://%s/" % host)
     print("IndexNow key：%s\n" % (key or "(未找到 —— 先在根目录放 <key>.txt)"))
@@ -97,10 +103,19 @@ def main():
         print("  [跳过] IndexNow：缺少 key 文件")
 
     sm = urllib.parse.quote("https://%s/sitemap.xml" % host, safe="")
-    for name, url in (("Bing sitemap ping", "https://www.bing.com/ping?sitemap=" + sm),
-                      ("Yandex sitemap ping", "https://webmaster.yandex.com/ping?sitemap=" + sm)):
-        code = ping(url)
-        print("  [%s] %-22s → HTTP %s" % ("OK" if code == 200 else "FAIL", name, code))
+    # Bing 官方已于 2023 年左右下线 /ping?sitemap 接口，返回 410 属预期，
+    # IndexNow（上面的 200）才是现在给 Bing 递交 URL 的正确通道，故此处只作提示不算失败。
+    code = ping("https://www.bing.com/ping?sitemap=" + sm)
+    if code == 410:
+        print("  [--] %-22s → 接口已废弃（Bing 不再支持 ping，"
+              "上面的 IndexNow 才是有效通道）" % "Bing sitemap ping")
+    else:
+        print("  [%s] %-22s → HTTP %s" % ("OK" if code == 200 else "FAIL",
+                                           "Bing sitemap ping", code))
+
+    yc = ping("https://webmaster.yandex.com/ping?sitemap=" + sm)
+    print("  [%s] %-22s → HTTP %s" % ("OK" if yc == 200 else "FAIL",
+                                       "Yandex sitemap ping", yc))
 
     print("\nGoogle 不走 IndexNow，需你在 Search Console 手动做一次（2 分钟）：")
     print("  1) https://search.google.com/search-console  用 Google 账号登录")
