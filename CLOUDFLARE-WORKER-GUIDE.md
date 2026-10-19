@@ -42,7 +42,7 @@
 1. 左侧 **Workers & Pages**（有的版本叫 Compute / Workers）
 2. 点进你的项目 **`global-yellow-pages`**
 3. 顶部标签点 **Settings**
-4. 左侧子菜单找到 **Bindings**（有的版本叫 Functions → Bindings）
+4. 左侧子菜单找到 **Bindings**（KV 绑定和 Variables and Secrets 都在 Settings 这一层）
 5. 点 **Add binding**
 6. 填：
    - **Variable name（变量名）**：`MESSAGES` ← 必须一字不差，全大写
@@ -56,14 +56,20 @@
 
 ## 第 3 步 · 设置管理员密钥 ADMIN_KEY
 
-1. 还在 Pages 项目里 → **Settings → Environment variables**（有的版本叫 Variables and Secrets）
-2. 点 **Add**
-3. 填：
+1. 还在 Pages 项目里 → **Settings → Variables and Secrets**
+   （旧版界面叫 Environment variables，是同一个地方）
+2. 页面顶部有 **Production ｜ Preview** 两个标签页，先确认当前停在 **Production**
+3. 点 **Add**，填：
+   - **Type**：选 **Encrypt**（明文可见会变成 Secret；不选则存成明文变量）
    - **Variable name**：`ADMIN_KEY`
-   - **Type**：选 **Secret**（加密存储，控制台里显示成 ••••）
    - **Value**：自己定一个强密码，建议 20 位以上随机串
-4. 环境范围：Production 和 Preview **都勾上**（预览环境也勾，方便测试）
-5. 点 **Save**
+4. 点 **Save**
+5. **再点一次 Add**，重复上面三步，这次把顶部标签切到 **Preview**，名字同样填 `ADMIN_KEY`
+
+> ⚠️ **Production 和 Preview 不是勾选框，是两个分开的标签页。**
+> 你必须**添加两次**才能两个环境都有这个变量——只在 Production 加的话，
+> 预览分支（每个 PR / 其他分支的部署）读不到 ADMIN_KEY，测试时会误判成"密钥没配"。
+> 两个环境的值可以设成不同值，测试时互不干扰。
 
 **生成强密码的两种办法**（任选其一）：
 
@@ -134,10 +140,11 @@ curl https://ypage.ccwu.cc/api/messages -H "Authorization: Bearer 你的ADMIN_KE
 |---|---|---|
 | 表单提示「发送失败，请稍后重试」 | 静态服务器打开的，或 API 404 | Functions 只在 Cloudflare 上运行；确认域名是 Pages 域名且已重新部署 |
 | `KV not bound` | 变量名不是 `MESSAGES`，或加完没重新部署 | 回第 2 步核对变量名 → 第 4 步重新部署 |
-| 后台提示「密钥不正确，或服务器未配置 ADMIN_KEY」 | ADMIN_KEY 没设 / 环境没勾 / 没重新部署 | 回第 3 步；注意 Production + Preview 都要勾 |
+| 后台提示「密钥不正确，或服务器未配置 ADMIN_KEY」 | ADMIN_KEY 没设 / 只加了 Production 没加 Preview / 加完没重新部署 | 回第 3 步；Preview 环境要**单独再 Add 一次**（同名 ADMIN_KEY） |
 | 401 但密钥确定没错 | 前后端差一个空格或换行 | 密钥前后不要有空格；`Bearer` 后有一个空格 |
 | 提交返回 429「发送太频繁」 | 同 IP 1 分钟内已有留言 | 等待 1 分钟，或换网络（设计如此，防滥用） |
-| 后台看不到刚提交的留言 | KV 有约 60 秒全球传播延迟 | 等 1 分钟再刷新（Cloudflare KV 特性，非 bug） |
+| **连发两条都不 429，限流像没生效** | **KV 最终一致性**：写入最多 60 秒才对其他边缘节点可见 | 不是故障，实测间隔 2 秒两条都会入库；限流在分钟尺度上生效 |
+| 后台看不到刚提交的留言 | 同上，KV 有约 60 秒全球传播延迟 | 等 1 分钟再刷新（Cloudflare KV 特性，非 bug） |
 
 ---
 
@@ -146,7 +153,7 @@ curl https://ypage.ccwu.cc/api/messages -H "Authorization: Bearer 你的ADMIN_KE
 - `admin.html` **不要**放进任何外链或 README，知道地址 + 持有密钥才能看
 - 留言内容对公众完全不可见，只有持 ADMIN_KEY 的你能读
 - 访客的联系方式只存 Cloudflare KV，**不发送到任何邮箱**
-- 若怀疑密钥泄露：Cloudflare → Pages → Settings → Environment variables 删掉 `ADMIN_KEY` 重新生成，旧密钥立即失效
+- 若怀疑密钥泄露：Cloudflare → Pages → Settings → **Variables and Secrets** 删掉 `ADMIN_KEY` 重新生成，旧密钥立即失效
 - 同 IP 每分钟 1 条限流已实现在 `feedback.js`（KV 计数，2 分钟 TTL 自动过期）
 
 ---
