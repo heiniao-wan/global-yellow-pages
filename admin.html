@@ -12,13 +12,14 @@
   .wrap { max-width:860px; margin:0 auto; }
   h1 { font-size:22px; margin-bottom:4px; }
   .sub { font-size:13px; color:var(--muted); margin-bottom:20px; }
-  .login { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; display:flex; gap:10px; }
+  .login { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; display:flex; gap:10px; flex-wrap:wrap; }
+  .login .tip { flex:0 0 100%; font-size:12px; line-height:1.7; color:var(--muted); margin:4px 0 0; }
   .login input { flex:1; height:40px; padding:0 14px; font-size:14px; border:1px solid var(--line); border-radius:10px; outline:none; }
   .login input:focus { border-color:var(--accent); }
   button { font-family:inherit; cursor:pointer; border:none; border-radius:10px; font-size:13.5px; font-weight:600; }
   .btn-main { height:40px; padding:0 20px; color:#fff; background:var(--accent); }
   .btn-main:active { transform:scale(.97); }
-  .msg { font-size:13px; margin:12px 2px; }
+  .msg { font-size:13px; margin:12px 2px; white-space:pre-line; line-height:1.7; }
   .msg.err { color:var(--danger); }
   .msg.ok { color:var(--ok); }
   .toolbar { display:flex; justify-content:space-between; align-items:center; margin:20px 2px 12px; }
@@ -46,6 +47,7 @@
   <div class="login" id="loginBox">
     <input type="password" id="keyInput" placeholder="输入管理员密钥 ADMIN_KEY" autocomplete="off">
     <button class="btn-main" id="loginBtn">查看留言</button>
+    <p class="tip">粘贴时注意：不要带首尾空格、引号或换行。密钥存于 Cloudflare 的 Variables and Secrets → ADMIN_KEY，改动后需重新部署。</p>
   </div>
   <p class="msg err" id="msg" hidden></p>
 
@@ -107,9 +109,18 @@
     $('#empty').hidden = true;
     fetch('/api/messages', { headers: { 'Authorization': 'Bearer ' + key } })
       .then(function (r) {
-        if (r.status === 401) { showMsg('密钥不正确，或服务器未配置 ADMIN_KEY'); throw 0; }
+        // 401 与 503 是两回事：401 = 密钥不匹配（KV 无关）；503 = 密钥对了但 KV 没绑
+        if (r.status === 401) {
+          showMsg('密钥不匹配（HTTP 401）\n' +
+            '· 请确认输入的字符与 Cloudflare 里 ADMIN_KEY 的值完全一致（注意首尾空格、是否带了引号）\n' +
+            '· 若确认无误，可能是服务器还没配置 ADMIN_KEY，或改完后未重新部署\n' +
+            '· 这一条与 KV 无关 —— KV 未绑定会返回 503，不是 401');
+          throw 0;
+        }
+        if (r.status === 403) { showMsg('密钥校验未通过（HTTP 403）'); throw 0; }
         if (r.status === 404) { showMsg('留言后台尚未部署（需 Cloudflare Pages Functions，见部署指南附录 F）'); throw 0; }
-        if (r.status === 503) { showMsg('服务器尚未绑定 KV（MESSAGES），见部署指南附录 F'); throw 0; }
+        if (r.status === 503) { showMsg('密钥正确，但服务器尚未绑定 KV（MESSAGES），见部署指南附录 F'); throw 0; }
+        if (!r.ok) { showMsg('读取失败（HTTP ' + r.status + '）'); throw 0; }
         return r.json();
       })
       .then(function (j) {
