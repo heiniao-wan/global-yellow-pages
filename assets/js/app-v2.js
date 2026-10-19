@@ -540,6 +540,17 @@
     const applyServer = function (counts) {
       if (counts) {
         state.counts = mergeCounts(state.counts, counts);
+        // KV 最终一致性：服务端刚返回的可能还是自己写入前的旧快照。
+        // 若直接采信，用户会看到「明明取消了，数字却没变回去」。
+        // 所以本次操作的增量/减量在本地先行落实，服务端值只用于补齐其他站点。
+        const c = state.counts[siteId] || { like: 0, dislike: 0, broken: 0 };
+        if (isCancel) {
+          c[action] = Math.max(0, c[action] - 1);
+        } else {
+          if (isChange && myVote) c[myVote] = Math.max(0, c[myVote] - 1);
+          c[action] += 1;
+        }
+        state.counts[siteId] = c;
         saveCounts();
       }
       if (isCancel) {
