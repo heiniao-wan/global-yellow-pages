@@ -295,6 +295,98 @@ def write_cat_pages(base, cats, sites):
     return made
 
 
+# ───────────────────── 首页静态首屏（AdSense / 爬虫可见） ─────────────────────
+# 为什么需要：首页的站点列表由 JS 渲染，Googlebot 抓到的原始 HTML 里
+# 一个站点都看不到、也没有任何出站链接。AdSense 的人工审核员看��是同样的内容，
+# 会判定「内容价值低」直接拒审。
+#
+# 做法：把各分类的代表站点直接写成静态 HTML，放在结果区之前。
+# JS 渲染的完整网格仍然保留（381 个站点都在），静态这块负责：
+#   ① 让爬虫看到真实内容与真实出站链接
+#   ② 给无 JS 环境（爬虫/老浏览器/禁用 JS）一个可用的替代视图
+#   ③ 补足首屏可读内容，把首页可见文字从 131 词提到千词量级
+
+STATIC_START = "<!-- STATIC-FEED:START (由 tools/gen-seo.py 生成，勿手改) -->"
+STATIC_END = "<!-- STATIC-FEED:END -->"
+
+# 每个分类取几个代表站点，保证覆盖到各行业
+STATIC_PER_CAT = 3
+# 静态块最多列多少个站点（太多会让首页 HTML 膨胀，影响首屏速度）
+STATIC_MAX = 36
+
+STATIC_CSS = """
+/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
+.static-feed{margin:0 0 28px}
+.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
+.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.static-feed .sf-item{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
+}
+.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
+.static-feed .sf-item h4 a:hover{color:var(--accent)}
+.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
+.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.static-feed .sf-cat{
+  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
+  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
+}
+/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
+html.js-on .static-feed{display:none}
+@media (prefers-color-scheme:dark){
+  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
+  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
+}
+"""
+
+
+def write_static_feed(base, cats, sites):
+    """生成首页静态精选块，返回 HTML 字符串（空字符串表示无内容）"""
+    by = {}
+    for s in sites:
+        by.setdefault(s["category"], []).append(s)
+    cmap = {c["key"]: c for c in cats}
+
+    picked = []
+    for c in cats:
+        for s in by.get(c["key"], [])[:STATIC_PER_CAT]:
+            picked.append((c, s))
+            if len(picked) >= STATIC_MAX:
+                break
+        if len(picked) >= STATIC_MAX:
+            break
+
+    if not picked:
+        return ""
+
+    out = [STATIC_START,
+           '<section class="static-feed" aria-label="精选网站（静态索引）">',
+           '<h3>精选网站 · %d 个行业分类</h3>' % len(cats),
+           '<p class="sf-note">本页列出各行业的代表站点，均为各站官方首页链接；'
+           '完整 %d 个站点见下方列表或<a href="%s/sites.html">全站索引</a>。</p>'
+           % (len(sites), base),
+           '<div class="sf-grid">']
+
+    for c, s in picked:
+        out.append('<div class="sf-item">')
+        out.append('<span class="sf-cat">%s %s</span>'
+                   % (html.escape(c["icon"]), html.escape(c["zh"])))
+        out.append('<h4><a href="%s" target="_blank" rel="noopener">%s</a></h4>'
+                   % (html.escape(s["url"]), html.escape(s["name"])))
+        # 站点数据里没有 domain 字段，从 URL 提取（去掉 www. 与末尾斜杠）
+        dom = re.sub(r"^https?://", "", s["url"]).rstrip("/")
+        dom = re.sub(r"^www\.", "", dom).split("/")[0]
+        out.append('<span class="sf-domain">%s</span>' % html.escape(dom))
+        out.append('<p>%s</p>' % html.escape(s["desc"]))
+        out.append('</div>')
+
+    out.append('</div>')
+    out.append('</section>')
+    out.append(STATIC_END)
+    return "\n".join(out)
+
+
 # ─────────────────────────── 社交封面图 ───────────────────────────
 
 def write_og_image(nsites, ncats):
@@ -360,7 +452,7 @@ def bump_asset_versions(text):
     return text
 
 
-def inject_meta(base, nsites, ncats):
+def inject_meta(base, nsites, ncats, static_feed=""):
     block = [
         START,
         '<link rel="canonical" href="%s/">' % base,
@@ -405,6 +497,19 @@ def inject_meta(base, nsites, ncats):
         t = bump_asset_versions(t)
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
+
+        # 静态精选块：插在结果区的 grid 之前，让爬虫先看到实心内容
+        if static_feed:
+            # 幂等：先清掉旧块
+            t = re.sub(re.escape(STATIC_START) + r".*?" + re.escape(STATIC_END), "", t, flags=re.S)
+            # 插到 <div class="grid" id="grid"></div> 之前
+            anchor = '<div class="grid" id="grid"></div>'
+            if anchor in t:
+                t = t.replace(anchor, static_feed + "\n\n    " + anchor, 1)
+            # 样式内联到 head（单独走一个 CSS 文件会增加请求数，直接内联更省）
+            css = "<style>\n" + STATIC_CSS + "</style>"
+            if "</head>" in t:
+                t = t.replace("</head>", css + "\n</head>", 1)
         io.open(path, "w", encoding="utf-8", newline="\n").write(t)
         done.append(page)
     return "、".join(done) + "（已注入 OG / Twitter Card / canonical + noscript 引导）"
@@ -430,6 +535,11 @@ def main():
         (base + "/", 1.0, "daily"),
         (base + "/sites.html", 0.9, "weekly"),
         (base + "/index-v2.html", 0.6, "monthly"),
+        # 信任页面：AdSense 审核必查项，独立 URL 权重不能低于汇总页
+        (base + "/about.html", 0.5, "monthly"),
+        (base + "/privacy.html", 0.5, "monthly"),
+        (base + "/contact.html", 0.4, "monthly"),
+        (base + "/disclaimer.html", 0.3, "yearly"),
         (base + "/legal.html", 0.3, "yearly"),
     ]
     # 分类页排在大站索引之后、全站索引之前，作为抓取主入口
@@ -438,7 +548,9 @@ def main():
     print("  生成", write_sitemap(base, sm))
     print("  生成", write_sites_html(base, cats, sites))
     print("  生成", write_og_image(len(sites), len(cats)))
-    print("  改写", inject_meta(base, len(sites), len(cats)))
+    static_feed = write_static_feed(base, cats, sites)
+    print("  生成 首页静态精选块（%d 条）" % (static_feed.count('class="sf-item"') if static_feed else 0))
+    print("  改写", inject_meta(base, len(sites), len(cats), static_feed))
     print("\n完成。把 robots.txt / sitemap.xml / sites.html / assets/img/og-cover.png "
           "一起部署到站点根目录，\n并确保托管方不会对这几个路径做 SPA 回退（否则又返回首页 HTML）。")
     return 0

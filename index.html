@@ -27,6 +27,61 @@
 
 
 
+
+
+<style>
+
+/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
+.static-feed{margin:0 0 28px}
+.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
+.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.static-feed .sf-item{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
+}
+.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
+.static-feed .sf-item h4 a:hover{color:var(--accent)}
+.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
+.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.static-feed .sf-cat{
+  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
+  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
+}
+/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
+html.js-on .static-feed{display:none}
+@media (prefers-color-scheme:dark){
+  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
+  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
+}
+</style>
+
+<style>
+
+/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
+.static-feed{margin:0 0 28px}
+.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
+.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.static-feed .sf-item{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
+}
+.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
+.static-feed .sf-item h4 a:hover{color:var(--accent)}
+.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
+.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.static-feed .sf-cat{
+  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
+  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
+}
+/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
+html.js-on .static-feed{display:none}
+@media (prefers-color-scheme:dark){
+  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
+  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
+}
+</style>
 <!-- SEO:START (由 tools/gen-seo.py 生成，勿手改) -->
 <link rel="canonical" href="https://ypage.ccwu.cc/">
 <link rel="alternate" hreflang="zh-CN" href="https://ypage.ccwu.cc/">
@@ -44,6 +99,32 @@
 <meta name="twitter:description" content="381 个精选网站 · 17 个行业分类 · 四语切换">
 <meta name="twitter:image" content="https://ypage.ccwu.cc/assets/img/og-cover.png">
 <!-- SEO:END -->
+<style>
+
+/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
+.static-feed{margin:0 0 28px}
+.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
+.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.static-feed .sf-item{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
+}
+.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
+.static-feed .sf-item h4 a:hover{color:var(--accent)}
+.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
+.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.static-feed .sf-cat{
+  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
+  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
+}
+/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
+html.js-on .static-feed{display:none}
+@media (prefers-color-scheme:dark){
+  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
+  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
+}
+</style>
 </head>
 <body>
 <noscript><div style="padding:12px 16px;background:#fff3cd;border-bottom:1px solid #ffe69c;font-size:14px">本站列表需要 JavaScript 渲染。搜索引擎与无脚本环境请访问<a href="https://ypage.ccwu.cc/sites.html">全站索引（381 个网站）</a>。</div></noscript>
@@ -134,6 +215,235 @@
         <button id="brokenSel" class="filter-toggle" type="button">⚠ 仅看问题站点</button>
       </div>
     </div>
+
+    
+
+    
+
+    <!-- STATIC-FEED:START (由 tools/gen-seo.py 生成，勿手改) -->
+<section class="static-feed" aria-label="精选网站（静态索引）">
+<h3>精选网站 · 17 个行业分类</h3>
+<p class="sf-note">本页列出各行业的代表站点，均为各站官方首页链接；完整 381 个站点见下方列表或<a href="https://ypage.ccwu.cc/sites.html">全站索引</a>。</p>
+<div class="sf-grid">
+<div class="sf-item">
+<span class="sf-cat">🔍 搜索引擎</span>
+<h4><a href="https://www.google.com" target="_blank" rel="noopener">Google</a></h4>
+<span class="sf-domain">google.com</span>
+<p>全球覆盖面最广的搜索引擎，提供网页、图片、视频等多形态检索服务。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🔍 搜索引擎</span>
+<h4><a href="https://www.baidu.com" target="_blank" rel="noopener">百度</a></h4>
+<span class="sf-domain">baidu.com</span>
+<p>中国市场份额第一的搜索引擎，覆盖网页、贴吧、地图与智能问答。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🔍 搜索引擎</span>
+<h4><a href="https://www.bing.com" target="_blank" rel="noopener">Bing</a></h4>
+<span class="sf-domain">bing.com</span>
+<p>微软旗下搜索引擎，提供网页、图片与人工智能 Copilot 搜索能力。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🧭 门户与导航</span>
+<h4><a href="https://www.hao123.com" target="_blank" rel="noopener">hao123</a></h4>
+<span class="sf-domain">hao123.com</span>
+<p>百度旗下网址导航，按分类整理全网站点，是中国最早导航站之一。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🧭 门户与导航</span>
+<h4><a href="https://hao.360.com" target="_blank" rel="noopener">360导航</a></h4>
+<span class="sf-domain">hao.360.com</span>
+<p>奇虎 360 网址导航，聚合门户、新闻、影视等入口并承接安全软件流量。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🧭 门户与导航</span>
+<h4><a href="https://www.2345.com" target="_blank" rel="noopener">2345网址导航</a></h4>
+<span class="sf-domain">2345.com</span>
+<p>老牌中文网址导航，收录音乐、小说、财经与热门游戏等分类站点。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💬 社区与社交</span>
+<h4><a href="https://www.facebook.com" target="_blank" rel="noopener">Facebook</a></h4>
+<span class="sf-domain">facebook.com</span>
+<p>全球用户规模最大的社交网络，承载好友动态、群组与商务广告。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💬 社区与社交</span>
+<h4><a href="https://x.com" target="_blank" rel="noopener">X</a></h4>
+<span class="sf-domain">x.com</span>
+<p>原 Twitter 的实时信息流平台，以短文本与话题传播见长。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💬 社区与社交</span>
+<h4><a href="https://www.instagram.com" target="_blank" rel="noopener">Instagram</a></h4>
+<span class="sf-domain">instagram.com</span>
+<p>以图片与短视频分享为核心的照片社交平台，青少年用户占比高。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📰 新闻与媒体</span>
+<h4><a href="https://www.bbc.com" target="_blank" rel="noopener">BBC News</a></h4>
+<span class="sf-domain">bbc.com</span>
+<p>英国广播公司新闻站点，国际时政报道以中立严谨著称。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📰 新闻与媒体</span>
+<h4><a href="https://www.reuters.com" target="_blank" rel="noopener">Reuters</a></h4>
+<span class="sf-domain">reuters.com</span>
+<p>国际顶级财经通讯社，突发快讯与市场数据被全球广泛引用。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📰 新闻与媒体</span>
+<h4><a href="https://www.cnn.com" target="_blank" rel="noopener">CNN</a></h4>
+<span class="sf-domain">cnn.com</span>
+<p>美国有线电视新闻网，擅长突发热点与现场连线式深度报道。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🎬 视频与流媒体</span>
+<h4><a href="https://www.youtube.com" target="_blank" rel="noopener">YouTube</a></h4>
+<span class="sf-domain">youtube.com</span>
+<p>全球最大视频平台，兼具长视频创作者生态与短视频信息流。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🎬 视频与流媒体</span>
+<h4><a href="https://www.netflix.com" target="_blank" rel="noopener">Netflix</a></h4>
+<span class="sf-domain">netflix.com</span>
+<p>全球最大流媒体订阅平台，自制剧集与电影内容库覆盖广泛。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🎬 视频与流媒体</span>
+<h4><a href="https://www.twitch.tv" target="_blank" rel="noopener">Twitch</a></h4>
+<span class="sf-domain">twitch.tv</span>
+<p>以游戏直播为核心的视频平台，电竞赛事与主播生态成熟。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🤖 AI 与大模型</span>
+<h4><a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a></h4>
+<span class="sf-domain">chatgpt.com</span>
+<p>OpenAI 旗下通用对话助手，是全球用户规模最大的 AI 应用入口。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🤖 AI 与大模型</span>
+<h4><a href="https://openai.com" target="_blank" rel="noopener">OpenAI</a></h4>
+<span class="sf-domain">openai.com</span>
+<p>美国人工智能研究机构官网，发布模型、研究成果与开发者 API。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🤖 AI 与大模型</span>
+<h4><a href="https://claude.ai" target="_blank" rel="noopener">Claude</a></h4>
+<span class="sf-domain">claude.ai</span>
+<p>Anthropic 推出的对话式 AI 助手，长文本分析与写作能力突出。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📚 百科与词条</span>
+<h4><a href="https://www.wikipedia.org" target="_blank" rel="noopener">Wikipedia</a></h4>
+<span class="sf-domain">wikipedia.org</span>
+<p>全球最大的免费多语言百科全书，采用开放协作与知识共享许可。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📚 百科与词条</span>
+<h4><a href="https://baike.baidu.com" target="_blank" rel="noopener">百度百科</a></h4>
+<span class="sf-domain">baike.baidu.com</span>
+<p>中文互联网最大的百科词条平台，覆盖人物、地名与影视资料。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📚 百科与词条</span>
+<h4><a href="https://www.britannica.com" target="_blank" rel="noopener">Britannica</a></h4>
+<span class="sf-domain">britannica.com</span>
+<p>历史悠久的英文权威百科，学术性与词条撰写质量极高。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💻 开发者与技术</span>
+<h4><a href="https://github.com" target="_blank" rel="noopener">GitHub</a></h4>
+<span class="sf-domain">github.com</span>
+<p>全球最大代码托管平台，承载开源项目协作与软件包分发。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💻 开发者与技术</span>
+<h4><a href="https://gitlab.com" target="_blank" rel="noopener">GitLab</a></h4>
+<span class="sf-domain">gitlab.com</span>
+<p>覆盖 DevOps 全流程的代码平台，支持自建与公有云仓库托管。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💻 开发者与技术</span>
+<h4><a href="https://stackoverflow.com" target="_blank" rel="noopener">Stack Overflow</a></h4>
+<span class="sf-domain">stackoverflow.com</span>
+<p>全球开发者技术问答社区，编程问题解答与职位机会集聚。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🛒 电商与购物</span>
+<h4><a href="https://www.amazon.com" target="_blank" rel="noopener">Amazon</a></h4>
+<span class="sf-domain">amazon.com</span>
+<p>全球最大综合电商平台，Prime 会员与第三方卖家生态完善。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🛒 电商与购物</span>
+<h4><a href="https://www.ebay.com" target="_blank" rel="noopener">eBay</a></h4>
+<span class="sf-domain">ebay.com</span>
+<p>历史最悠久的 C2C 在线拍卖平台，二手与收藏品类突出。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">🛒 电商与购物</span>
+<h4><a href="https://www.walmart.com" target="_blank" rel="noopener">Walmart</a></h4>
+<span class="sf-domain">walmart.com</span>
+<p>美国零售巨头官网，提供线上下单、门店自提及第三方卖家服务。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📍 本地生活与黄页</span>
+<h4><a href="https://www.yelp.com" target="_blank" rel="noopener">Yelp</a></h4>
+<span class="sf-domain">yelp.com</span>
+<p>美国本地商户点评与黄页网站，餐厅酒吧评价覆盖密度极高。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📍 本地生活与黄页</span>
+<h4><a href="https://www.dianping.com" target="_blank" rel="noopener">大众点评</a></h4>
+<span class="sf-domain">dianping.com</span>
+<p>中国本地生活服务平台，餐饮到店消费与优惠团购用户众多。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📍 本地生活与黄页</span>
+<h4><a href="https://www.meituan.com" target="_blank" rel="noopener">美团</a></h4>
+<span class="sf-domain">meituan.com</span>
+<p>中国头部本地生活平台，餐饮外卖、酒店住宿与到店业务齐全。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💼 招聘与求职</span>
+<h4><a href="https://www.linkedin.com" target="_blank" rel="noopener">LinkedIn</a></h4>
+<span class="sf-domain">linkedin.com</span>
+<p>全球最大职业社交平台，兼具人脉经营与招聘求职双重功能。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💼 招聘与求职</span>
+<h4><a href="https://www.indeed.com" target="_blank" rel="noopener">Indeed</a></h4>
+<span class="sf-domain">indeed.com</span>
+<p>全球访问量领先的招聘搜索平台，聚合各渠道职位并支持匿名投递。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">💼 招聘与求职</span>
+<h4><a href="https://www.glassdoor.com" target="_blank" rel="noopener">Glassdoor</a></h4>
+<span class="sf-domain">glassdoor.com</span>
+<p>职位信息与雇主口碑社区，面试题与薪酬数据是核心特色。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📈 金融与证券</span>
+<h4><a href="https://www.bloomberg.com" target="_blank" rel="noopener">Bloomberg</a></h4>
+<span class="sf-domain">bloomberg.com</span>
+<p>全球顶级财经媒体与数据终端，行情终端和深度报道壁垒高。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📈 金融与证券</span>
+<h4><a href="https://www.cnbc.com" target="_blank" rel="noopener">CNBC</a></h4>
+<span class="sf-domain">cnbc.com</span>
+<p>美国财经电视网媒体，提供实时行情与市场解读短视频内容。</p>
+</div>
+<div class="sf-item">
+<span class="sf-cat">📈 金融与证券</span>
+<h4><a href="https://finance.yahoo.com" target="_blank" rel="noopener">Yahoo! Finance</a></h4>
+<span class="sf-domain">finance.yahoo.com</span>
+<p>雅虎旗下财经门户，提供行情报价、财报数据与市场资讯。</p>
+</div>
+</div>
+</section>
+<!-- STATIC-FEED:END -->
 
     <div class="grid" id="grid"></div>
 
@@ -296,11 +606,11 @@
     <p class="muted">共收录 <b id="year">—</b> 站点数据 · 分类体系参考主流流量分析平台通用行业分类</p>
     <p class="muted small">所有网站版权归各自所有者所有 · 本页仅作导航索引与用户评价参考</p>
     <nav class="foot-links">
-      <a href="legal.html#about">关于本站</a>
-      <a href="legal.html#privacy">隐私政策</a>
+      <a href="about.html">关于本站</a>
+      <a href="privacy.html">隐私政策</a>
       <a href="legal.html#terms">使用条款</a>
-      <a href="legal.html#disclaimer">免责声明</a>
-      <a href="legal.html#contact">联系我们</a>
+      <a href="disclaimer.html">免责声明</a>
+      <a href="contact.html">联系我们</a>
     </nav>
   </div>
 </footer>
@@ -326,7 +636,7 @@
 <script src="assets/js/share.js?v=535da1df"></script>
 <script src="assets/js/thumbs.js?v=4583dac7"></script>
 <script src="assets/js/i18n.js?v=3348703e"></script>
-<script src="assets/js/app.js?v=d5059f90"></script>
+<script src="assets/js/app.js?v=2f0b9d2b"></script>
 <script>
   /* PWA：注册 Service Worker（离线可用 + 可安装到主屏）
      register 时带 updateViaCache:'none'，避免浏览器用旧的 sw.js 缓存拖延更新 */

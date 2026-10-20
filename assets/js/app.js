@@ -1100,6 +1100,8 @@
 
   /* ───────────────────── 启动 ───────────────────── */
   function init() {
+    // 标记 JS 可用：静态精选块（给爬虫看的内容）随之隐藏，避免与渲染网格重复
+    document.documentElement.classList.add('js-on');
     // 蜜罐：视觉隐藏但对自动化脚本可见
     var hp = document.createElement('div');
     hp.className = 'hp-trap';
