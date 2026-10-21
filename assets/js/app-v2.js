@@ -1227,6 +1227,11 @@
     // 标记 JS 可用：静态精选块（给爬虫看的内容）随之隐藏，避免与渲染网格重复
     document.documentElement.classList.add('js-on');
 
+    // 渲染「今日新发现」热点区块（数据来自 trending.js，缺失时自动隐藏）
+    try {
+      if (window.TrendingUI) window.TrendingUI.init();
+    } catch (e) { /* 热点区块失败不影响主功能 */ }
+
     // 加载广告脚本（未获批时 GypAds.isEnabled() 为 false，不会请求任何第三方资源）
     try {
       if (window.GypAds) window.GypAds.init();
@@ -1272,6 +1277,9 @@
       renderStats();
       renderProtection();
       renderFaq();
+      try {
+        if (window.TrendingUI) window.TrendingUI.render();
+      } catch (e) { /* 忽略 */ }
     };
 
     renderCategories();
