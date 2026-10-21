@@ -30,6 +30,7 @@ import hashlib
 import html
 import io
 import os
+import sys
 import re
 import sys
 
@@ -215,6 +216,12 @@ CAT_CSS = (
     'color:#1d1d1f;background:#fff}'
     '.wrap{max-width:860px;margin:0 auto;padding:28px 20px 60px}'
     'h1{font-size:25px;margin:0 0 8px}.sub{color:#6e6e73;margin:0 0 4px}'
+    '.cat-guide{margin:26px 0 0}'
+    '.cat-guide h2{font-size:16px;margin:0 0 8px;font-weight:600;letter-spacing:.01em}'
+    '.cat-guide h3{font-size:13px;margin:16px 0 5px;font-weight:600;color:#6e6e73}'
+    '.cat-guide p{margin:0 0 8px;color:#3a3a3c;line-height:1.85;font-size:14.5px}'
+    '.cat-guide p b{color:#1d1d1f;font-weight:600}'
+    '.cat-guide .cg-note{border-left:3px solid #d8d8dd;padding-left:14px;color:#6e6e73;font-size:13.5px}'
     '.en{font-size:12px;color:#8e8e93;margin-left:8px}'
     '.back{display:inline-block;margin:14px 0 8px;padding:8px 16px;border-radius:999px;'
     'background:#0071e3;color:#fff;text-decoration:none;font-size:14px}'
@@ -224,8 +231,24 @@ CAT_CSS = (
     '.desc{color:#48484a;margin:2px 0}.meta{font-size:12px;color:#8e8e93;margin:0}'
     'footer{margin-top:44px;padding-top:16px;border-top:1px solid #e5e5ea;color:#8e8e93;font-size:13px}'
     '@media (prefers-color-scheme:dark){body{background:#1c1c1e;color:#f5f5f7}'
-    'li{border-color:#2c2c2e}.desc{color:#c7c7cc}.sub,.meta,.en{color:#98989d}footer{border-color:#3a3a3c}}'
+    'li{border-color:#2c2c2e}.desc{color:#c7c7cc}.sub,.meta,.en{color:#98989d}footer{border-color:#3a3a3c}'
+    '.cat-guide p{color:#c7c7cc}.cat-guide p b{color:#f5f5f7}'
+    '.cat-guide h3{color:#98989d}.cat-guide .cg-note{border-color:#3a3a3c;color:#98989d}}'
 )
+
+
+def load_cat_content():
+    """加载分类页的原创文案（tools/cat-content.py）"""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "cat_content", os.path.join(ROOT, "tools", "cat-content.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.CONTENT
+    except Exception as e:
+        print("  [警告] 载入 cat-content.py 失败：%s（分类页将不含文案）" % e)
+        return {}
 
 
 def write_cat_pages(base, cats, sites):
@@ -233,6 +256,8 @@ def write_cat_pages(base, cats, sites):
     out_dir = os.path.join(ROOT, "cat")
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
+
+    cat_content = load_cat_content()
 
     by = {}
     for s in sites:
@@ -283,6 +308,22 @@ def write_cat_pages(base, cats, sites):
             p.append("</li>")
 
         p.append("</ul>")
+
+        # 原创内容：选站标准 / 使用建议 / 补充说明
+        # 这部分不是站点简介的复制，而是「为什么这样选、怎么用」的判断，
+        # 是分类页区别于纯索引页的关键，也是人工审核读得出的价值所在。
+        ctext = cat_content.get(c["key"])
+        if ctext:
+            p.append('<div class="cat-guide">')
+            p.append('<h2>这个分类里怎么挑</h2>')
+            p.append('<h3>选站标准</h3>')
+            p.append('<p>%s</p>' % ctext["criteria"])
+            p.append('<h3>使用建议</h3>')
+            p.append('<p>%s</p>' % ctext["guide"])
+            p.append('<h3>补充说明</h3>')
+            p.append('<p class="cg-note">%s</p>' % ctext["notes"])
+            p.append('</div>')
+
         p.append('<footer>%s 分类共 %d 个网站 · 最后更新 %s<br>'
                  '© 全球黄页 %s — 收录均为各站点官方首页链接</footer>'
                  % (html.escape(c["zh"]), len(items), today, datetime.date.today().year))
@@ -537,6 +578,7 @@ def main():
         (base + "/index-v2.html", 0.6, "monthly"),
         # 信任页面：AdSense 审核必查项，独立 URL 权重不能低于汇总页
         (base + "/about.html", 0.5, "monthly"),
+        (base + "/about-long.html", 0.6, "monthly"),   # 站长长文，E-E-A-T 主要落点
         (base + "/privacy.html", 0.5, "monthly"),
         (base + "/contact.html", 0.4, "monthly"),
         (base + "/disclaimer.html", 0.3, "yearly"),

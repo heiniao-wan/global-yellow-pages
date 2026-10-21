@@ -11,7 +11,7 @@
  *
  * 升级方式：改动本文件时把 CACHE 版本号 +1，旧缓存自动清理。
  */
-const CACHE = 'gyp-v4';
+const CACHE = 'gyp-v5';
 
 const PRECACHE = [
   './',
@@ -23,13 +23,21 @@ const PRECACHE = [
   './assets/css/style-v2.css',
   './assets/js/data.js',
   './assets/js/antiabuse.js',
+  './assets/js/votes-sync.js',
+  './assets/js/faq-data.js',
   './assets/js/vault.js',
   './assets/js/share.js',
   './assets/js/thumbs.js',
   './assets/js/i18n.js',
   './assets/js/app.js',
   './assets/js/app-v2.js',
-  './assets/img/icon.svg'
+  './assets/img/icon.svg',
+  './404.html',
+  './about.html',
+  './privacy.html',
+  './contact.html',
+  './disclaimer.html',
+  './sites.html'
 ];
 
 const CODE_RE = /\.(?:js|css)$/i;

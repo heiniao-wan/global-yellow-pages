@@ -40,7 +40,10 @@
     counts: loadCounts(),
     voted: {},
     favs: loadFavs(),
-    faqGroup: null
+    faqGroup: null,
+    // 服务端票数/我的票是否已同步到位。
+    // false 时禁止投票，避免把「本机旧票」误判成「再点一次=取消」。
+    synced: false
   };
 
   /** 各站点累计票数：经 Vault 加密+校验存于本地，被篡改/损坏时自动作废重置
@@ -388,21 +391,122 @@
    */
   function syncFromServer() {
     if (!window.VotesSync) return;
+
+    // 兜底：若 fetch 迟迟不返回（网络挂起），8 秒后强制放开投票。
+    // 否则 state.synced 一直是 false，投票按钮会永久提示「正在同步」。
+    setTimeout(function () { state.synced = true; }, 8000);
+
+    // 本机旧票先留一份副本：服务端没有的要在迁移时补传
+    var localVotes = {};
+    Object.keys(state.voted || {}).forEach(function (id) {
+      var v = state.voted[id];
+      if (v === true) {
+        // 老版本只记了「投过」没记「投了哪一项」——
+        // 这类票无法还原选项，只能跳过（凭空猜一个会污染真实统计）
+        return;
+      }
+      if (v) localVotes[id] = v;
+    });
+
     window.VotesSync.fetchCounts().then(function (remote) {
-      if (!remote) return;
+      if (!remote) {
+        state.synced = true;   // 服务端不可达，放开投票走本地降级
+        return;
+      }
       state.counts = mergeCounts(state.counts, remote);
       saveCounts();
       renderGrid();
       renderStats();
+    }).catch(function () {
+      state.synced = true;
     });
 
     // 服务端记录优先于本机：这样换设备后仍知道自己投过什么
     window.VotesSync.fetchMine().then(function (mine) {
       if (!mine) return;
-      state.voted = mine;
+
+      // 迁移：全站共享功能上线前，本机投票只存在 localStorage。
+      // 那些票在服务端没有对应记录，属于"用户真实表达过的评价"，
+      // 不该因为改架构就凭空消失 —— 逐条补传给服务端。
+      //
+      // 注意「服务端优先」：若某站本机与服务端都有票，以服务端的为准。
+      // 本机那份是旧架构的残留，可能是过期数据；若以本机为准，
+      // 点一下会变成「取消」而不是「投票」，票数会莫名减 1。
+      var pending = Object.keys(localVotes).filter(function (id) {
+        return !mine[id] && SITES.some(function (s) { return s.id === id; });
+      });
+
+      // 无论是否需要迁移，本机与服务端的记录都要合并，
+      // 且服务端的优先（避免用旧的本机数据覆盖真实的新数据）。
+      var merged = {};
+      Object.keys(localVotes).forEach(function (id) { merged[id] = localVotes[id]; });
+      Object.keys(mine).forEach(function (id) { merged[id] = mine[id]; });
+
+      if (pending.length) {
+        // 迁移是异步的，等它跑完再统一更新 state.voted
+        migrateVotes(pending, localVotes, function (migrated) {
+          Object.keys(migrated).forEach(function (id) { merged[id] = migrated[id]; });
+          state.voted = merged;
+          state.synced = true;
+          saveCounts();
+          Object.keys(merged).forEach(function (id) { markVotedUI(id); });
+        });
+        return;
+      }
+
+      state.voted = merged;
+      state.synced = true;
       saveCounts();
-      Object.keys(mine).forEach(function (id) { markVotedUI(id); });
+      Object.keys(merged).forEach(function (id) { markVotedUI(id); });
+    }).catch(function () {
+      // 服务端不可用（离线/接口挂了）：放开投票，走本机降级路径，
+      // 否则按钮会永久卡在「同步中」无法使用。
+      state.synced = true;
     });
+  }
+
+  /**
+   * 把本机旧票补传给服务端。
+   * 逐条串行发送（避免并发写入造成 KV 聚合丢更新），
+   * 传完再刷新一次全站票数。
+   */
+  function migrateVotes(ids, localVotes, onDone) {
+    var done = 0;
+    var failed = 0;
+    var migrated = {};
+
+    function next(i) {
+      if (i >= ids.length) {
+        // 迁移结束：拉一次最新票数，并清掉本机的迁移标记
+        window.VotesSync.fetchCounts().then(function (remote) {
+          if (remote) {
+            state.counts = mergeCounts(state.counts, remote);
+            saveCounts();
+            renderGrid();
+            renderStats();
+          }
+        });
+        try {
+          localStorage.setItem('gyp:voteMigrated', String(Date.now()));
+        } catch (e) { /* 忽略 */ }
+        if (done) {
+          flash(document.querySelector('.vote-btn') || document.body,
+                t('vote_migrated').replace('{n}', done), 'ok');
+        }
+        if (typeof onDone === 'function') onDone(migrated);
+        return;
+      }
+      var id = ids[i];
+      window.VotesSync.vote(id, localVotes[id]).then(function () {
+        done++;
+        migrated[id] = localVotes[id];
+        next(i + 1);
+      }).catch(function () {
+        failed++;
+        next(i + 1);
+      });
+    }
+    next(0);
   }
 
   /** 把站点挂到一个卡片上；滚动进视口时才真正去请求截图 */
@@ -525,6 +629,20 @@
 
     const siteId = btn.dataset.id;
     const action = btn.dataset.vote;
+
+    // 判断「再点是取消还是投票」时，必须以服务端的记录为准。
+    //
+    // 隐患：state.voted 初始值来自本机 localStorage（共享功能上线前的旧票）。
+    // 而服务端记录是异步后到的，在它到达之前，state.voted 里只有本机旧数据。
+    // 若旧数据是 'like'、用户这次也点 like，就会被误判成「取消」——
+    // 表现为「我明明是第一次点，却把票减掉了」。
+    //
+    // 解决：服务端数据到达前（synced 为 false），不把它当成本机旧票，
+    // 而是等服务端同步完再允许投票。
+    if (!state.synced) {
+      flash(btn, t('vote_syncing'), 'warn');
+      return;
+    }
     const myVote = state.voted[siteId];
 
     // 先过本地防刷（自动化特征、蜜罐、时序、速率）

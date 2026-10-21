@@ -153,6 +153,7 @@ def build_page(legal_html, sec_id, title, desc, crumb_label, self_href):
         cls = " class=\"on\"" if href == "/" + self_href else ""
         nav_html.append('      <li><a href="%s"%s>%s</a></li>' % (href, cls, label))
     nav = ('\n  <nav class="lp-nav">\n    <h3>相关页面</h3>\n    <ul>\n'
+           '      <li><a href="/about-long.html" class="on">站长长文（完整版）</a></li>\n'
            + "\n".join(nav_html) + "\n    </ul>\n  </nav>\n")
 
     html = (

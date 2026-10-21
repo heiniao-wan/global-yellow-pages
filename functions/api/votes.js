@@ -13,9 +13,18 @@
  *
  * ── 数据模型 ──
  *   票数聚合：  votes:agg            → JSON { "<站点ID>": {like,dislike,broken}, ... }
- *   个人票记录：v:<hash>:<站点ID>    → "like" | "dislike" | "broken"
+ *   个人票记录：v:<hash>:<站点ID>    → "like" | "dislike" | "broken"（权威源）
+ *   个人票索引：u:<hash>             → JSON { "<站点ID>": "action" }（加速读取）
  *   防刷计数：  rl:<hash>            → 时间戳（TTL 60s）
  *   全局限流：  rl:g:<ip>           → 时间戳（TTL 60s）
+ *
+ * ── 为什么需要 u:<hash> 索引 ──
+ * 「我投过什么」若只靠 v: 前缀扫描（kv.list），会踩到 KV 的最终一致性：
+ * 刚写下的键最长 60 秒才出现在 list 结果里。用户表现为——
+ * 投完票刷新，按钮上的「取消」角标消失、状态退回未投，
+ * 再点一次被当成新投票（票数又 +1），想取消反而加了票。
+ * u:<hash> 用 kv.get 单键读取，命中边缘缓存但读到的永远是本账号最新值，
+ * 彻底消除这个 60 秒空窗。v: 仍是权威源，list 扫描作为兜底补齐历史数据。
  *
  * ── 为什么 hash 而不是直接存指纹 ──
  * 浏览器指纹本身是稳定可重算的，等同于个人标识。存明文意味着 KV 里躺着
@@ -60,6 +69,60 @@ const json = (code, obj) => new Response(JSON.stringify(obj), {
 });
 
 const ACTIONS = ['like', 'dislike', 'broken'];
+
+/**
+ * 合法站点 ID 集合。
+ *
+ * 站点 ID 是运行时按「名称-序号」生成的（见 assets/js/data.js 的 forEach），
+ * 服务端拿不到源数据，所以改为由调用方通过 ?ids= 传入，
+ * 服务端只负责按这份名单核对，避免误删真实数据。
+ *
+ * 没传 ids 时只清「三项全为 0」的残留记录 —— 那是绝对安全的操作。
+ */
+function parseIdList(raw) {
+  if (!raw) return [];
+  return String(raw).split(',')
+    .map(x => x.trim())
+    .filter(x => x && /^[A-Za-z0-9_-]{1,64}$/.test(x));
+}
+
+/**
+ * 读「我投过什么」的加速索引 u:<hash>。
+ * 用 kv.get 单键读（强一致到本账号），避免 kv.list 的 60 秒最终一致空窗。
+ * 读失败或读不到时返回空对象，由调用方用 list 兜底。
+ */
+async function readUserIndex(kv, hash) {
+  try {
+    const raw = await kv.get('u:' + hash);
+    if (!raw) return {};
+    const o = JSON.parse(raw);
+    if (!o || typeof o !== 'object') return {};
+    const out = {};
+    Object.keys(o).forEach(function (k) {
+      if (ACTIONS.indexOf(o[k]) >= 0) out[k] = o[k];
+    });
+    return out;
+  } catch (e) { return {}; }
+}
+
+/**
+ * 写「我投过什么」的加速索引。
+ * 只作加速用，写失败不影响正确性（v: 权威源 + list 兜底仍能还原），
+ * 所以这里吞掉异常，不让它把整个投票请求拖成 503。
+ */
+async function writeUserIndex(kv, hash, map) {
+  try {
+    await kv.put('u:' + hash, JSON.stringify(map));
+  } catch (e) { /* 索引写失败可容忍，下次 list 兜底会补齐 */ }
+}
+
+/** 改票/投票后同步索引：设置或移除某个站点的记录 */
+async function syncUserIndex(kv, hash, siteId, action) {
+  const map = await readUserIndex(kv, hash);
+  if (action) map[siteId] = action;
+  else delete map[siteId];
+  await writeUserIndex(kv, hash, map);
+}
 
 /** 站点 ID 只允许安全字符，防键注入 */
 function safeId(id) {
@@ -194,6 +257,30 @@ export async function onRequestGet(context) {
 
   // 诊断：只回报「配没配」与配置项是否齐全，绝不回传密钥本身。
   // 用途是让站长在控制台外确认绑定状态，避免反复猜。
+  // 清理：删掉无效站点 ID 的票数残留与 0 票记录。
+  // 仅站长可用（需 ADMIN_KEY），用于清理测试数据或历史脏数据。
+  if (url.searchParams.get('purge') === '1') {
+    const key = request.headers.get('X-Gyp-Admin') || '';
+    if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) {
+      return json(401, { ok: false, error: 'unauthorized' });
+    }
+    const agg = await readAgg(kv);
+    const valid = new Set(parseIdList(url.searchParams.get('ids')));
+    const removed = [];
+    for (const id of Object.keys(agg)) {
+      const c = agg[id] || {};
+      const total = (c.like || 0) + (c.dislike || 0) + (c.broken || 0);
+      // 站点 ID 不在数据源里，或三项全为 0 → 是残留，可清
+      const badId = valid.size > 0 && !valid.has(id);
+      if (badId || total === 0) {
+        removed.push({ id: id, counts: c, reason: badId ? 'invalid-id' : 'zero' });
+        delete agg[id];
+      }
+    }
+    if (removed.length) await writeAgg(kv, agg);
+    return json(200, { ok: true, removed: removed, remaining: Object.keys(agg).length });
+  }
+
   if (url.searchParams.get('diag') === '1') {
     const secret = String(env.VOTE_KEY || '');
     return json(200, {
@@ -209,14 +296,17 @@ export async function onRequestGet(context) {
     const fp = request.headers.get('X-Gyp-Fp') || '';
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const hash = await actorHash(fp, ip, env.VOTE_KEY);
-    const mine = {};
+    // 加速索引（u:）优先：kv.get 单键读，拿到的一定是本账号最新值。
+    // 若索引缺失（首次投票前的历史数据），再用 v: 前缀扫描兜底补齐。
+    const mine = await readUserIndex(kv, hash);
     try {
       const list = await kv.list({ prefix: 'v:' + hash + ':', limit: 1000 });
       for (const k of list.keys) {
+        const siteId = k.name.slice(('v:' + hash + ':').length);
+        if (!siteId || mine[siteId]) continue;
         const val = await kv.get(k.name);
         if (!val) continue;
-        const siteId = k.name.slice(('v:' + hash + ':').length);
-        if (siteId && ACTIONS.indexOf(val) >= 0) mine[siteId] = val;
+        if (ACTIONS.indexOf(val) >= 0) mine[siteId] = val;
       }
     } catch (e) { /* 读不到就当没投过 */ }
     return json(200, { ok: true, mine: mine });
@@ -263,6 +353,8 @@ export async function onRequestPost(context) {
 
   if (prev === action) {
     // 重复提交同一票：返回当前全站票数，不做任何写入
+    // （顺手补一次索引，防止此前索引丢失导致「我投过」查不到）
+    await syncUserIndex(kv, hash, siteId, action);
     return json(200, { ok: true, action: action, changed: false,
                        counts: await readAgg(kv) });
   }
@@ -276,6 +368,7 @@ export async function onRequestPost(context) {
 
   try {
     await kv.put(voteKey, action);
+    await syncUserIndex(kv, hash, siteId, action);
   } catch (e) {
     // 个人票写失败：回滚聚合，避免出现「票数加了但查不到谁投的」
     if (prev && ACTIONS.indexOf(prev) >= 0) {
@@ -324,6 +417,7 @@ export async function onRequestDelete(context) {
   await adjustCount(kv, siteId, prev, -1);
   try {
     await kv.delete(voteKey);
+    await syncUserIndex(kv, hash, siteId, null);
   } catch (e) {
     await adjustCount(kv, siteId, prev, +1);   // 删失败则回滚
     return json(503, { ok: false, error: 'delete failed' });
