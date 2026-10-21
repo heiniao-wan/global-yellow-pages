@@ -1,0 +1,24 @@
+# ads.txt — 授权广告卖方声明
+#
+# 作用：告诉互联网广告交易平台（Google AdSense 等），
+#       哪些机构被授权在你的域名上投放广告。
+#       未经你授权的机构不得在你的站点投放广告。
+#
+# ★ 提交 AdSense 申请前必须完成：
+#   1. 登录 https://adsense.google.com
+#   2. 进入「信息源管理」→「ads.txt 标签」
+#   3. 把 Google 给你的一行复制到下面（格式类似）：
+#
+#      google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+#
+#   4. 把本文件上传到站点根目录：
+#      https://ypage.ccwu.cc/ads.txt
+#
+#   ★ 必须是根目录下的 ads.txt，不能是 ads.txt.html 或放在子目录。
+#     访问不到会被直接拒审（这是 AdSense 拒审的常见红线之一）。
+#
+# ── 当前状态 ──────────────────────────────────────────────
+# 本文件目前不含有效的发布商 ID，AdSense 审核时会判定为「缺少 ads.txt」。
+# 拿到 ID 后替换下方注释行即可，无需改动其他任何文件。
+
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

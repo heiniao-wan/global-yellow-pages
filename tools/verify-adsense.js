@@ -30,6 +30,15 @@ function note(name, extra) {
   warn++; console.log('  NOTE  ' + name + (extra !== undefined ? '  → ' + extra : ''));
 }
 
+async function fetchText(url) {
+  try {
+    const r = await fetch(url);
+    return { status: r.status, body: await r.text() };
+  } catch (e) {
+    return { status: 0, body: '' };
+  }
+}
+
 function getJSON(url) {
   return new Promise((res, rej) => {
     http.get(url, r => { let d = ''; r.on('data', c => d += c); r.on('end', () => res(JSON.parse(d))); })
@@ -79,8 +88,27 @@ function getJSON(url) {
     await send('Page.navigate', { url: BASE + '/' });
     await new Promise(r => setTimeout(r, 3000));
 
+    // 性能指标：用真实的资源传输量与导航计时，
+    // 而不是 document.documentElement.outerHTML ——
+    // 那是渲染后的完整 DOM（含 381 张卡片），会虚高到 700KB+，
+    // 与用户实际下载的字节数无关。
+    const perf = await evalJS(`(() => {
+      const nav = performance.getEntriesByType('navigation')[0] || {};
+      const res = performance.getEntriesByType('resource') || [];
+      let transfer = 0, count = 0;
+      res.forEach(r => { transfer += (r.transferSize || 0); count++; });
+      const paints = performance.getEntriesByType('paint') || [];
+      const fcp = paints.find(p => p.name === 'first-contentful-paint');
+      return {
+        domContentLoaded: Math.round(nav.domContentLoadedEventEnd || 0),
+        loadComplete: Math.round(nav.loadEventEnd || 0),
+        fcp: fcp ? Math.round(fcp.startTime) : null,
+        transferKB: Math.round((transfer + (nav.transferSize || 0)) / 1024),
+        resourceCount: count + 1
+      };
+    })()`);
+
     const home = await evalJS(`(() => {
-      const raw = document.documentElement.outerHTML;
       const clone = document.body.cloneNode(true);
       clone.querySelectorAll('script,style,svg,noscript').forEach(e => e.remove());
       const text = (clone.textContent || '').replace(/\\s+/g, ' ').trim();
@@ -93,7 +121,6 @@ function getJSON(url) {
       return {
         cjk, latin, words: cjk + latin,
         extLinks: ext.length,
-        htmlBytes: raw.length,
         viewport: !!document.querySelector('meta[name=viewport]'),
         hasNoscript: !!document.querySelector('noscript'),
         title: document.title,
@@ -103,7 +130,10 @@ function getJSON(url) {
 
     check('首页可见文字 ≥ 800 字', home.words >= 800, home.words + ' 字');
     check('首页有出站链接（≥ 20 条）', home.extLinks >= 20, home.extLinks + ' 条');
-    check('首页 HTML 体积 < 60KB', home.htmlBytes < 60000, Math.round(home.htmlBytes / 1024) + ' KB');
+    check('首屏传输量 < 400KB', perf.transferKB < 400, perf.transferKB + ' KB');
+    check('DOMContentLoaded < 3 秒', perf.domContentLoaded < 3000, perf.domContentLoaded + ' ms');
+    check('FCP < 2.5 秒', perf.fcp !== null && perf.fcp < 2500, (perf.fcp === null ? '未采集到' : perf.fcp + ' ms'));
+    console.log('  INFO  资源请求数 ' + perf.resourceCount + ' · 完整加载 ' + perf.loadComplete + ' ms');
     check('有 viewport（移动端适配）', home.viewport);
     check('有 noscript 引导（无 JS 兜底）', home.hasNoscript);
     check('有 title 与 description', !!home.title && home.desc.length > 30);
@@ -229,7 +259,59 @@ function getJSON(url) {
     check('robots.txt 屏蔽了 admin', rb.indexOf('Disallow: /admin') >= 0);
 
     // ───────── ⑧ AdSense 代码位 ─────────
-    console.log('\n【8】AdSense 代码位');
+    // ───────── ⑧ ads.txt 与广告版位 ─────────
+    console.log('\n【8】ads.txt 与广告版位');
+
+    // 上一段检查 sitemap/robots 时用 Page.navigate 打开了纯文本文件，
+    // 页面已不是首页 —— 必须先导回首页再查 DOM 元素。
+    await send('Page.navigate', { url: BASE + '/' });
+    await new Promise(r => setTimeout(r, 3000));
+
+    // ads.txt 必须在根目录可访问 —— 这是 AdSense 的硬性红线，404 直接拒审
+    const adsTxt = await fetchText(BASE + '/ads.txt');
+    check('ads.txt 可访问（非 404）', adsTxt.status === 200, 'HTTP ' + adsTxt.status);
+    check('ads.txt 内容非空', adsTxt.body.trim().length > 10, adsTxt.body.length + ' 字节');
+    check('ads.txt 含 google.com 授权行', /google\.com,\s*pub-/i.test(adsTxt.body),
+      adsTxt.body.trim().split('\n').filter(l => l.trim() && !l.startsWith('#')).slice(0, 1).join('') || '无有效行');
+
+    // 广告版位：容器要渲染在页面上，审核员才看得到
+    const adSlots = await evalJS(`(() => {
+      const slots = document.querySelectorAll('.ad-slot');
+      const ins = document.querySelectorAll('ins.adsbygoogle');
+      return {
+        n: slots.length,
+        ins: ins.length,
+        hasClient: !!document.querySelector('ins.adsbygoogle[data-ad-client]'),
+        // 获批前不应真的去请求 adsbygoogle.js
+        requestedScript: performance.getEntriesByType('resource')
+          .some(r => r.name.includes('googlesyndication.com'))
+      };
+    })()`);
+    check('页面有广告版位容器（≥ 2 个）', adSlots.n >= 2, adSlots.n + ' 个');
+    check('版位含 ins.adsbygoogle 标签', adSlots.ins >= 2, adSlots.ins + ' 个');
+    check('版位带 data-ad-client 属性', adSlots.hasClient);
+    check('未获批前不加载 googlesyndication 脚本', adSlots.requestedScript === false,
+      adSlots.requestedScript ? '仍在请求（说明开关没关）' : '未请求');
+
+    // Cookie 同意条：未接入广告时不该显示
+    const consent = await evalJS(`(() => {
+      const bar = document.getElementById('consentBar');
+      return { exists: !!bar, visible: bar ? !bar.hidden : false };
+    })()`);
+    check('Cookie 同意条元素存在', consent.exists);
+    check('未接入广告时同意条不弹出', consent.visible === false, consent.visible ? '正在显示' : '已隐藏');
+
+    // ads-config.js 配置状态
+    const adsCfg = await evalJS(`(() => ({
+      loaded: typeof window.GypAds === 'object',
+      enabled: window.GypAds ? window.GypAds.isEnabled() : null,
+      clientId: window.GypAds ? window.GypAds.getClientId() : null
+    }))()`);
+    check('ads-config.js 已加载', adsCfg.loaded);
+    check('广告开关当前为关闭（获批后再开）', adsCfg.enabled === false, String(adsCfg.enabled));
+    console.log('  INFO  发布商 ID 当前为 ' + (adsCfg.clientId ? adsCfg.clientId : '（空，待填）'));
+
+    console.log('\n【9】AdSense 代码位');
     await send('Page.navigate', { url: BASE + '/' });
     await new Promise(r => setTimeout(r, 2500));
     const ad = await evalJS(`({

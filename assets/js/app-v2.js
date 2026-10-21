@@ -1034,13 +1034,19 @@
   }
 
   /* ───────────────────── Cookie / 本地存储同意条 ───────────────────── */
-  /** Google AdSense 开关：未接入广告前同意条保持隐藏；
-      接入后把此值改为 true 即可启用（仅首次访问出现，点「好的」后记住不再显示） */
-  var ADSENSE_ENABLED = false;
+  /**
+   * Cookie 同意条：只在真正接入广告后才显示。
+   * 开关与发布商 ID 统一由 assets/js/ads-config.js 管理，
+   * 那里把 enabled 改成 true 并填上 clientId 即可，无需改本文件。
+   * （仅首次访问出现，点「好的」后记住不再显示）
+   */
+  function adsEnabled() {
+    return !!(window.GypAds && window.GypAds.isEnabled());
+  }
 
   function bindConsent() {
     var bar = $('#consentBar');
-    if (!bar || !ADSENSE_ENABLED) return;
+    if (!bar || !adsEnabled()) return;
     var accepted = false;
     try { accepted = localStorage.getItem('gyp:consent') === '1'; } catch (e) { /* 忽略 */ }
     if (!accepted) bar.hidden = false;
@@ -1220,6 +1226,11 @@
   function init() {
     // 标记 JS 可用：静态精选块（给爬虫看的内容）随之隐藏，避免与渲染网格重复
     document.documentElement.classList.add('js-on');
+
+    // 加载广告脚本（未获批时 GypAds.isEnabled() 为 false，不会请求任何第三方资源）
+    try {
+      if (window.GypAds) window.GypAds.init();
+    } catch (e) { /* 广告加载失败不影响页面 */ }
     // 蜜罐：视觉隐藏但对自动化脚本可见
     var hp = document.createElement('div');
     hp.className = 'hp-trap';

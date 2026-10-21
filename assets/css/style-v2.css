@@ -1067,6 +1067,32 @@ body::before {
   font-size: 13px; color: var(--accent);
 }
 
+/* ═══════════════ 广告位 ═══════════════ */
+/* 容器始终渲染（AdSense 审核看得到版位），但预留固定高度，
+   避免广告填充前后产生布局跳动（CLS）。 */
+.ad-wrap {
+  max-width: 1200px;
+  margin: 0 auto 28px;
+  padding: 0 20px;
+}
+.ad-slot {
+  min-height: 90px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--line);
+  overflow: hidden;
+}
+.ad-slot-top { min-height: 100px; }
+/* 广告加载后去掉占位虚线框 */
+.ad-slot:has(ins.adsbygoogle[data-ad-status="filled"]) {
+  border: none;
+  background: transparent;
+}
+@media (max-width: 640px) {
+  .ad-wrap { padding: 0 16px; }
+  .ad-slot { min-height: 100px; }
+}
+
 /* ═══════════════ 页脚 ═══════════════ */
 .footer {
   padding: 44px 0 52px;
