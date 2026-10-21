@@ -72,11 +72,22 @@ function getJSON(url) {
     for (const pg of ['index.html', 'index-v2.html']) {
       console.log('\n=== ' + pg + ' ===');
       await send('Page.navigate', { url: BASE + '/' + pg });
-      await new Promise(r => setTimeout(r, 3200));
+      // 等网格真正渲染完：首页多了 36 条静态精选内容，
+      // 固定等待 3.2 秒不够，会在卡片生成前就断言。
+      await evalJS(`new Promise(res => {
+        const t0 = Date.now();
+        (function wait() {
+          const cards = document.querySelectorAll('.site-card').length;
+          const btns = document.querySelectorAll('.site-card .copy-btn').length;
+          if ((cards > 0 && btns === cards) || Date.now() - t0 > 20000) return res(1);
+          setTimeout(wait, 200);
+        })();
+      })`);
+      await new Promise(r => setTimeout(r, 500));
 
       // 按钮渲染
       const btns = await evalJS(`(() => {
-        const all = document.querySelectorAll('.copy-btn');
+        const all = document.querySelectorAll('.site-card .copy-btn');
         const first = all[0];
         return {
           n: all.length,
@@ -104,7 +115,7 @@ function getJSON(url) {
           value: { writeText: t => { window.__clip.push(t); return Promise.resolve(); } },
         });
         window.__isSecure = window.isSecureContext;
-        const btn = document.querySelectorAll('.copy-btn')[0];
+        const btn = document.querySelectorAll('.site-card .copy-btn')[0];
         btn.click();
         return new Promise(res => setTimeout(() => {
           const t = document.querySelector('.gyp-toast');
@@ -133,7 +144,7 @@ function getJSON(url) {
 
       // 1.8 秒后自动复原
       const reverted = await evalJS(`(() => {
-        const btn = document.querySelectorAll('.copy-btn')[0];
+        const btn = document.querySelectorAll('.site-card .copy-btn')[0];
         return new Promise(res => setTimeout(() => res({
           done: btn.classList.contains('done'),
           txt: btn.querySelector('.cb-txt').textContent
@@ -148,7 +159,7 @@ function getJSON(url) {
           configurable: true,
           value: { writeText: () => Promise.reject(new Error('nope')) },
         });
-        document.querySelectorAll('.copy-btn')[0].click();
+        document.querySelectorAll('.site-card .copy-btn')[0].click();
         return new Promise(res => setTimeout(() => {
           const t = document.querySelector('.gyp-toast');
           const r = { toast: t ? t.textContent : '', on: !!(t && t.classList.contains('on')) };
@@ -162,11 +173,11 @@ function getJSON(url) {
       const lang = await evalJS(`(() => {
         const sel = document.getElementById('langSel');
         sel.value = 'en'; sel.dispatchEvent(new Event('change'));
-        const en = document.querySelectorAll('.copy-btn')[0].querySelector('.cb-txt').textContent;
+        const en = document.querySelectorAll('.site-card .copy-btn')[0].querySelector('.cb-txt').textContent;
         sel.value = 'ja'; sel.dispatchEvent(new Event('change'));
-        const ja = document.querySelectorAll('.copy-btn')[0].querySelector('.cb-txt').textContent;
+        const ja = document.querySelectorAll('.site-card .copy-btn')[0].querySelector('.cb-txt').textContent;
         sel.value = 'ko'; sel.dispatchEvent(new Event('change'));
-        const ko = document.querySelectorAll('.copy-btn')[0].querySelector('.cb-txt').textContent;
+        const ko = document.querySelectorAll('.site-card .copy-btn')[0].querySelector('.cb-txt').textContent;
         sel.value = 'zh'; sel.dispatchEvent(new Event('change'));
         return { en, ja, ko };
       })()`);
