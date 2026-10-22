@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#f5f5f7">
 <title>全球黄页 · 优质网站导航与口碑库</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
-<link rel="stylesheet" href="assets/css/style.css?v=94fbdb97">
+<link rel="stylesheet" href="assets/css/style.css?v=daef62f8">
 <link rel="stylesheet" href="assets/css/rail.css?v=8be05b1e">
 <link rel="manifest" href="manifest.webmanifest">
-  <link rel="preload" href="assets/css/style.css?v=94fbdb97" as="style">
+  <link rel="preload" href="assets/css/style.css?v=daef62f8" as="style">
   <link rel="preload" href="assets/js/data.js?v=381" as="script">
   <link rel="preload" href="assets/js/app.js?v=98fbbd4d" as="script">
 
@@ -31,6 +31,33 @@
 
 
 
+
+<style>
+
+/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
+.static-feed{margin:0 0 28px}
+.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
+.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
+.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.static-feed .sf-item{
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
+}
+.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
+.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
+.static-feed .sf-item h4 a:hover{color:var(--accent)}
+.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
+.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
+.static-feed .sf-cat{
+  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
+  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
+}
+/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
+html.js-on .static-feed{display:none}
+@media (prefers-color-scheme:dark){
+  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
+  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
+}
+</style>
 
 <style>
 
@@ -413,14 +440,14 @@ html.js-on .static-feed{display:none}
 </section>
 
 <!-- ── 分类栏 ── -->
-<!-- ── 今日新发现（热点追踪，每日自动更新） ── -->
+<!-- ── 最新发现（热点追踪，持续自动更新） ── -->
 <section class="trend" id="trendSection">
   <div class="wrap">
     <div class="section-head">
-      <h2 id="trendTitle">今日新发现</h2>
+      <h2 id="trendTitle">最新发现</h2>
       <span class="section-note" id="trendCount"></span>
     </div>
-    <p class="trend-intro" id="trendIntro">从公开榜单实时追踪的热门新站点，每日更新。</p>
+    <p class="trend-intro" id="trendIntro">从公开榜单实时追踪的热门新站点，持续更新。</p>
     <div class="trend-bar" id="trendGrid"></div>
     <div class="trend-cards" id="trendCards"></div>
     <div class="trend-morebox" id="trendMoreBox"></div>
@@ -449,6 +476,8 @@ html.js-on .static-feed{display:none}
         <button id="brokenSel" class="filter-toggle" type="button">⚠ 仅看问题站点</button>
       </div>
     </div>
+
+    
 
     
 
@@ -910,9 +939,9 @@ html.js-on .static-feed{display:none}
 <script src="assets/js/vault.js?v=d6c28448" defer></script>
 <script src="assets/js/share.js?v=535da1df" defer></script>
 <script src="assets/js/thumbs.js?v=4583dac7" defer></script>
-<script src="assets/js/i18n.js?v=47cf8b17" defer></script>
-<script src="assets/js/trending.js?v=4edfcef7" defer></script>
-<script src="assets/js/trending-ui.js?v=7db9d0a2" defer></script>
+<script src="assets/js/i18n.js?v=55ecb237" defer></script>
+<script src="assets/js/trending.js?v=722f493b" defer></script>
+<script src="assets/js/trending-ui.js?v=3e2362db" defer></script>
 <script src="assets/js/app.js?v=98fbbd4d" defer></script>
 <script>
   /* PWA：注册 Service Worker（离线可用 + 可安装到主屏）
