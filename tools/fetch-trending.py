@@ -121,7 +121,16 @@ DEEP_PATH_HINTS = [
     "/release", "/releases/", "/tag/", "/tags/", "/category/", "/c/",
     "/wiki/", "/docs/", "/documentation", "/changelog", "/blog/20",
     "/202", "/question", "/answer", "/video/", "/watch", "/amp",
+    # 个人页与学术页（~user 是共享主机上的个人目录，论文 PDF 不是站点）
+    "/~", "/writing", "/paper", "/papers", "/publication", "/publications",
+    "/abstract", "/files", "/download", "/downloads", "/media/",
+    "/readme", "/license", "/privacy", "/terms", "/careers", "/jobs/",
 ]
+
+# URL 指向文档而不是网站——直接淘汰
+DOC_SUFFIX_RE = re.compile(
+    r"\.(pdf|docx?|pptx?|xlsx?|key|pages|numbers|zip|tar|gz|rar|7z|epub|"
+    r"png|jpe?g|gif|svg|mp[34]|webm|wav|flac)(\?.*)?$", re.I)
 
 # ── 个人博客 / 内容站排除 ──
 # HN/InfoQ 这类榜单是「新闻与文章聚合」，榜首经常是个人博客、
@@ -147,24 +156,40 @@ MAX_NEW = 24
 MIN_DOMAIN_LEN = 4
 
 
+# 双路径网络策略：
+#   · 沙箱/开发环境里系统代理常对部分主机返回 502，而直连通常是通的；
+#   · 但反过来也有主机（如 github.com）直连不通、走代理反而通。
+# 所以两条路都建 opener：先直连，失败后走系统代理，最大化源覆盖率。
+_OPENER_DIRECT = urllib.request.build_opener(
+    urllib.request.HTTPSHandler(context=_SSL_CTX),
+    urllib.request.ProxyHandler({}),
+)
+_OPENER_PROXY = urllib.request.build_opener(
+    urllib.request.HTTPSHandler(context=_SSL_CTX),
+)
+
+
 def http_get(url, timeout=25, headers=None):
-    """带重试的 GET，返回 (status, body)"""
+    """带重试的 GET，返回 (status, body)
+
+    每条 URL 内部按「直连 → 系统代理」顺序尝试，任一路通即返回。
+    """
     h = {"User-Agent": UA, "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8"}
     if headers:
         h.update(headers)
     last = None
     for attempt in range(3):
-        try:
-            req = urllib.request.Request(url, headers=h)
-            with urllib.request.urlopen(req, timeout=timeout,
-                                        context=_SSL_CTX) as r:
-                return r.status, r.read().decode("utf-8", "ignore")
-        except urllib.error.HTTPError as e:
-            if e.code in (403, 404):
-                return e.code, ""
-            last = e
-        except Exception as e:
-            last = e
+        for opener in (_OPENER_DIRECT, _OPENER_PROXY):
+            try:
+                req = urllib.request.Request(url, headers=h)
+                with opener.open(req, timeout=timeout) as r:
+                    return r.status, r.read().decode("utf-8", "ignore")
+            except urllib.error.HTTPError as e:
+                if e.code in (403, 404):
+                    return e.code, ""
+                last = e
+            except Exception as e:
+                last = e
         time.sleep(1.2 * (attempt + 1))
     print("    [跳过] %s —— %s" % (url[:60], str(last)[:60]))
     return 0, ""
@@ -181,6 +206,52 @@ def get_json(url):
 
 
 # ── 域名工具 ─────────────────────────────────────────────
+
+# 常见的二级公共后缀（取根域时整体保留，且这些后缀本身不是有效站点域名）
+TWO_LEVEL_SUFFIXES = {
+    # 英国
+    "co.uk", "org.uk", "ac.uk", "gov.uk", "net.uk", "me.uk", "sch.uk",
+    # 中国及港澳台
+    "com.cn", "org.cn", "net.cn", "gov.cn", "edu.cn", "ac.cn",
+    "com.hk", "org.hk", "net.hk", "edu.hk", "gov.hk", "idv.hk",
+    "com.tw", "org.tw", "net.tw", "gov.tw", "edu.tw", "idv.tw",
+    "com.mo", "org.mo", "net.mo", "gov.mo", "edu.mo",
+    # 日本
+    "co.jp", "or.jp", "ne.jp", "go.jp", "ac.jp", "lg.jp",
+    # 韩国
+    "co.kr", "or.kr", "re.kr", "ne.kr", "go.kr", "pe.kr",
+    # 澳大利亚（二级域直接可注册，如 education.gov.au）
+    "com.au", "net.au", "org.au", "edu.au", "gov.au", "asn.au",
+    "id.au", "act.au", "nsw.au", "vic.au", "qld.au", "sa.au",
+    "wa.au", "tas.au", "nt.au", "csiro.au", "conf.au", "otc.au",
+    # 其他常见二级后缀
+    "co.nz", "net.nz", "org.nz", "govt.nz", "ac.nz", "geek.nz",
+    "com.sg", "net.sg", "org.sg", "gov.sg", "edu.sg",
+    "com.br", "net.br", "org.br", "gov.br", "edu.br",
+    "co.in", "net.in", "org.in", "gov.in", "ac.in", "edu.in",
+    "com.mx", "org.mx", "net.mx", "gob.mx", "edu.mx",
+    "com.ar", "net.ar", "org.ar", "gob.ar", "edu.ar",
+    "com.my", "net.my", "org.my", "gov.my", "edu.my",
+    "co.id", "web.id", "or.id", "go.id", "ac.id", "sch.id",
+    "co.th", "in.th", "or.th", "ac.th", "go.th",
+    "com.vn", "net.vn", "org.vn", "gov.vn", "edu.vn",
+    "com.ua", "net.ua", "org.ua", "gov.ua", "edu.ua",
+    "com.tr", "net.tr", "org.tr", "gov.tr", "edu.tr",
+    "com.pl", "net.pl", "org.pl", "gov.pl", "edu.pl",
+    "com.ru", "net.ru", "org.ru", "gov.ru", "edu.ru",
+    "com.co", "net.co", "org.co", "gov.co", "edu.co",
+    "com.pe", "net.pe", "org.pe", "gob.pe", "edu.pe",
+    "com.ve", "net.ve", "org.ve", "gob.ve", "edu.ve",
+    "com.eg", "net.eg", "org.eg", "gov.eg", "edu.eg",
+    "co.il", "org.il", "net.il", "gov.il", "ac.il", "edu.il",
+    "co.za", "net.za", "org.za", "gov.za", "edu.za", "web.za",
+    "com.ph", "net.ph", "org.ph", "gov.ph", "edu.ph",
+    "com.pk", "net.pk", "org.pk", "gov.pk", "edu.pk",
+    "com.bd", "net.bd", "org.bd", "gov.bd", "edu.bd",
+    "com.np", "net.np", "org.np", "gov.np", "edu.np",
+}
+
+
 def normalize_domain(url):
     """从 URL 提取裸域名，小写、去 www."""
     if not url:
@@ -211,12 +282,8 @@ def root_domain(domain):
     if len(parts) <= 2:
         return domain
     # 常见的二级公共后缀
-    two_level = {"co.uk", "com.cn", "com.hk", "com.tw", "co.jp", "co.kr",
-                 "com.au", "co.nz", "com.sg", "com.br", "co.in", "org.cn",
-                 "net.cn", "gov.cn", "edu.cn", "ac.uk", "gov.uk", "ne.jp",
-                 "or.jp", "go.jp", "re.kr", "or.kr", "com.mx", "com.ar"}
     last2 = ".".join(parts[-2:])
-    if last2 in two_level and len(parts) >= 3:
+    if last2 in TWO_LEVEL_SUFFIXES and len(parts) >= 3:
         return ".".join(parts[-3:])
     # 品牌博客子站：googleblog.com → blog.google
     if len(parts) >= 3 and parts[-2] in ("blog", "blogs", "blogspot",
@@ -235,6 +302,9 @@ def is_valid_domain(d):
         return False          # 纯 IP
     if d.endswith(".local") or d.endswith(".test") or d.endswith(".invalid"):
         return False
+    # 域名本身就是公共后缀（如 gov.au / co.uk）——不是可注册站点
+    if d in TWO_LEVEL_SUFFIXES:
+        return False
     if d.count(".") > 4:
         return False
     if re.search(r"\s", d):
@@ -252,6 +322,9 @@ def is_homepage_url(url, domain):
     if path in ("", "/index.html", "/index.htm", "/index.php", "/home"):
         return True
     low = url.lower()
+    # 文档/媒体文件不是网站
+    if DOC_SUFFIX_RE.search(p.path or ""):
+        return False
     for hint in DEEP_PATH_HINTS:
         if hint in low:
             return False
@@ -380,6 +453,13 @@ PERSONAL_META_HINTS = [
     "book notes", "linkblog", "links and", "tumblr", "photography",
     "portfolio", "resume", "cv of", "curriculum vitae",
 ]
+# 出现在「职业词 | 人名」左侧的职业词——个人名片站的强特征
+# （iOS App Developer | Alberto Denia）
+PERSONAL_ROLE_WORDS = [
+    "developer", "engineer", "designer", "photographer", "writer",
+    "blogger", "student", "freelancer", "consultant", "illustrator",
+    "musician", "artist", "architect", "scientist", "researcher",
+]
 # 首页 title/description 里出现这些词 → 是真正的产品 / 工具
 PRODUCT_META_HINTS = [
     "platform", "tool", "app", "api", "sdk", "software", "saas", "dashboard",
@@ -440,6 +520,10 @@ def looks_personal_by_meta(title, domain=""):
     if not t:
         return False
 
+    # 白名单：已知产品站直接放行（如 Welcome to Steam 这种短标题）
+    if domain and domain in KNOWN_PRODUCT_DOMAINS:
+        return False
+
     # ① 明确的自我描述词
     for h in PERSONAL_META_HINTS:
         if h in t:
@@ -448,16 +532,27 @@ def looks_personal_by_meta(title, domain=""):
     # ② 「人名 | 域名」结构 —— 个人站的强特征
     if " | " in t:
         left, right = t.split(" | ", 1)
+        left, right = left.strip(), right.strip()
         # 右边是本站域名，左边是人名（两个首字母大写的词）
         base = domain.split(".")[0].lower() if domain else ""
-        if base and right.strip().startswith(base):
-            if re.match(r"^[a-z]+ [a-z]+$", left.strip()):
+        if base and right.startswith(base):
+            if re.match(r"^[a-z]+ [a-z]+$", left):
                 return True
-        if re.match(r"^[a-z]+ [a-z]+$", left.strip()):
+        if re.match(r"^[a-z]+ [a-z]+$", left):
+            return True
+        # 「职业词 | 人名」——iOS App Developer | Alberto Denia
+        if (re.match(r"^[a-z]+ [a-z]+$", right)
+                and any(w in left for w in PERSONAL_ROLE_WORDS)):
             return True
 
-    # ③ 标题很短（< 26 字符）且不含任何产品关键词 → 疑似个人站
-    if len(t) < 26 and not looks_like_product_by_meta(t):
+    # ③ 整个标题就是一个人名（1-2 个词、无产品关键词）→ 疑似个人站
+    #    注意不能用「短标题」一刀切：Welcome to Steam 只有 15 字符，
+    #    但它是 3 个词的站点名，不是人名。
+    #    豁免：域名主名出现在标题里（ansible.com → "Ansible Tower"）。
+    words = t.split()
+    base = domain.split(".")[0].lower() if domain else ""
+    if (len(words) <= 2 and not looks_like_product_by_meta(t)
+            and not (base and len(base) >= 4 and base in t)):
         return True
 
     return False
@@ -487,6 +582,22 @@ def is_media_or_hiring(domain, title):
         if h in base:
             return True
     return False
+
+
+def is_institutional_domain(d):
+    """教育 / 政府 / 科研机构域名
+
+    这类域名不作为「热点发现」的收录对象：
+    论文 PDF、课题页面托管在 uni.edu.au 上是常态，
+    但热点主体是论文本身，不是大学官网。
+    """
+    if not d:
+        return False
+    suffixes = (".edu", ".ac.uk", ".ac.jp", ".ac.cn", ".ac.in", ".ac.kr",
+                ".edu.au", ".edu.cn", ".edu.hk", ".edu.tw", ".edu.sg",
+                ".gov", ".gov.au", ".gov.uk", ".gov.cn", ".gob.mx",
+                ".go.jp", ".go.kr", ".govt.nz", ".sch.uk")
+    return any(d.endswith(s) or d == s[1:] for s in suffixes)
 
 
 def is_feature_page(domain):
@@ -543,16 +654,23 @@ def fetch_hackernews(limit=60):
 
 
 def fetch_hackernews_recent(min_points=50):
-    """Hacker News 近期高分（按时间倒序 + points 门槛）
+    """HN 近期高分（时间窗 × points 门槛）
 
     比 front_page 更适合「追踪热点」：front_page 是当前榜首页，
-    很快被刷掉；按时间取能覆盖最近 24-48 小时的新鲜内容。
+    很快被刷掉；按时间取能覆盖最近 24-72 小时的新鲜内容。
+
+    坑：Algolia search_by_date 按时间倒序返回，直接取前 40 条的话，
+    高赞旧闻（如 4000 分的讲解站）会被随后发的新帖挤出窗口。
+    所以每个窗口取 100 条，并追加一个 7 天窗（points 门槛提高），
+    专门捞「发了几天但一直很热」的大热点。
     """
     out = []
-    for hours in (24, 48, 72):
+    windows = ((24, min_points), (48, min_points), (72, min_points),
+               (168, max(min_points, 200)))
+    for hours, mp in windows:
         url = ("https://hn.algolia.com/api/v1/search_by_date?tags=story"
-               "&numericFilters=points>%d,created_at_i>%d&hitsPerPage=40"
-               % (min_points, int(time.time()) - hours * 3600))
+               "&numericFilters=points>%d,created_at_i>%d&hitsPerPage=100"
+               % (mp, int(time.time()) - hours * 3600))
         d = get_json(url)
         if not d:
             continue
@@ -740,7 +858,8 @@ def classify(domain, title, source_key):
                    "youtube", "twitch", "live", "radio"]),
         ("education", ["learn", "course", "tutorial", "book", "study",
                        "school", "university", "course", "academy", "lecture",
-                       "training", "skill"]),
+                       "training", "skill", "museum", "explainer",
+                       "interactive", "history", "archive"]),
         ("finance", ["bank", "fintech", "invest", "trading", "stock", "crypto",
                      "payment", "invoice", "accounting", "tax", "budget",
                      "market", "wealth", "money", "insur"]),
@@ -758,7 +877,12 @@ def classify(domain, title, source_key):
         if cat == "security":
             continue
         for kw in kws:
-            if kw in blob:
+            # 短关键词必须整词匹配，否则 "ai" 会命中 "railway"、
+            # "dev" 会命中 "device" 这类误判
+            if len(kw) <= 3:
+                if re.search(r"\b" + re.escape(kw) + r"\b", blob):
+                    return cat
+            elif kw in blob:
                 return cat
     if source_key == "github":
         return "devtools"
@@ -836,10 +960,14 @@ def main():
         if not is_homepage_url(item["url"], dom):
             stats["deep"] += 1
             root = root_domain(dom)
+            # 机构域名（大学/政府/科研院所）不走文章页归并：
+            # HN 上常见的是一篇托管在 uni.edu.au 服务器上的论文 PDF，
+            # 热点主体是那篇论文，不是大学官网——收进来没有意义。
             if (root and root != dom and is_valid_domain(root)
                     and root not in existing and root not in seen_today
                     and root not in SHORTLINK_DOMAINS
-                    and not any(root.endswith("." + e) for e in EXCLUDE_DOMAINS)):
+                    and not any(root.endswith("." + e) for e in EXCLUDE_DOMAINS)
+                    and not is_institutional_domain(root)):
                 root_candidates.setdefault(root, []).append(item)
             continue
         # 归一化：把域名换成根域，URL 换成首页
@@ -917,12 +1045,25 @@ def main():
         for d, it in pending_meta:
             m = metas.get(d) or ""
             if m:
+                # 标题就是裸域名（jrdsgl.com → "jrdsgl.com"）——
+                # 站点没有自我描述，无法确认是真实站点还是停放页，
+                # 按元信息不足处理
+                m_norm = m.strip().lower()
+                d_norm = d.lower()
+                if m_norm in (d_norm, "www." + d_norm,
+                              d_norm.replace(".", ""), d_norm.replace(".", " ")):
+                    stats["meta_fail"] += 1
+                    continue
                 if looks_personal_by_meta(m, d):
                     stats["personal_meta"] += 1
                     continue
                 it["metaTitle"] = m
             else:
+                # 抓不到首页元信息 → 无法确认这是「站点」还是「文章页」，
+                # 也无法拿到准确的站点名称。宁可少收，不可收错：
+                # 早期版本按域名规则保留，结果把 HN 文章标题当站名收录。
                 stats["meta_fail"] += 1
+                continue
             keep.append((d, it))
         picked = keep
 
@@ -948,11 +1089,11 @@ def main():
              stats["feature"], stats["media"], stats["personal_meta"],
              stats["spam"], stats["low"]))
     if stats["meta_fail"]:
-        print("  （%d 个站点抓不到首页元信息，按域名规则保留）" % stats["meta_fail"])
+        print("  （%d 个站点抓不到首页元信息，已淘汰）" % stats["meta_fail"])
 
     if not picked:
-        print("\n没有新的合格站点（可能是今天榜单都被收录过了）。")
-        return 0
+        print("\n今天没有新的合格站点（可能是榜单都被收录过了）。")
+        # 不急着返回——下面还要把旧文件里未过期的条目保留下来
 
     print("\n【3】候选站点")
     for dom, item in picked:
@@ -992,6 +1133,40 @@ def main():
         })
         history[dom] = {"date": today, "source": item["source"],
                         "hits": 1, "lastSeen": today}
+
+    # ── 滚动合并 ──
+    # HN 首页实时滚动，单日捕获量可能从 15 条骤降到 1 条（大热点刚跌出
+    # 首页、又被新帖挤出时间窗）。若直接覆盖，页面会被冲成空壳。
+    # 所以保留现有文件里「近 3 天、域名不重复」的条目，与新条目合并后
+    # 按热度排序、总量封顶。旧条目保留各自的 date 字段，卡片上会显示
+    # 它是哪天被发现的——不冒充「今日」。
+    TREND_WINDOW_DAYS = 3
+    retained = []
+    try:
+        old_src = io.open(OUT_FILE, encoding="utf-8").read()
+        old_data = json.loads(
+            re.search(r"window\.TRENDING_DATA = (\{.*\});", old_src, re.S)
+            .group(1))
+        cutoff = (datetime.date.today()
+                  - datetime.timedelta(days=TREND_WINDOW_DAYS - 1)).isoformat()
+        today_domains = {e["domain"] for e in entries}
+        for e in (old_data.get("entries") or []):
+            if e.get("domain") in today_domains:
+                continue
+            if (e.get("date") or "") >= cutoff:
+                retained.append(e)
+    except Exception:
+        retained = []
+    if retained:
+        print("  合并旧条目 %d 个（近 %d 天窗口）"
+              % (len(retained), TREND_WINDOW_DAYS))
+    merged = entries + retained
+    merged.sort(key=lambda e: e.get("points", 0), reverse=True)
+    merged = merged[:MAX_NEW]
+    if not merged:
+        print("\n没有可写入的条目，保留现有文件。")
+        return 0
+    entries = merged
 
     payload = {
         "date": today,
