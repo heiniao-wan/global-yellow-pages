@@ -42,8 +42,10 @@ def token():
 
 def api(path, data=None, method=None):
     body = json.dumps(data).encode("utf-8") if data is not None else None
+    # 路径可能含中文（如「每日更新热点.bat」），URL 必须是 ASCII——percent 编码
+    quoted = urllib.parse.quote(path, safe="/")
     req = urllib.request.Request(
-        "https://api.github.com/repos/%s/%s/contents/%s" % (OWNER, REPO, path),
+        "https://api.github.com/repos/%s/%s/contents/%s" % (OWNER, REPO, quoted),
         data=body, method=method or ("PUT" if body else "GET"),
         headers={"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json",
                  "User-Agent": "gyp-api-commit", "Content-Type": "application/json"})
