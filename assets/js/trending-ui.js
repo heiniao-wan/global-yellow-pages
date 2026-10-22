@@ -107,16 +107,19 @@ window.TrendingUI = (function () {
     // ── 卡片 ──
     var cards = shown.map(function (e) {
       var badge = e.sourceKey === 'github' ? 'GitHub' : e.source;
+      // 条目自己的发现日期（滚动窗口内可能是前几天的）
+      var day = (e.date || '').replace(/^(\d+)-(\d+)-(\d+)$/, '$2.$3');
       return '<article class="trend-card" data-domain="' + esc(e.domain) + '">' +
         '<div class="trend-head">' +
           '<a class="trend-name" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer">' +
             esc(e.siteTitle || e.name) + '</a>' +
-          '<span class="trend-heat" title="' + esc(t('trend_heat', '今日热度')) + '">' +
+          '<span class="trend-heat" title="' + esc(t('trend_heat', '热度')) + '">' +
             esc(heatText(e)) + '</span>' +
         '</div>' +
         '<a class="trend-why" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer" ' +
           'title="' + esc(e.hotTitle || '') + '">' + esc(e.hotTitle || e.domain) + '</a>' +
         '<div class="trend-meta">' +
+          (day ? '<span class="trend-day">' + esc(day) + '</span>' : '') +
           '<span class="trend-src">' + esc(badge) + '</span>' +
           '<span class="trend-cat">' + esc(catName(e.category)) + '</span>' +
           '<span class="trend-dom">' + esc(e.domain) + '</span>' +
@@ -152,7 +155,7 @@ window.TrendingUI = (function () {
     // 数量
     var cnt = document.getElementById('trendCount');
     if (cnt) {
-      cnt.textContent = t('trend_count', '今日新发现 {n} 个站点')
+      cnt.textContent = t('trend_count', '近 3 日新发现 {n} 个站点')
         .replace('{n}', String(d.entries.length));
     }
   }
