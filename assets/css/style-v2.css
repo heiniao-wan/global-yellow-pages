@@ -1151,6 +1151,7 @@ body::before {
   padding: 1px 6px; border-radius: 4px;
   background: var(--bg-sunken); font-weight: 600;
 }
+.trend-day { opacity: .7; font-variant-numeric: tabular-nums; }
 .trend-dom { opacity: .7; }
 .trend-morebox { text-align: center; margin-top: 14px; }
 .trend-more {
