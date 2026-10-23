@@ -34,18 +34,22 @@ for %%G in ("C:/Users/heini/.workbuddy/binaries/PortableGit/versions/1.3.0/cmd/g
     )
 )
 
-echo   [1/5] 抓取当日热点站点（HN / GitHub / InfoQ / RSS）...
+echo   [1/6] 抓取当日热点站点（HN / GitHub / InfoQ / RSS）...
 %PYCMD% tools\fetch-trending.py
 if errorlevel 1 (
     echo   [警告] 采集器报错，继续用现有数据走后续流程。
 )
 
 echo.
-echo   [2/5] 刷新资源版本号与 sitemap...
+echo   [2/6] 翻译热点条目为四国语言（失败自动回退英文原文）...
+%PYCMD% tools\translate-trending.py
+
+echo.
+echo   [3/6] 刷新资源版本号与 sitemap...
 %PYCMD% tools\gen-seo.py
 
 echo.
-echo   [3/5] 本地提交...
+echo   [4/6] 本地提交...
 if defined GITCMD (
     %GITCMD% add assets\js\trending.js index.html index-v2.html sitemap.xml sites.html robots.txt
     %GITCMD% commit -m "chore(trending): 每日热点更新"
@@ -54,7 +58,7 @@ if defined GITCMD (
 )
 
 echo.
-echo   [4/5] 推送到 GitHub（Cloudflare 约 30 秒自动部署）...
+echo   [5/6] 推送到 GitHub（Cloudflare 约 30 秒自动部署）...
 set "PUSHED=0"
 if defined GITCMD (
     %GITCMD% push origin main >nul 2>nul
@@ -66,7 +70,7 @@ if "%PUSHED%"=="0" (
 )
 
 echo.
-echo   [5/5] 等待部署并线上验证...
+echo   [6/6] 等待部署并线上验证...
 timeout /t 40 /nobreak >nul
 curl -s https://ypage.ccwu.cc/assets/js/trending.js -o "%TEMP%\gyp-trend.js"
 findstr /c:"siteTitle" "%TEMP%\gyp-trend.js" >nul
