@@ -22,7 +22,15 @@ window.TRENDING_DATA = {
    "comments": 413,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Bartosz Ciechanowski",
+   "siteTitle_zh": "巴托斯·切哈诺夫斯基",
+   "siteTitle_ja": "バルトシュ・チェチャノフスキ",
+   "siteTitle_ko": "바르토스 치에하노프스키",
+   "hotTitle_en": "Mechanical Watch",
+   "hotTitle_zh": "机械表",
+   "hotTitle_ja": "機械式時計",
+   "hotTitle_ko": "기계식 시계"
   },
   {
    "domain": "marginalia.nu",
@@ -35,7 +43,15 @@ window.TRENDING_DATA = {
    "comments": 717,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "www.marginalia.nu | marginalia.nu",
+   "siteTitle_zh": "www.marginalia.nu |旁注.nu",
+   "siteTitle_ja": "www.marginalia.nu |マージナリア.nu",
+   "siteTitle_ko": "www.marginalia.nu | marginalia.nu",
+   "hotTitle_en": "A search engine that favors text-heavy sites and punishes modern web design",
+   "hotTitle_zh": "一个偏爱文本较多的网站并惩罚现代网页设计的搜索引擎",
+   "hotTitle_ja": "テキストの多いサイトを優先し、現代の Web デザインを罰する検索エンジン",
+   "hotTitle_ko": "텍스트가 많은 사이트를 선호하고 현대적인 웹 디자인을 처벌하는 검색 엔진"
   },
   {
    "domain": "googleblog.com",
@@ -48,7 +64,15 @@ window.TRENDING_DATA = {
    "comments": 485,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "News from Google | Google Product and Technology News and Stories",
+   "siteTitle_zh": "来自谷歌的新闻 | Google 产品和技术新闻和故事",
+   "siteTitle_ja": "Google からのニュース | Google の製品とテクノロジーのニュースとストーリー",
+   "siteTitle_ko": "Google의 뉴스 | Google 제품 및 기술 뉴스와 스토리",
+   "hotTitle_en": "Announcing the first SHA-1 collision",
+   "hotTitle_zh": "宣布首次 SHA-1 冲突",
+   "hotTitle_ja": "最初の SHA-1 衝突の発表",
+   "hotTitle_ko": "최초의 SHA-1 충돌 발표"
   },
   {
    "domain": "kernel.org",
@@ -61,7 +85,15 @@ window.TRENDING_DATA = {
    "comments": 1912,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "The Linux Kernel Archives",
+   "siteTitle_zh": "Linux 内核档案",
+   "siteTitle_ja": "Linux カーネル アーカイブ",
+   "siteTitle_ko": "Linux 커널 아카이브",
+   "hotTitle_en": "“They introduce kernel bugs on purpose”",
+   "hotTitle_zh": "“他们故意引入内核错误”",
+   "hotTitle_ja": "「彼らは意図的にカーネルのバグを導入します」",
+   "hotTitle_ko": "“그들은 고의로 커널 버그를 도입합니다”"
   },
   {
    "domain": "steampowered.com",
@@ -74,7 +106,15 @@ window.TRENDING_DATA = {
    "comments": 1514,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Welcome to Steam",
+   "siteTitle_zh": "欢迎来到蒸汽",
+   "siteTitle_ja": "Steam へようこそ",
+   "siteTitle_ko": "스팀에 오신 것을 환영합니다",
+   "hotTitle_en": "Steam Machine",
+   "hotTitle_zh": "蒸汽机",
+   "hotTitle_ja": "スチームマシン",
+   "hotTitle_ko": "스팀 머신"
   },
   {
    "domain": "marc.info",
@@ -87,7 +127,15 @@ window.TRENDING_DATA = {
    "comments": 217,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "MARC: Mailing list ARChives",
+   "siteTitle_zh": "MARC：邮件列表 ARChives",
+   "siteTitle_ja": "MARC: メーリング リスト アーカイブ",
+   "siteTitle_ko": "MARC: 메일링 리스트 ARChives",
+   "hotTitle_en": "Wine ported to OpenBSD",
+   "hotTitle_zh": "Wine 移植到 OpenBSD",
+   "hotTitle_ja": "Wine を OpenBSD に移植",
+   "hotTitle_ko": "OpenBSD로 포팅된 와인"
   },
   {
    "domain": "joshwcomeau.com",
@@ -100,7 +148,15 @@ window.TRENDING_DATA = {
    "comments": 269,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Josh W. Comeau",
+   "siteTitle_zh": "乔什·科莫",
+   "siteTitle_ja": "ジョシュ・W・コモー",
+   "siteTitle_ko": "조쉬 W. 코모",
+   "hotTitle_en": "The Future of CSS",
+   "hotTitle_zh": "CSS 的未来",
+   "hotTitle_ja": "CSS の未来",
+   "hotTitle_ko": "CSS의 미래"
   },
   {
    "domain": "arxiv.org",
@@ -113,7 +169,15 @@ window.TRENDING_DATA = {
    "comments": 239,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "arXiv.org e-Print archive",
+   "siteTitle_zh": "arXiv.org 电子打印档案",
+   "siteTitle_ja": "arXiv.org e-Print アーカイブ",
+   "siteTitle_ko": "arXiv.org 전자 인쇄 아카이브",
+   "hotTitle_en": "Hybrid Reasoning Agents: LLM agents that think in latent space, act through text",
+   "hotTitle_zh": "混合推理代理：LLM 代理在潜在空间中思考，通过文本行动",
+   "hotTitle_ja": "ハイブリッド推論エージェント: 潜在空間で思考し、テキストを通じて行動する LLM エージェント",
+   "hotTitle_ko": "하이브리드 추론 에이전트: 잠재 공간에서 생각하고 텍스트를 통해 행동하는 LLM 에이전트"
   },
   {
    "domain": "openbsd.org",
@@ -126,7 +190,15 @@ window.TRENDING_DATA = {
    "comments": 157,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "OpenBSD",
+   "siteTitle_zh": "开放BSD",
+   "siteTitle_ja": "OpenBSD",
+   "siteTitle_ko": "오픈BSD",
+   "hotTitle_en": "OpenBSD 8.0",
+   "hotTitle_zh": "OpenBSD 8.0",
+   "hotTitle_ja": "OpenBSD 8.0",
+   "hotTitle_ko": "오픈BSD 8.0"
   },
   {
    "domain": "railway.com",
@@ -139,7 +211,15 @@ window.TRENDING_DATA = {
    "comments": 275,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Railway | The all-in-one intelligent cloud provider",
+   "siteTitle_zh": "铁路|一站式智能云提供商",
+   "siteTitle_ja": "鉄道 |オールインワンのインテリジェント クラウド プロバイダー",
+   "siteTitle_ko": "철도 | 올인원 지능형 클라우드 제공업체",
+   "hotTitle_en": "Security Disclosure",
+   "hotTitle_zh": "安全披露",
+   "hotTitle_ja": "機密情報の開示",
+   "hotTitle_ko": "보안 공개"
   },
   {
    "domain": "pwn.watch",
@@ -152,7 +232,15 @@ window.TRENDING_DATA = {
    "comments": 165,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "pwn.watch · live security incidents",
+   "siteTitle_zh": "pwn.watch · 直播安全事件",
+   "siteTitle_ja": "pwn.watch · ライブセキュリティインシデント",
+   "siteTitle_ko": "pwn.watch · 실시간 보안 사고",
+   "hotTitle_en": "What’s getting pwned right now",
+   "hotTitle_zh": "现在正在流行什么",
+   "hotTitle_ja": "現在ポーンされているもの",
+   "hotTitle_ko": "지금 무슨 일이 벌어지고 있는 걸까"
   },
   {
    "domain": "fulcrumsec.vg",
@@ -165,7 +253,15 @@ window.TRENDING_DATA = {
    "comments": 54,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "FulcrumSec",
+   "siteTitle_zh": "支点安全",
+   "siteTitle_ja": "支点秒",
+   "siteTitle_ko": "FulcrumSec",
+   "hotTitle_en": "PingCap TiDB Leaks",
+   "hotTitle_zh": "PingCap TiDB 泄露",
+   "hotTitle_ja": "PingCap TiDB リーク",
+   "hotTitle_ko": "PingCap TiDB 누출"
   },
   {
    "domain": "yale.edu",
@@ -178,7 +274,15 @@ window.TRENDING_DATA = {
    "comments": 190,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Yale University",
+   "siteTitle_zh": "耶鲁大学",
+   "siteTitle_ja": "イェール大学",
+   "siteTitle_ko": "예일대학교",
+   "hotTitle_en": "Sixteen years after Deepwater Horizon, deep sea life shows few signs of recovery",
+   "hotTitle_zh": "深水地平线十六年后，深海生物几乎没有恢复的迹象",
+   "hotTitle_ja": "ディープウォーター・ホライゾンから16年、深海の生物は回復の兆しをほとんど示さない",
+   "hotTitle_ko": "Deepwater Horizon 이후 16년, 심해 생물은 회복의 조짐을 거의 보이지 않습니다."
   },
   {
    "domain": "apple.com",
@@ -191,7 +295,15 @@ window.TRENDING_DATA = {
    "comments": 331,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Apple",
+   "siteTitle_zh": "苹果",
+   "siteTitle_ja": "りんご",
+   "siteTitle_ko": "사과",
+   "hotTitle_en": "macOS 15.8.2 Breaks OpenGL",
+   "hotTitle_zh": "macOS 15.8.2 破坏 OpenGL",
+   "hotTitle_ja": "macOS 15.8.2 で OpenGL が壊れる",
+   "hotTitle_ko": "macOS 15.8.2에서 OpenGL 중단"
   },
   {
    "domain": "php.net",
@@ -204,7 +316,15 @@ window.TRENDING_DATA = {
    "comments": 2,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "PHP",
+   "siteTitle_zh": "PHP",
+   "siteTitle_ja": "PHP",
+   "siteTitle_ko": "PHP",
+   "hotTitle_en": "PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 out",
+   "hotTitle_zh": "PHP 8.5.12、8.4.27、8.3.36 和 8.2.35 已发布",
+   "hotTitle_ja": "PHP 8.5.12、8.4.27、8.3.36、および 8.2.35 以降",
+   "hotTitle_ko": "PHP 8.5.12, 8.4.27, 8.3.36 및 8.2.35 출력"
   },
   {
    "domain": "getlazarus.org",
@@ -217,7 +337,15 @@ window.TRENDING_DATA = {
    "comments": 53,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Lazarus IDE Home",
+   "siteTitle_zh": "Lazarus IDE 主页",
+   "siteTitle_ja": "Lazarus IDE ホーム",
+   "siteTitle_ko": "라자루스 IDE 홈",
+   "hotTitle_en": "Free Pascal compiler now supports dynamic packages",
+   "hotTitle_zh": "Free Pascal 编译器现在支持动态包",
+   "hotTitle_ja": "Free Pascal コンパイラが動的パッケージをサポートするようになりました",
+   "hotTitle_ko": "프리파스칼 컴파일러는 이제 동적 패키지를 지원합니다."
   },
   {
    "domain": "plex.tv",
@@ -230,7 +358,15 @@ window.TRENDING_DATA = {
    "comments": 114,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "Watch Movies and TV Shows Free Online - Plex",
+   "siteTitle_zh": "免费在线观看电影和电视节目 - Plex",
+   "siteTitle_ja": "映画やテレビ番組をオンラインで無料で視聴 - Plex",
+   "siteTitle_ko": "온라인으로 영화 및 TV 프로그램을 무료로 시청하세요 - Plex",
+   "hotTitle_en": "Plex laid off the whole player team",
+   "hotTitle_zh": "Plex 解雇了整个玩家团队",
+   "hotTitle_ja": "プレックス、選手チーム全員を解雇",
+   "hotTitle_ko": "Plex는 플레이어 팀 전체를 해고했습니다."
   },
   {
    "domain": "canarytokens.org",
@@ -243,7 +379,15 @@ window.TRENDING_DATA = {
    "comments": 23,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "Canarytokens",
+   "siteTitle_zh": "金丝雀代币",
+   "siteTitle_ja": "カナリアトークン",
+   "siteTitle_ko": "카나리아토큰",
+   "hotTitle_en": "Canary Tokens",
+   "hotTitle_zh": "金丝雀代币",
+   "hotTitle_ja": "カナリアトークン",
+   "hotTitle_ko": "카나리아 토큰"
   },
   {
    "domain": "lastmuseum.com",
@@ -256,7 +400,15 @@ window.TRENDING_DATA = {
    "comments": 30,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "The Last Museum",
+   "siteTitle_zh": "最后的博物馆",
+   "siteTitle_ja": "最後の博物館",
+   "siteTitle_ko": "마지막 박물관",
+   "hotTitle_en": "Semantic search across major museums",
+   "hotTitle_zh": "各大博物馆的语义搜索",
+   "hotTitle_ja": "主要な博物館にわたるセマンティック検索",
+   "hotTitle_ko": "주요 박물관 전체의 의미 검색"
   },
   {
    "domain": "jank-lang.org",
@@ -269,7 +421,15 @@ window.TRENDING_DATA = {
    "comments": 16,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "jank programming language - Clojure/LLVM/C++",
+   "siteTitle_zh": "jank 编程语言 - Clojure/LLVM/C++",
+   "siteTitle_ja": "ジャンク プログラミング言語 - Clojure/LLVM/C++",
+   "siteTitle_ko": "버벅거림 프로그래밍 언어 - Clojure/LLVM/C++",
+   "hotTitle_en": "Jank – The native Clojure dialect with seamless C++ interop",
+   "hotTitle_zh": "Jank – 具有无缝 C++ 互操作的本机 Clojure 方言",
+   "hotTitle_ja": "Jank – シームレスな C++ 相互運用機能を備えたネイティブ Clojure 方言",
+   "hotTitle_ko": "Jank – 원활한 C++ 상호 운용성을 갖춘 기본 Clojure 방언"
   },
   {
    "domain": "every.to",
@@ -282,7 +442,15 @@ window.TRENDING_DATA = {
    "comments": 59,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-23"
+   "date": "2026-10-23",
+   "siteTitle_en": "Every",
+   "siteTitle_zh": "每一个",
+   "siteTitle_ja": "毎",
+   "siteTitle_ko": "모든",
+   "hotTitle_en": "After automation: Solo founding will be the default",
+   "hotTitle_zh": "自动化后：单独创建将成为默认设置",
+   "hotTitle_ja": "自動化後: ソロ設立がデフォルトになります",
+   "hotTitle_ko": "자동화 후 : 솔로창업이 기본이 됩니다."
   },
   {
    "domain": "os2museum.com",
@@ -295,7 +463,16 @@ window.TRENDING_DATA = {
    "comments": 4,
    "source": "Hacker News",
    "sourceKey": "hn",
-   "date": "2026-10-22"
+   "date": "2026-10-22",
+   "siteTitle_en": "The OS/2 Museum",
+   "siteTitle_zh": "OS/2 博物馆",
+   "siteTitle_ja": "OS/2 ミュージアム",
+   "siteTitle_ko": "OS/2 박물관",
+   "hotTitle_en": "ThinkPad I9990303 Error Catch-22",
+   "hotTitle_zh": "ThinkPad I9990303 错误 Catch-22",
+   "hotTitle_ja": "ThinkPad I9990303 エラー キャッチ 22",
+   "hotTitle_ko": "ThinkPad I9990303 오류 캐치-22"
   }
- ]
+ ],
+ "translated": "2026-10-23 19:44"
 };
