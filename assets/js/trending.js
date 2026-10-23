@@ -8,8 +8,8 @@
  * 勿手改本文件 —— 下次采集会整体覆盖。
  */
 window.TRENDING_DATA = {
- "date": "2026-10-22",
- "generated": "2026-10-22 18:40",
+ "date": "2026-10-23",
+ "generated": "2026-10-23 19:23",
  "entries": [
   {
    "domain": "ciechanow.ski",
@@ -36,6 +36,19 @@ window.TRENDING_DATA = {
    "source": "Hacker News",
    "sourceKey": "hn",
    "date": "2026-10-22"
+  },
+  {
+   "domain": "googleblog.com",
+   "name": "Googleblog",
+   "siteTitle": "News from Google | Google Product and Technology News and Stories",
+   "hotTitle": "Announcing the first SHA-1 collision",
+   "url": "https://googleblog.com",
+   "category": "news",
+   "points": 3030,
+   "comments": 485,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
   },
   {
    "domain": "kernel.org",
@@ -129,6 +142,19 @@ window.TRENDING_DATA = {
    "date": "2026-10-22"
   },
   {
+   "domain": "pwn.watch",
+   "name": "Pwn",
+   "siteTitle": "pwn.watch · live security incidents",
+   "hotTitle": "What’s getting pwned right now",
+   "url": "https://pwn.watch",
+   "category": "media",
+   "points": 368,
+   "comments": 165,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
+  },
+  {
    "domain": "fulcrumsec.vg",
    "name": "Fulcrumsec",
    "siteTitle": "FulcrumSec",
@@ -194,6 +220,19 @@ window.TRENDING_DATA = {
    "date": "2026-10-22"
   },
   {
+   "domain": "plex.tv",
+   "name": "Plex",
+   "siteTitle": "Watch Movies and TV Shows Free Online - Plex",
+   "hotTitle": "Plex laid off the whole player team",
+   "url": "https://plex.tv",
+   "category": "devtools",
+   "points": 160,
+   "comments": 114,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
+  },
+  {
    "domain": "canarytokens.org",
    "name": "Canarytokens",
    "siteTitle": "Canarytokens",
@@ -205,6 +244,45 @@ window.TRENDING_DATA = {
    "source": "Hacker News",
    "sourceKey": "hn",
    "date": "2026-10-22"
+  },
+  {
+   "domain": "lastmuseum.com",
+   "name": "Lastmuseum",
+   "siteTitle": "The Last Museum",
+   "hotTitle": "Semantic search across major museums",
+   "url": "https://lastmuseum.com",
+   "category": "education",
+   "points": 121,
+   "comments": 30,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
+  },
+  {
+   "domain": "jank-lang.org",
+   "name": "Jank Lang",
+   "siteTitle": "jank programming language - Clojure/LLVM/C++",
+   "hotTitle": "Jank – The native Clojure dialect with seamless C++ interop",
+   "url": "https://jank-lang.org",
+   "category": "devtools",
+   "points": 110,
+   "comments": 16,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
+  },
+  {
+   "domain": "every.to",
+   "name": "Every",
+   "siteTitle": "Every",
+   "hotTitle": "After automation: Solo founding will be the default",
+   "url": "https://every.to",
+   "category": "devtools",
+   "points": 52,
+   "comments": 59,
+   "source": "Hacker News",
+   "sourceKey": "hn",
+   "date": "2026-10-23"
   },
   {
    "domain": "os2museum.com",
