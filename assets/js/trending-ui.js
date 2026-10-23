@@ -1,15 +1,17 @@
 /**
  * trending.js — 热点站点渲染层
  *
- * 职责：把 window.TRENDING_DATA（由 tools/fetch-trending.py 每日生成）
- *       渲染成首页的「今日新发现」区块。
+ * 职责：把 window.TRENDING_DATA（由 tools/fetch-trending.py 每日生成，
+ *       tools/translate-trending.py 翻译）渲染成首页的「最新发现」区块。
  *
  * 设计要点：
  * ① 与 data.js 完全解耦 —— 热点数据缺失或为空时，整个区块不渲染，
  *    页面照常工作（这是纯静态站必须有的容错）。
  * ② 热度数据来自公开榜单（Hacker News / GitHub Trending / InfoQ），
- *    每条都标明来源与原始标题，让用户知道「它为什么今天火」。
- * ③ 分类筛选可点，与主网格的分类栏联动。
+ *    每条都标明来源与原始标题，让用户知道「它为什么火」。
+ * ③ 站点名与热点理由带 _zh/_en/_ja/_ko 四个语言字段（生成时翻译），
+ *    渲染时按当前语言取，缺失回退英文原文——翻译挂了对页面零影响。
+ * ④ 分类筛选可点，与主网格的分类栏联动。
  */
 window.TrendingUI = (function () {
   'use strict';
@@ -29,8 +31,13 @@ window.TrendingUI = (function () {
   }
 
   function t(key, fallback) {
+    // 注意：取词走 window.I18N.t —— i18n.js 只往 window.I18N 上挂方法，
+    // 从来没有 window.t（曾经误用导致动态文案在英日韩下静默走中文兜底）。
     try {
-      if (window.t && window.t(key) !== key) return window.t(key);
+      if (window.I18N && window.I18N.t) {
+        var v = window.I18N.t(key);
+        if (v && v !== key) return v;
+      }
     } catch (e) { /* i18n 未就绪时用兜底 */ }
     return fallback || key;
   }
@@ -56,17 +63,34 @@ window.TrendingUI = (function () {
     return key;
   }
 
-  /** 热度文案 */
+  /** 当前语言码（与分类名同一来源，默认中文） */
+  function curLang() {
+    try {
+      if (window.I18N && window.I18N.lang) return window.I18N.lang();
+    } catch (e) { /* 忽略 */ }
+    return 'zh';
+  }
+
+  /** 取条目的本地化字段：siteTitle_zh / hotTitle_ja …
+   *  翻译缺失（生成时翻失败或还没翻）时回退英文原文 */
+  function loc(e, field) {
+    var v = e[field + '_' + curLang()];
+    return v || e[field] || '';
+  }
+
+  /** 热度文案（跟随当前语言） */
   function heatText(e) {
     if (e.sourceKey === 'github') {
-      return e.points > 0 ? (e.points + ' ★ 今日') : '今日热门';
+      return e.points > 0
+        ? (e.points + ' ★ ' + t('trend_today', '今日'))
+        : t('trend_hot_day', '今日热门');
     }
     if (e.points > 0) {
-      var s = e.points + ' 分';
-      if (e.comments > 0) s += ' · ' + e.comments + ' 评论';
+      var s = e.points + ' ' + t('trend_pts', '分');
+      if (e.comments > 0) s += ' · ' + e.comments + ' ' + t('trend_cmt', '评论');
       return s;
     }
-    return '热门';
+    return t('trend_hot', '热门');
   }
 
   function render() {
@@ -112,12 +136,12 @@ window.TrendingUI = (function () {
       return '<article class="trend-card" data-domain="' + esc(e.domain) + '">' +
         '<div class="trend-head">' +
           '<a class="trend-name" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer">' +
-            esc(e.siteTitle || e.name) + '</a>' +
+            esc(loc(e, 'siteTitle') || e.name) + '</a>' +
           '<span class="trend-heat" title="' + esc(t('trend_heat', '热度')) + '">' +
             esc(heatText(e)) + '</span>' +
         '</div>' +
         '<a class="trend-why" href="' + esc(e.url) + '" target="_blank" rel="noopener noreferrer" ' +
-          'title="' + esc(e.hotTitle || '') + '">' + esc(e.hotTitle || e.domain) + '</a>' +
+          'title="' + esc(loc(e, 'hotTitle')) + '">' + esc(loc(e, 'hotTitle') || e.domain) + '</a>' +
         '<div class="trend-meta">' +
           (day ? '<span class="trend-day">' + esc(day) + '</span>' : '') +
           '<span class="trend-src">' + esc(badge) + '</span>' +
