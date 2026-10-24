@@ -332,6 +332,10 @@
     const c = countsOf(s.id);
     const cat = CATS.find(function (x) { return x.key === s.category; }) || { zh: '', icon: '' };
     const voted = state.voted[s.id];
+    // 三票全零且我没投过：只显图标不显「0」——一片 0/0/0 像坏站，
+    // 图标 alone 干净；投出第一票后数字自然出现（renderGrid 重渲染）。
+    const voteTotal = c.like + c.dislike + c.broken;
+    const voteZero = (voteTotal === 0 && !voted);
 
     // 按钮不禁用：我投过的那一项高亮并标注「取消」，其余保持可点（用于改票）
     const buttons = VOTE_TYPES.map(function (v) {
@@ -378,7 +382,7 @@
               '<span class="cb-ico">⧉</span><span class="cb-txt">' + esc(t('copy_link')) + '</span>' +
             '</button>' +
           '</div>' +
-          '<div class="vote-group">' + buttons + '</div>' +
+          '<div class="vote-group' + (voteZero ? ' zero' : '') + '">' + buttons + '</div>' +
         '</div>' +
         '<div class="vote-flash" hidden></div>' +
       '</div>' +
@@ -841,16 +845,19 @@
     $('#statDislikeNum').textContent = total.dislike;
     $('#statBrokenNum').textContent = total.broken;
     $('#statSites').textContent = SITES.length;
-    var heroLike = $('#statLike');
-    if (heroLike) heroLike.textContent = total.like;
 
     var voteAll = total.like + total.dislike + total.broken;
     var health = voteAll === 0 ? 100 : Math.round(total.like / voteAll * 100);
 
+    // 首屏指标：一票没有时显示「—」而不是 0 和 100%——
+    // 「0 累计点赞 / 100% 好评率」既是死数据也是假数据。
+    var heroLike = $('#statLike');
+    if (heroLike) heroLike.textContent = voteAll === 0 ? '—' : total.like;
+    var heroHealth = $('#healthPct');
+    if (heroHealth) heroHealth.textContent = voteAll === 0 ? '—' : health + '%';
+
     $('#healthBar').style.width = health + '%';
     $('#healthPctNum').textContent = health + '%';
-    var heroHealth = $('#healthPct');
-    if (heroHealth) heroHealth.textContent = health + '%';
     $('#healthNote').textContent = voteAll === 0
       ? t('health_none')
       : t('health_based').replace('{n}', voteAll);
@@ -1223,6 +1230,63 @@
   }
 
   /* ───────────────────── 启动 ───────────────────── */
+  /* ───────────── 微交互 ───────────── */
+
+  function reducedMotion() {
+    return !!(window.matchMedia &&
+              window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  /** 数字滚动：easeOutCubic，首屏指标专用 */
+  function countUp(el, target, suffix) {
+    if (!el) return;
+    suffix = suffix || '';
+    if (reducedMotion() || !isFinite(target) || target <= 0) return;
+    var dur = 900, t0 = null;
+    el.textContent = '0' + suffix;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /** 按 / 聚焦搜索框（搜索框里按 / 不劫持，方便输入） */
+  function bindSearchHotkey() {
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' ||
+                t.tagName === 'SELECT' || t.isContentEditable)) return;
+      var inp = document.getElementById('search');
+      if (!inp) return;
+      e.preventDefault();
+      inp.focus();
+      inp.select();
+    });
+  }
+
+  /** 区块进场渐显：轻微上浮，只跑一次（尊重减少动效偏好） */
+  function bindReveal() {
+    if (reducedMotion() || !('IntersectionObserver' in window)) return;
+    var els = Array.prototype.slice.call(
+      document.querySelectorAll('.section-head, .hero-kicker, .hero-title, .hero-sub, .hero-metrics'));
+    if (!els.length) return;
+    els.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.06 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
   function init() {
     // 标记 JS 可用：静态精选块（给爬虫看的内容）随之隐藏，避免与渲染网格重复
     document.documentElement.classList.add('js-on');
@@ -1297,6 +1361,13 @@
     renderStats();
     renderProtection();
     renderFaq();
+
+    // 微交互：/ 聚焦搜索、区块渐显、首屏指标数字滚动（只此一次）
+    bindSearchHotkey();
+    bindReveal();
+    countUp(document.getElementById('statSites'), SITES.length);
+    countUp(document.getElementById('statLike'), parseInt(document.getElementById('statLike').textContent, 10));
+    countUp(document.getElementById('healthPct'), parseInt(document.getElementById('healthPct').textContent, 10), '%');
 
     // 回填：把本机已投过的卡片标记为已投票
     Object.keys(state.voted).forEach(function (id) { markVotedUI(id); });
