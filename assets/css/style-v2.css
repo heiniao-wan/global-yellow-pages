@@ -195,6 +195,16 @@ body::before {
 .topnav a:hover { color: var(--accent); text-shadow: 0 0 12px rgba(34, 211, 238, .6); }
 
 /* ═══════════════ 首屏 ═══════════════ */
+/* 区块进场渐显：JS 加 .js-on 后才启用，避免无 JS 时内容被藏 */
+.js-on .reveal { opacity: 0; transform: translateY(10px); }
+.js-on .reveal.in {
+  opacity: 1; transform: none;
+  transition: opacity .5s ease, transform .5s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js-on .reveal { opacity: 1; transform: none; }
+}
+
 .hero {
   padding: 96px 0 72px;
   text-align: center;
@@ -670,6 +680,9 @@ body::before {
 }
 
 .vote-group { display: flex; gap: 5px; }
+
+/* 三票全零且未投过：只显图标不显 0——一片 0/0/0 像坏站 */
+.vote-group.zero .vb-num { display: none; }
 
 .vote-btn {
   position: relative;      /* 「取消」角标要相对按钮定位 */
