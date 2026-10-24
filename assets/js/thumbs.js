@@ -8,7 +8,9 @@
  *   · 站点本身已经打不开（这恰恰是「无法访问」投票最有价值的时候）
  * 所以准备多条独立通道，任一成功即止；全失败则降级为 favicon + 品牌色占位卡。
  *
- * 通道优先级（按国内实测稳定性排序）：
+ * 通道优先级：
+ *   ⓿ 静态预生成  —— assets/img/shots/<域名>.webp，tools/gen-shots.py 批量抓取，
+ *                      同源秒开、可 CDN 缓存、不耗免费额度（主力通道）
  *   ① Microlink API  —— 独立 SaaS，返回 JSON 里带截图直链，国内可达
  *   ② mShots         —— 微软 Azure 上的开源服务，免费无限，但国内线路不稳
  *   ③ Google favicon —— 图标服务，可用即说明域名能解析
@@ -69,11 +71,20 @@ const Thumbnails = (function () {
 
   /**
    * 依次尝试各条通道，返回第一条可用的图。
+   * 静态预生成截图（assets/img/shots/，由 tools/gen-shots.py 批量抓取）排第一：
+   * 同源秒开、可被 CDN 缓存、不消耗免费截图服务的额度。
    * @returns {Promise<{img:HTMLImageElement|null, level:string}>}
    */
   async function resolve(site) {
     const url = site.url;
     let img;
+
+    // ⓿ 静态预生成截图（域名命名与 app.js 的 site.domain 一致：hostname 去 www.）
+    if (site.domain) {
+      img = await probe('assets/img/shots/' + encodeURIComponent(site.domain) + '.webp', 5000);
+      if (!img) img = await probe('assets/img/shots/' + encodeURIComponent(site.domain) + '.png', 5000);
+      if (img) return { img: img, level: 'static' };
+    }
 
     // ① Microlink：国内实测最稳的一路
     const direct = await fetchMicrolink(url);
