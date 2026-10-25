@@ -21,6 +21,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -91,13 +92,32 @@ def main():
         s = sha_of(rel)
         if s:
             payload["sha"] = s
-        try:
-            r = api(rel, payload)
-            print("  [OK] %-34s %s (%d B)" % (rel, r["commit"]["sha"][:7], len(raw)))
-            ok += 1
-        except urllib.error.HTTPError as e:
-            print("  [失败] %-34s HTTP %s %s"
-                  % (rel, e.code, e.read().decode("utf-8", "replace")[:120]))
+        # 网络抖动重试：沙箱代理常间歇 502，不重试会让整批推送中途崩掉
+        # （每日 bat 一次推 6-26 个文件，崩一个就全停）。
+        done = False
+        for attempt in range(4):
+            try:
+                r = api(rel, payload)
+                print("  [OK] %-34s %s (%d B)" % (rel, r["commit"]["sha"][:7], len(raw)))
+                ok += 1
+                done = True
+                break
+            except urllib.error.HTTPError as e:
+                if e.code in (409, 422) and attempt < 3:
+                    # 分支瞬时冲突 / sha 过期：重取 sha 再来
+                    time.sleep(1.5)
+                    s = sha_of(rel)
+                    if s:
+                        payload["sha"] = s
+                    continue
+                print("  [失败] %-34s HTTP %s %s"
+                      % (rel, e.code, e.read().decode("utf-8", "replace")[:120]))
+                break
+            except Exception as e:
+                if attempt < 3:
+                    time.sleep(2 * (attempt + 1))
+                    continue
+                print("  [失败] %-34s %s" % (rel, str(e)[:80]))
     print("\n提交 %d/%d 个文件 → https://github.com/%s/%s" % (ok, len(args), OWNER, REPO))
     return 0 if ok else 1
 
