@@ -38,6 +38,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "assets", "js", "data.js")
 DEFAULT_BASE = "https://ypage.ccwu.cc"
 
+# 主题合辑生成器（文件名带连字符，不能直接 import，走 importlib）
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import importlib
+try:
+    gen_collections = importlib.import_module("gen-collections")
+except Exception as _e:      # 合辑模块缺失不影响其余 SEO 基建
+    gen_collections = None
+    print("[警告] 载入 gen-collections 失败：%s" % _e)
+
 START = "<!-- SEO:START (由 tools/gen-seo.py 生成，勿手改) -->"
 END = "<!-- SEO:END -->"
 
@@ -496,7 +505,7 @@ def bump_asset_versions(text):
     return text
 
 
-def inject_meta(base, nsites, ncats, static_feed=""):
+def inject_meta(base, nsites, ncats, static_feed="", guides=""):
     block = [
         START,
         '<link rel="canonical" href="%s/">' % base,
@@ -542,6 +551,17 @@ def inject_meta(base, nsites, ncats, static_feed=""):
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
 
+        # 主题合辑区块：插在精选块之前（编辑内容优先于索引填充）
+        if guides:
+            # 幂等：先清掉旧块
+            t = re.sub(re.escape(gen_collections.GUIDES_START) + r".*?"
+                       + re.escape(gen_collections.GUIDES_END), "", t, flags=re.S)
+            anchor = '<div class="grid" id="grid"></div>'
+            if anchor in t:
+                t = t.replace(anchor, guides + "\n\n    " + anchor, 1)
+            css = "<style>\n" + gen_collections.GUIDES_CSS + "</style>"
+            if "</head>" in t:
+                t = t.replace("</head>", css + "\n</head>", 1)
         # 静态精选块：插在结果区的 grid 之前，让爬虫先看到实心内容
         if static_feed:
             # 幂等：先清掉旧块
@@ -575,6 +595,11 @@ def main():
     cat_pages = write_cat_pages(base, cats, sites)
     print("  生成 分类独立页 cat/*.html（%d 个）" % len(cat_pages))
 
+    guide_pages = []
+    if gen_collections:
+        guide_pages = gen_collections.write_guides(base, sites)
+        print("  生成 主题合辑页 guides/*.html（%d 页）" % len(guide_pages))
+
     sm = [
         (base + "/", 1.0, "daily"),
         (base + "/sites.html", 0.9, "weekly"),
@@ -590,12 +615,16 @@ def main():
     # 分类页排在大站索引之后、全站索引之前，作为抓取主入口
     for rel, _n in cat_pages:
         sm.append((base + "/" + rel, 0.8, "weekly"))
+    # 主题合辑页：原创编辑内容，权重与分类页同级
+    for rel, _n in guide_pages:
+        sm.append((base + "/" + rel, 0.8, "weekly"))
     print("  生成", write_sitemap(base, sm))
     print("  生成", write_sites_html(base, cats, sites))
     print("  生成", write_og_image(len(sites), len(cats)))
     static_feed = write_static_feed(base, cats, sites)
     print("  生成 首页静态精选块（%d 条）" % (static_feed.count('class="sf-item"') if static_feed else 0))
-    print("  改写", inject_meta(base, len(sites), len(cats), static_feed))
+    guides = gen_collections.guides_block(base, sites) if gen_collections else ""
+    print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides))
     print("\n完成。把 robots.txt / sitemap.xml / sites.html / assets/img/og-cover.png "
           "一起部署到站点根目录，\n并确保托管方不会对这几个路径做 SPA 回退（否则又返回首页 HTML）。")
     return 0
