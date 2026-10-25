@@ -83,7 +83,12 @@ def is_image_bytes(b):
 
 
 def valid_image(b):
-    """尺寸与体积校验——mshots 的「生成中」占位图通常又小又矮"""
+    """截图质量校验——防三类假图混进图库：
+    ① mshots「生成中」占位图（固定 400x300）
+    ② 纯色/近纯色空白页（目标站挂了或屏蔽了截图服务）
+    ③ 错误模板页（不同域名拿到字节相同的图——批量阶段查重处理）
+    真实网站首页截图几乎必然有数百种颜色（文字抗锯齿就有几十种灰）。
+    """
     if not is_image_bytes(b) or len(b) < 12000:
         return False
     if not HAS_PIL:
@@ -91,7 +96,18 @@ def valid_image(b):
     try:
         with Image.open(io.BytesIO(b)) as im:
             w, h = im.size
-            return w >= 380 and h >= 240
+            if w < 380 or h < 240:
+                return False
+            im2 = im.convert("RGB")
+            colors = im2.getcolors(maxcolors=2000000)
+            if colors is None:
+                return True               # 颜色数爆炸 → 真实页面
+            if len(colors) < 200:
+                return False              # 纯色/近纯色
+            top_ratio = max(colors)[0] / float(w * h)
+            if top_ratio > 0.97:
+                return False              # 单一颜色占比过高 = 空白
+            return True
     except Exception:
         return False
 
@@ -282,6 +298,28 @@ def main():
     print("\n完成：成功 %d，失败 %d" % (ok, fail))
     if fails:
         print("失败列表（可重跑补抓）：%s" % ", ".join(fails[:30]))
+
+    # ── 查重：不同域名拿到字节相同的图 = 错误模板页（实测 abb.com /
+    #    abema.tv / catch.co.kr 三站捕获完全一致）。真实站点截图不可能
+    #    跨域名一致，整组删掉，下一轮重抓（届时走 Microlink 兜底）。
+    import hashlib
+    by_hash = {}
+    for f in os.listdir(OUT_DIR):
+        if not f.endswith((".webp", ".png")):
+            continue
+        p = os.path.join(OUT_DIR, f)
+        h = hashlib.sha1(open(p, "rb").read()).hexdigest()
+        by_hash.setdefault(h, []).append(f)
+    dup_groups = [fs for fs in by_hash.values() if len(fs) > 1]
+    if dup_groups:
+        n = 0
+        for fs in dup_groups:
+            for f in fs:
+                os.remove(os.path.join(OUT_DIR, f))
+                n += 1
+        print("查重：发现 %d 组跨域名相同截图（错误模板页），已删除 %d 个文件，"
+              "下次运行重抓" % (len(dup_groups), n))
+
     total = len(existing_files())
     print("截图库现有 %d 个文件（%s）" % (total, os.path.relpath(OUT_DIR, ROOT)))
     return 0
