@@ -34,38 +34,42 @@ for %%G in ("C:/Users/heini/.workbuddy/binaries/PortableGit/versions/1.3.0/cmd/g
     )
 )
 
-echo   [1/7] 抓取当日热点站点（HN / GitHub / InfoQ / RSS）...
+echo   [1/8] 抓取当日热点站点（HN / GitHub / InfoQ / RSS）...
 %PYCMD% tools\fetch-trending.py
 if errorlevel 1 (
     echo   [警告] 采集器报错，继续用现有数据走后续流程。
 )
 
 echo.
-echo   [2/7] 翻译热点条目为四国语言（失败自动回退英文原文）...
+echo   [2/8] 翻译热点条目为四国语言（失败自动回退英文原文）...
 %PYCMD% tools\translate-trending.py
 
 echo.
-echo   [3/7] 补抓缺失的站点截图（每日 20 个，滚动补齐 + 新热点站点）...
+echo   [3/8] 补抓缺失的站点截图（每日 20 个，滚动补齐 + 新热点站点）...
 %PYCMD% tools\gen-shots.py --trending --limit 20
 
 echo.
-echo   [4/7] 刷新资源版本号与 sitemap（顺带重新生成主题合辑页）...
+echo   [4/8] 补中文站名拼音索引（仅 data.js 中文站名有变化时才写）...
+%PYCMD% tools\gen-pinyin.py
+
+echo.
+echo   [5/8] 刷新资源版本号与 sitemap（顺带重新生成主题合辑页）...
 %PYCMD% tools\gen-seo.py
 
 rem V2 皮肤由 app.js 生成，改了 app.js 必须同步，否则两版行为会分叉
 %PYCMD% tools\sync-app-v2.py
 
 echo.
-echo   [5/7] 本地提交...
+echo   [6/8] 本地提交...
 if defined GITCMD (
-    %GITCMD% add assets\js\trending.js assets\img\shots index.html index-v2.html sitemap.xml sites.html robots.txt
+    %GITCMD% add assets\js\trending.js assets\js\data.js assets\img\shots index.html index-v2.html sitemap.xml sites.html robots.txt
     %GITCMD% commit -m "chore(trending): 每日热点更新"
 ) else (
     echo   [跳过] 没找到 git，只生成本地文件。
 )
 
 echo.
-echo   [6/7] 推送到 GitHub（Cloudflare 约 30 秒自动部署）...
+echo   [7/8] 推送到 GitHub（Cloudflare 约 30 秒自动部署）...
 set "PUSHED=0"
 if defined GITCMD (
     %GITCMD% push origin main >nul 2>nul
@@ -74,11 +78,11 @@ if defined GITCMD (
 if "%PUSHED%"=="0" (
     echo   git push 不可用（常见于代理环境），改用 GitHub API 提交...
     for /f "delims=" %%F in ('dir /b assets\img\shots 2^>nul') do git add "assets\img\shots\%%F" >nul 2>nul
-    %PYCMD% tools\gh-api-commit.py assets\js\trending.js index.html index-v2.html sitemap.xml sites.html robots.txt -m "chore(trending): 每日热点更新"
+    %PYCMD% tools\gh-api-commit.py assets\js\trending.js assets\js\data.js index.html index-v2.html sitemap.xml sites.html robots.txt -m "chore(trending): 每日热点更新"
 )
 
 echo.
-echo   [7/7] 等待部署并线上验证...
+echo   [8/8] 等待部署并线上验证...
 timeout /t 40 /nobreak >nul
 curl -s https://ypage.ccwu.cc/assets/js/trending.js -o "%TEMP%\gyp-trend.js"
 findstr /c:"siteTitle" "%TEMP%\gyp-trend.js" >nul
