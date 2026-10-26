@@ -13,789 +13,6 @@
   <link rel="preload" href="assets/css/style-v2.css?v=15153882" as="style">
   <link rel="preload" href="assets/js/data.js?v=381-3e6c76e7" as="script">
   <link rel="preload" href="assets/js/app-v2.js?v=65cf7af6" as="script">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.scenes{padding:52px 0 8px}
-.scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
-.scene-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:15px 16px;border:1px solid var(--line,#e8e8ed);border-radius:14px;background:var(--bg-elevated,#fff);cursor:pointer;font-family:inherit;text-align:left;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
-.scene-item:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10);transform:translateY(-1px)}
-.scene-item.on{border-color:var(--accent,#0071e3);background:var(--accent-soft,#f2f7ff)}
-.scene-ico{font-size:19px;line-height:1}
-.scene-label{font-size:14.5px;font-weight:600;color:var(--text,#1d1d1f)}
-.scene-n{font-size:12px;color:var(--text-3,#8e8e93)}
-.scene-n b{font-weight:650;color:var(--accent,#0071e3)}
-.scene-status{margin:14px 0 0;font-size:13.5px;color:var(--text-3,#8e8e93)}
-.scene-status button{font:inherit;font-size:13px;color:var(--accent,#0071e3);background:none;border:none;padding:0 0 0 8px;cursor:pointer;text-decoration:underline}
-@media (max-width:560px){.scene-grid{grid-template-columns:repeat(2,1fr)}}
-</style>
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.scenes{padding:52px 0 8px}
-.scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
-.scene-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:15px 16px;border:1px solid var(--line,#e8e8ed);border-radius:14px;background:var(--bg-elevated,#fff);cursor:pointer;font-family:inherit;text-align:left;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
-.scene-item:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10);transform:translateY(-1px)}
-.scene-item.on{border-color:var(--accent,#0071e3);background:var(--accent-soft,#f2f7ff)}
-.scene-ico{font-size:19px;line-height:1}
-.scene-label{font-size:14.5px;font-weight:600;color:var(--text,#1d1d1f)}
-.scene-n{font-size:12px;color:var(--text-3,#8e8e93)}
-.scene-n b{font-weight:650;color:var(--accent,#0071e3)}
-.scene-status{margin:14px 0 0;font-size:13.5px;color:var(--text-3,#8e8e93)}
-.scene-status button{font:inherit;font-size:13px;color:var(--accent,#0071e3);background:none;border:none;padding:0 0 0 8px;cursor:pointer;text-decoration:underline}
-@media (max-width:560px){.scene-grid{grid-template-columns:repeat(2,1fr)}}
-</style>
-<style>
-
-.editors{padding:40px 0 8px}
-.ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
-.ed-card{border:1px solid var(--line,#e8e8ed);border-radius:18px;overflow:hidden;background:var(--bg-elevated,#fff);transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease}
-.ed-card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.08);border-color:var(--accent,#0071e3)}
-.ed-link{display:block;text-decoration:none;color:inherit}
-.ed-shot{height:140px;background:var(--brand-soft,#f2f7ff);position:relative}
-.ed-shot img{width:100%;height:100%;object-fit:cover;display:block}
-.ed-body{padding:14px 16px 16px}
-.ed-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.ed-fav{width:28px;height:28px;border-radius:7px;background:#fff;flex:none}
-.ed-titles{min-width:0}
-.ed-titles h3{margin:0;font-size:15.5px;font-weight:650;color:var(--text,#1d1d1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ed-domain{font-size:12px;color:var(--text-3,#8e8e93)}
-.ed-reason{margin:0 0 12px;font-size:13.5px;line-height:1.6;color:var(--text-2,#48484a);min-height:42px}
-.ed-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.ed-cat{font-size:12px;color:var(--text-3,#8e8e93)}
-.ed-cta{font-size:13px;font-weight:600;color:var(--accent,#0071e3)}
-@media (max-width:560px){.ed-grid{grid-template-columns:1fr 1fr}.ed-shot{height:96px}.ed-reason{font-size:12.5px;min-height:38px}}
-</style>
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
-
-<style>
-
-.scenes{padding:52px 0 8px}
-.scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
-.scene-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:15px 16px;border:1px solid var(--line,#e8e8ed);border-radius:14px;background:var(--bg-elevated,#fff);cursor:pointer;font-family:inherit;text-align:left;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
-.scene-item:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10);transform:translateY(-1px)}
-.scene-item.on{border-color:var(--accent,#0071e3);background:var(--accent-soft,#f2f7ff)}
-.scene-ico{font-size:19px;line-height:1}
-.scene-label{font-size:14.5px;font-weight:600;color:var(--text,#1d1d1f)}
-.scene-n{font-size:12px;color:var(--text-3,#8e8e93)}
-.scene-n b{font-weight:650;color:var(--accent,#0071e3)}
-.scene-status{margin:14px 0 0;font-size:13.5px;color:var(--text-3,#8e8e93)}
-.scene-status button{font:inherit;font-size:13px;color:var(--accent,#0071e3);background:none;border:none;padding:0 0 0 8px;cursor:pointer;text-decoration:underline}
-@media (max-width:560px){.scene-grid{grid-template-columns:repeat(2,1fr)}}
-</style>
-<style>
-
-.editors{padding:40px 0 8px}
-.ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
-.ed-card{border:1px solid var(--line,#e8e8ed);border-radius:18px;overflow:hidden;background:var(--bg-elevated,#fff);transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease}
-.ed-card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.08);border-color:var(--accent,#0071e3)}
-.ed-link{display:block;text-decoration:none;color:inherit}
-.ed-shot{height:140px;background:var(--brand-soft,#f2f7ff);position:relative}
-.ed-shot img{width:100%;height:100%;object-fit:cover;display:block}
-.ed-body{padding:14px 16px 16px}
-.ed-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.ed-fav{width:28px;height:28px;border-radius:7px;background:#fff;flex:none}
-.ed-titles{min-width:0}
-.ed-titles h3{margin:0;font-size:15.5px;font-weight:650;color:var(--text,#1d1d1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ed-domain{font-size:12px;color:var(--text-3,#8e8e93)}
-.ed-reason{margin:0 0 12px;font-size:13.5px;line-height:1.6;color:var(--text-2,#48484a);min-height:42px}
-.ed-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.ed-cat{font-size:12px;color:var(--text-3,#8e8e93)}
-.ed-cta{font-size:13px;font-weight:600;color:var(--accent,#0071e3)}
-@media (max-width:560px){.ed-grid{grid-template-columns:1fr 1fr}.ed-shot{height:96px}.ed-reason{font-size:12.5px;min-height:38px}}
-</style>
-<style>
-
-.guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
-.gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
-.gc-card{display:block;background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .18s ease,box-shadow .18s ease}
-.gc-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 4px 18px rgba(0,113,227,.10)}
-.gc-k{color:var(--accent,#0071e3);font-size:12.5px;font-weight:600;margin:0 0 6px}
-.gc-card h3{font-size:15px;margin:0 0 6px}
-.gc-card p{color:var(--text-3,#8e8e93);font-size:12.5px;margin:0;line-height:1.7}
-.gc-n{color:var(--accent,#0071e3);font-weight:600;margin-top:8px !important}
-.gc-more{margin:16px 0 0;font-size:14px}
-.gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
-.gc-more a:hover{text-decoration:underline}
-</style>
-<style>
-
-/* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
-.static-feed{margin:0 0 28px}
-.static-feed h3{font-size:17px;margin:0 0 4px;font-weight:600}
-.static-feed .sf-note{font-size:13px;color:var(--text-3);margin:0 0 14px}
-.static-feed .sf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.static-feed .sf-item{
-  border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg-elevated);
-}
-.static-feed .sf-item h4{margin:0 0 3px;font-size:14.5px;font-weight:600}
-.static-feed .sf-item h4 a{color:inherit;text-decoration:none}
-.static-feed .sf-item h4 a:hover{color:var(--accent)}
-.static-feed .sf-item .sf-domain{font-size:12px;color:var(--text-3);display:block;margin-bottom:4px}
-.static-feed .sf-item p{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.6}
-.static-feed .sf-cat{
-  display:inline-block;margin:0 0 5px;padding:1px 7px;border-radius:999px;
-  font-size:11px;background:var(--bg-sunken);color:var(--text-2);
-}
-/* 有 JS 时隐藏静态块（完整网格已经渲染好了），但保留给爬虫的内容在 noscript 里 */
-html.js-on .static-feed{display:none}
-@media (prefers-color-scheme:dark){
-  .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
-  .static-feed .sf-cat{background:rgba(255,255,255,.08)}
-}
-</style>
 <!-- SEO:START (由 tools/gen-seo.py 生成，勿手改) -->
 <link rel="canonical" href="https://ypage.ccwu.cc/">
 <link rel="alternate" hreflang="zh-CN" href="https://ypage.ccwu.cc/">
@@ -813,7 +30,7 @@ html.js-on .static-feed{display:none}
 <meta name="twitter:description" content="381 个精选网站 · 17 个行业分类 · 四语切换">
 <meta name="twitter:image" content="https://ypage.ccwu.cc/assets/img/og-cover.png">
 <!-- SEO:END -->
-<style>
+<!-- SCENES-CSS:START --><style>
 
 .scenes{padding:52px 0 8px}
 .scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
@@ -827,8 +44,8 @@ html.js-on .static-feed{display:none}
 .scene-status{margin:14px 0 0;font-size:13.5px;color:var(--text-3,#8e8e93)}
 .scene-status button{font:inherit;font-size:13px;color:var(--accent,#0071e3);background:none;border:none;padding:0 0 0 8px;cursor:pointer;text-decoration:underline}
 @media (max-width:560px){.scene-grid{grid-template-columns:repeat(2,1fr)}}
-</style>
-<style>
+</style><!-- SCENES-CSS:END -->
+<!-- EDITORS-CSS:START --><style>
 
 .editors{padding:40px 0 8px}
 .ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
@@ -848,8 +65,8 @@ html.js-on .static-feed{display:none}
 .ed-cat{font-size:12px;color:var(--text-3,#8e8e93)}
 .ed-cta{font-size:13px;font-weight:600;color:var(--accent,#0071e3)}
 @media (max-width:560px){.ed-grid{grid-template-columns:1fr 1fr}.ed-shot{height:96px}.ed-reason{font-size:12.5px;min-height:38px}}
-</style>
-<style>
+</style><!-- EDITORS-CSS:END -->
+<!-- GUIDES-CSS:START --><style>
 
 .guides-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
 .gc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
@@ -862,8 +79,8 @@ html.js-on .static-feed{display:none}
 .gc-more{margin:16px 0 0;font-size:14px}
 .gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
 .gc-more a:hover{text-decoration:underline}
-</style>
-<style>
+</style><!-- GUIDES-CSS:END -->
+<!-- STATIC-CSS:START --><style>
 
 /* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
 .static-feed{margin:0 0 28px}
@@ -888,7 +105,7 @@ html.js-on .static-feed{display:none}
   .static-feed .sf-item{background:#151a2e;border-color:rgba(255,255,255,.08)}
   .static-feed .sf-cat{background:rgba(255,255,255,.08)}
 }
-</style>
+</style><!-- STATIC-CSS:END -->
 </head>
 <body>
 <noscript><div style="padding:12px 16px;background:#fff3cd;border-bottom:1px solid #ffe69c;font-size:14px">本站列表需要 JavaScript 渲染。搜索引擎与无脚本环境请访问<a href="https://ypage.ccwu.cc/sites.html">全站索引（381 个网站）</a>。</div></noscript>
@@ -984,6 +201,25 @@ html.js-on .static-feed{display:none}
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
     <!-- SCENES-BLOCK:START (由 tools/gen-blocks.py 生成，勿手改) -->
 <section class="scenes" id="scenesSec" aria-label="按场景找网站"><div class="wrap"><div class="section-head"><h2>按你要做的事找</h2><span class="section-note">不知道从哪个分类开始？先说你要做什么</span></div><div class="scene-grid"><button type="button" class="scene-item" data-sc="code"><span class="scene-ico">💻</span><span class="scene-label">写代码开发</span><span class="scene-n"><b>15</b> <span class="scene-nlabel">个站点</span></span></button><button type="button" class="scene-item" data-sc="ai"><span class="scene-ico">🤖</span><span class="scene-label">用 AI 工具</span><span class="scene-n"><b>12</b> <span class="scene-nlabel">个站点</span></span></button><button type="button" class="scene-item" data-sc="design"><span class="scene-ico">🎨</span><span class="scene-label">做设计找素材</span><span class="scene-n"><b>13</b> <span class="scene-nlabel">个站点</span></span></button><button type="button" class="scene-item" data-sc="money"><span class="scene-ico">📈</span><span class="scene-label">看行情理财</span><span class="scene-n"><b>9</b> <span class="scene-nlabel">个站点</span></span></button><button type="button" class="scene-item" data-sc="job"><span class="scene-ico">💼</span><span class="scene-label">找工作求职</span><span class="scene-n"><b>11</b> <span class="scene-nlabel">个站点</span></span></button><button type="button" class="scene-item" data-sc="learn"><span class="scene-ico">📚</span><span class="scene-label">查资料学习</span><span class="scene-n"><b>10</b> <span class="scene-nlabel">个站点</span></span></button></div><p class="scene-status" id="sceneStatus" hidden></p></div></section>
 <!-- SCENES-BLOCK:END -->
@@ -1070,6 +306,25 @@ html.js-on .static-feed{display:none}
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
     <!-- GUIDES-BLOCK:START (由 tools/gen-collections.py 生成，勿手改) -->
 <section class="guides-sec" aria-label="主题合辑"><div class="wrap"><div class="section-head"><h2>主题合辑</h2><span class="section-note">5 份编辑精选 · 按任务串联的网站动线</span></div><div class="gc-grid"><a class="gc-card" href="https://ypage.ccwu.cc/guides/indie-hacker.html"><p class="gc-k">从写下第一行代码，到收到第一笔美元</p><h3>独立开发者出海工具箱</h3><p>一个人做产品出海，中间隔着建站、开发、设计、文案、合规好几道坎。这份合辑把这条动线上的关键站点串成一条线…</p><p class="gc-n">14 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/ai-content.html"><p class="gc-k">从选题脚本到成片发布，一条线走完</p><h3>AI 内容创作流水线</h3><p>做自媒体的都知道，瓶颈从来不是「不会剪」，是每条内容都要重新想选题、写脚本、找素材、配音轨。这份合辑按创…</p><p class="gc-n">15 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/mech-engineer.html"><p class="gc-k">选型、样本、行业动态，一条检索动线</p><h3>机械工程师每日工具箱</h3><p>机械工程师的日常，大半时间花在「找资料」上：这个轴承的额定载荷多少、这家主机的液压系统什么参数、行业里又…</p><p class="gc-n">18 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/job-hunt.html"><p class="gc-k">找工作不从投简历开始，从研究公司开始</p><h3>求职跳槽情报站</h3><p>多数人找工作的顺序错了：先海投简历，再被动等待。高效的动线是反过来的——先在招聘平台看机会分布，摸清哪些…</p><p class="gc-n">13 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/deep-research.html"><p class="gc-k">从检索、验证到沉淀，完整的工具链</p><h3>一个人做深度研究</h3><p>深度研究的难点不在找资料，在交叉验证和信息沉淀。这份合辑按流程排：先用 AI 搜索快速建立全貌，再回到权…</p><p class="gc-n">14 个站点 →</p></a></div><p class="gc-more"><a href="https://ypage.ccwu.cc/guides.html">查看全部合辑 →</a></p></div></section>
 <!-- GUIDES-BLOCK:END -->
