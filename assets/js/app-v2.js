@@ -339,6 +339,9 @@
     } else if (state.sort === 'score') {
       // 口碑分 = (赞 - 踩) / 总票数，新站票少时回归到中性基准
       list.sort(function (a, b) { return score(b) - score(a); });
+    } else if (kw) {
+      // 搜索时（默认按热度排序下）改为按相关性排序，最匹配的排最前
+      list.sort(function (a, b) { return relScore(b, kw) - relScore(a, kw); });
     } else {
       list.sort(function (a, b) { return hot(b) - hot(a); });
     }
@@ -361,6 +364,35 @@
     const rank = s.rank;
     const vote = c.like * 2 - c.dislike * 2 + c.broken * 0.5;
     return -rank + vote;
+  }
+
+  /** 关键词高亮：先转义再包 <mark>，正则特殊字符先转义，避免注入/报错 */
+  function hl(text, kw) {
+    const s = esc(text || '');
+    if (!kw) return s;
+    const ek = esc(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    try {
+      return s.replace(new RegExp('(' + ek + ')', 'gi'), '<mark>$1</mark>');
+    } catch (e) { return s; }
+  }
+
+  /** 搜索相关性打分：名称开头 > 名称包含 > 分类 > 域名 > 网址 > 简介 */
+  function relScore(s, kw) {
+    const n = (s.name || '').toLowerCase();
+    const d = (s.domain || '').toLowerCase();
+    const u = (s.url || '').toLowerCase();
+    const de = (s.desc || '').toLowerCase();
+    const cat = CATS.find(function (c) { return c.key === s.category; }) || {};
+    const cn = (cat.zh || '').toLowerCase();
+    let score = 0;
+    if (n.indexOf(kw) === 0) score += 100;
+    else if (n.indexOf(kw) >= 0) score += 60;
+    if (cn.indexOf(kw) >= 0) score += 40;
+    if (d.indexOf(kw) === 0) score += 50;
+    else if (d.indexOf(kw) >= 0) score += 30;
+    if (u.indexOf(kw) >= 0) score += 20;
+    if (de.indexOf(kw) >= 0) score += 10;
+    return score;
   }
 
   /* ───────────────────── 渲染：卡片网格 ───────────────────── */
@@ -392,6 +424,7 @@
 
   function cardHtml(s) {
     const c = countsOf(s.id);
+    const kw = (state.keyword || '').trim().toLowerCase();
     const cat = CATS.find(function (x) { return x.key === s.category; }) || { zh: '', icon: '' };
     const voted = state.voted[s.id];
     // 三票全零且我没投过：只显图标不显「0」——一片 0/0/0 像坏站，
@@ -424,11 +457,11 @@
         '<div class="site-head">' +
           '<img class="site-favicon" src="' + esc(s.favicon) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' +
           '<div class="site-titles">' +
-            '<h3 class="site-name" title="' + esc(s.name) + '">' + esc(s.name) + '</h3>' +
+            '<h3 class="site-name" title="' + esc(s.name) + '">' + hl(s.name, kw) + '</h3>' +
             '<span class="site-domain">' + esc(s.domain) + '</span>' +
           '</div>' +
         '</div>' +
-        '<p class="site-desc">' + esc(s.desc) + '</p>' +
+        '<p class="site-desc">' + hl(s.desc, kw) + '</p>' +
         '<div class="site-meta">' +
           '<span class="tag tag-cat">' + cat.icon + ' ' + esc(catName(cat)) + '</span>' +
           '<span class="tag tag-region">' + esc(t('region_' + s.region)) + '</span>' +
@@ -1074,28 +1107,125 @@
   function bindSearch() {
     var input = $('#search');
     var form = $('#searchForm');
+    var clearBtn = $('#searchClear');
+    var suggest = $('#searchSuggest');
+    var sgIndex = -1;
     var timer = null;
 
     function run() {
       state.keyword = input.value;
       clearTimeout(timer);
+      suggest.hidden = true;
       renderGrid();
       document.querySelector('.results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // 输入时防抖即时搜索
+    function toggleClear() {
+      var has = !!input.value.trim();
+      if (clearBtn) clearBtn.hidden = !has;
+      var wrap = $('.search-wrap');
+      if (wrap) wrap.classList.toggle('has-text', has);
+    }
+
+    /** 自动补全：取相关性最高的 8 个匹配，渲染为下拉项 */
+    function renderSuggest() {
+      var kw = state.keyword.trim().toLowerCase();
+      if (!kw) { suggest.hidden = true; suggest.innerHTML = ''; return; }
+      var top = SITES.filter(function (s) {
+        var hay = (s.name + ' ' + s.domain + ' ' + s.url + ' ' + s.desc + ' ' + s.region).toLowerCase();
+        return hay.indexOf(kw) >= 0;
+      }).sort(function (a, b) { return relScore(b, kw) - relScore(a, kw); }).slice(0, 8);
+      if (!top.length) { suggest.hidden = true; suggest.innerHTML = ''; return; }
+      sgIndex = -1;
+      suggest.innerHTML = top.map(function (s) {
+        var cat = CATS.find(function (c) { return c.key === s.category; }) || { zh: '', icon: '' };
+        return '<div class="sg-item" data-id="' + esc(s.id) + '">' +
+          '<img class="sg-fav" src="' + esc(s.favicon) + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+          '<span class="sg-main"><span class="sg-name">' + hl(s.name, kw) + '</span>' +
+          '<span class="sg-domain">' + hl(s.domain, kw) + '</span></span>' +
+          '<span class="sg-cat">' + esc(cat.icon + ' ' + cat.zh) + '</span>' +
+          '</div>';
+      }).join('');
+      suggest.hidden = false;
+    }
+
+    function paintSg() {
+      var items = suggest.querySelectorAll('.sg-item');
+      Array.prototype.forEach.call(items, function (el, i) { el.classList.toggle('active', i === sgIndex); });
+    }
+
+    /** 点选建议：把搜索框填为该站名称并跑搜索（留在站内，可继续投票/收藏） */
+    function selectSuggestion(s) {
+      state.keyword = s.name;
+      input.value = s.name;
+      suggest.hidden = true;
+      toggleClear();
+      renderGrid();
+      var res = document.querySelector('.results');
+      if (res) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 输入时防抖：即时搜索 + 自动补全；清除按钮随输入显隐
     input.addEventListener('input', function (e) {
       state.keyword = e.target.value;
+      toggleClear();
       clearTimeout(timer);
-      timer = setTimeout(renderGrid, 180);
+      timer = setTimeout(function () { renderGrid(); renderSuggest(); }, 180);
     });
-    // 回车立即执行并滚到结果区
+
+    // 键盘：上下选建议、回车确认/搜索、Esc 清空
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); run(); }
-      if (e.key === 'Escape') { input.value = ''; state.keyword = ''; renderGrid(); input.blur(); }
+      var items = suggest.hidden ? [] : Array.prototype.slice.call(suggest.querySelectorAll('.sg-item'));
+      if (e.key === 'ArrowDown' && items.length) {
+        e.preventDefault();
+        sgIndex = (sgIndex + 1) % items.length;
+        paintSg();
+      } else if (e.key === 'ArrowUp' && items.length) {
+        e.preventDefault();
+        sgIndex = (sgIndex - 1 + items.length) % items.length;
+        paintSg();
+      } else if (e.key === 'Enter') {
+        if (!suggest.hidden && sgIndex >= 0 && items[sgIndex]) {
+          e.preventDefault();
+          var id = items[sgIndex].getAttribute('data-id');
+          var s = SITES.find(function (x) { return x.id === id; });
+          if (s) { selectSuggestion(s); return; }
+        }
+        e.preventDefault(); run();
+      } else if (e.key === 'Escape') {
+        input.value = ''; state.keyword = ''; suggest.hidden = true;
+        toggleClear(); renderGrid(); input.blur();
+      }
     });
+
+    if (clearBtn) clearBtn.addEventListener('click', function () {
+      input.value = ''; state.keyword = ''; suggest.hidden = true;
+      toggleClear(); renderGrid(); input.focus();
+    });
+
+    // 点选建议项（mousedown 阻止默认，避免 input 先 blur 把下拉藏掉）
+    if (suggest) {
+      suggest.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      suggest.addEventListener('click', function (e) {
+        var item = e.target.closest('.sg-item');
+        if (!item) return;
+        var id = item.getAttribute('data-id');
+        var s = SITES.find(function (x) { return x.id === id; });
+        if (s) selectSuggestion(s);
+      });
+    }
+
     // 表单提交（点「搜索」按钮或隐式回车）统一走这里
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); run(); });
+
+    // 聚焦且有内容时重新弹出补全
+    input.addEventListener('focus', function () {
+      if (state.keyword.trim()) renderSuggest();
+    });
+    // 失焦延迟隐藏，给点击建议留时间
+    input.addEventListener('blur', function () {
+      setTimeout(function () { suggest.hidden = true; }, 150);
+    });
 
     document.addEventListener('keydown', function (e) {
       if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); }
