@@ -510,6 +510,38 @@ def bump_asset_versions(text):
     return text
 
 
+def inject_block(text, block, start, end, anchor):
+    """幂等插入 HTML 区块：先连同上下的空行/缩进一起清掉，再按固定格式插一次。
+
+    只清 START..END 会留下插入时加的空行，每跑一次多几行 —— 每日批处理天天跑，
+    几个月下来又白胖一圈，故把两侧空白一并回收。
+    """
+    text = re.sub(r"\n*[ \t]*" + re.escape(start) + r".*?" + re.escape(end) + r"[ \t]*\n*",
+                  "\n", text, flags=re.S)
+    if not block or anchor not in text:
+        return text
+    return text.replace(anchor, block + "\n\n    " + anchor, 1)
+
+
+def inject_css(text, css_text, tag):
+    """把生成的内联 <style> 塞进 head，幂等。
+
+    历史教训：早先直接用 replace("</head>", css+"</head>") 注入，每跑一次 gen-seo
+    就多一份，而每日批处理天天跑 → index.html 一个月能胖上百 KB。这里先按标记清，
+    再按精确文本清掉所有无标记的历史副本，最后只注入一次。
+    """
+    start = "<!-- %s-CSS:START -->" % tag
+    end = "<!-- %s-CSS:END -->" % tag
+    text = re.sub(r"\n*[ \t]*" + re.escape(start) + r".*?" + re.escape(end) + r"[ \t]*\n*",
+                  "\n", text, flags=re.S)
+    chunk = "<style>\n" + css_text + "</style>"
+    while chunk in text:
+        text = text.replace(chunk, "", 1)
+    if "</head>" not in text:
+        return text
+    return text.replace("</head>", start + chunk + end + "\n</head>", 1)
+
+
 def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", editors=""):
     block = [
         START,
@@ -560,49 +592,26 @@ def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", edito
 
         # 场景化入口区块：插在分类栏之前——先按意图分流，再按行业浏览
         if scenes:
-            # 幂等：先清掉旧块
-            t = re.sub(re.escape(gen_blocks.SCENES_START) + r".*?"
-                       + re.escape(gen_blocks.SCENES_END), "", t, flags=re.S)
-            anchor = '<section class="cat-section" id="catSection">'
-            if anchor in t:
-                t = t.replace(anchor, scenes + "\n\n    " + anchor, 1)
-            css = "<style>\n" + gen_blocks.SCENES_CSS + "</style>"
-            if "</head>" in t:
-                t = t.replace("</head>", css + "\n</head>", 1)
+            t = inject_block(t, scenes, gen_blocks.SCENES_START, gen_blocks.SCENES_END,
+                             '<section class="cat-section" id="catSection">')
+            t = inject_css(t, gen_blocks.SCENES_CSS, "SCENES")
         # 编辑推荐大卡：插在场景之后、分类栏之前——先给新手几个不会踩坑的锚点
         if editors:
-            # 幂等：先清掉旧块
-            t = re.sub(re.escape(gen_blocks.EDITORS_START) + r".*?"
-                       + re.escape(gen_blocks.EDITORS_END), "", t, flags=re.S)
-            anchor = '<section class="cat-section" id="catSection">'
-            if anchor in t:
-                t = t.replace(anchor, editors + "\n\n    " + anchor, 1)
-            css = "<style>\n" + gen_blocks.EDITORS_CSS + "</style>"
-            if "</head>" in t:
-                t = t.replace("</head>", css + "\n</head>", 1)
+            t = inject_block(t, editors, gen_blocks.EDITORS_START, gen_blocks.EDITORS_END,
+                             '<section class="cat-section" id="catSection">')
+            t = inject_css(t, gen_blocks.EDITORS_CSS, "EDITORS")
         # 主题合辑区块：插在精选块之前（编辑内容优先于索引填充）
         if guides:
-            # 幂等：先清掉旧块
-            t = re.sub(re.escape(gen_collections.GUIDES_START) + r".*?"
-                       + re.escape(gen_collections.GUIDES_END), "", t, flags=re.S)
-            anchor = '<div class="grid" id="grid"></div>'
-            if anchor in t:
-                t = t.replace(anchor, guides + "\n\n    " + anchor, 1)
-            css = "<style>\n" + gen_collections.GUIDES_CSS + "</style>"
-            if "</head>" in t:
-                t = t.replace("</head>", css + "\n</head>", 1)
+            t = inject_block(t, guides, gen_collections.GUIDES_START, gen_collections.GUIDES_END,
+                             '<div class="grid" id="grid"></div>')
+            t = inject_css(t, gen_collections.GUIDES_CSS, "GUIDES")
         # 静态精选块：插在结果区的 grid 之前，让爬虫先看到实心内容
         if static_feed:
-            # 幂等：先清掉旧块
-            t = re.sub(re.escape(STATIC_START) + r".*?" + re.escape(STATIC_END), "", t, flags=re.S)
-            # 插到 <div class="grid" id="grid"></div> 之前
-            anchor = '<div class="grid" id="grid"></div>'
-            if anchor in t:
-                t = t.replace(anchor, static_feed + "\n\n    " + anchor, 1)
+            # 插到结果区 grid 之前，让爬虫先看到实心内容
+            t = inject_block(t, static_feed, STATIC_START, STATIC_END,
+                             '<div class="grid" id="grid"></div>')
             # 样式内联到 head（单独走一个 CSS 文件会增加请求数，直接内联更省）
-            css = "<style>\n" + STATIC_CSS + "</style>"
-            if "</head>" in t:
-                t = t.replace("</head>", css + "\n</head>", 1)
+            t = inject_css(t, STATIC_CSS, "STATIC")
         io.open(path, "w", encoding="utf-8", newline="\n").write(t)
         done.append(page)
     return "、".join(done) + "（已注入 OG / Twitter Card / canonical + noscript 引导）"
