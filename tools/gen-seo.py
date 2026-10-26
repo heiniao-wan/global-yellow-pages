@@ -46,6 +46,11 @@ try:
 except Exception as _e:      # 合辑模块缺失不影响其余 SEO 基建
     gen_collections = None
     print("[警告] 载入 gen-collections 失败：%s" % _e)
+try:
+    gen_blocks = importlib.import_module("gen-blocks")
+except Exception as _e:      # 首页区块模块缺失不影响其余 SEO 基建
+    gen_blocks = None
+    print("[警告] 载入 gen-blocks 失败：%s" % _e)
 
 START = "<!-- SEO:START (由 tools/gen-seo.py 生成，勿手改) -->"
 END = "<!-- SEO:END -->"
@@ -505,7 +510,7 @@ def bump_asset_versions(text):
     return text
 
 
-def inject_meta(base, nsites, ncats, static_feed="", guides=""):
+def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes=""):
     block = [
         START,
         '<link rel="canonical" href="%s/">' % base,
@@ -551,6 +556,17 @@ def inject_meta(base, nsites, ncats, static_feed="", guides=""):
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
 
+        # 场景化入口区块：插在分类栏之前——先按意图分流，再按行业浏览
+        if scenes:
+            # 幂等：先清掉旧块
+            t = re.sub(re.escape(gen_blocks.SCENES_START) + r".*?"
+                       + re.escape(gen_blocks.SCENES_END), "", t, flags=re.S)
+            anchor = '<section class="cat-section" id="catSection">'
+            if anchor in t:
+                t = t.replace(anchor, scenes + "\n\n    " + anchor, 1)
+            css = "<style>\n" + gen_blocks.SCENES_CSS + "</style>"
+            if "</head>" in t:
+                t = t.replace("</head>", css + "\n</head>", 1)
         # 主题合辑区块：插在精选块之前（编辑内容优先于索引填充）
         if guides:
             # 幂等：先清掉旧块
@@ -624,7 +640,8 @@ def main():
     static_feed = write_static_feed(base, cats, sites)
     print("  生成 首页静态精选块（%d 条）" % (static_feed.count('class="sf-item"') if static_feed else 0))
     guides = gen_collections.guides_block(base, sites) if gen_collections else ""
-    print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides))
+    scenes = gen_blocks.scenes_block(base, sites) if gen_blocks else ""
+    print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides, scenes))
     print("\n完成。把 robots.txt / sitemap.xml / sites.html / assets/img/og-cover.png "
           "一起部署到站点根目录，\n并确保托管方不会对这几个路径做 SPA 回退（否则又返回首页 HTML）。")
     return 0
