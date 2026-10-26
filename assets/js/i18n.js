@@ -104,6 +104,7 @@ window.I18N = (function () {
       sc_code: '写代码开发', sc_ai: '用 AI 工具', sc_design: '做设计找素材',
       sc_money: '看行情理财', sc_job: '找工作求职', sc_learn: '查资料学习',
       sc_active: '已按「{n}」筛选', sc_clear: '清除筛选', sc_n: '个站点',
+      ed_title: '编辑推荐', ed_note: '站长亲自用过、值得长期收藏的站点', ed_cta: '去看看',
       trend_all: '全部', trend_more: '展开全部', trend_less: '收起',
       trend_heat: '热度', trend_updated: '更新于',
       trend_pts: '分', trend_cmt: '评论', trend_today: '今日',
@@ -213,6 +214,7 @@ window.I18N = (function () {
       sc_code: 'Code & Dev', sc_ai: 'AI Tools', sc_design: 'Design & Assets',
       sc_money: 'Markets & Money', sc_job: 'Jobs & Hiring', sc_learn: 'Research & Study',
       sc_active: 'Filtered by "{n}"', sc_clear: 'Clear', sc_n: 'sites',
+      ed_title: 'Editor’s Picks', ed_note: 'Sites we’ve personally used and keep coming back to', ed_cta: 'Visit',
       trend_all: 'All', trend_more: 'Show all', trend_less: 'Collapse',
       trend_heat: 'Heat', trend_updated: 'Updated',
       trend_pts: 'pts', trend_cmt: 'comments', trend_today: 'today',
@@ -346,6 +348,7 @@ window.I18N = (function () {
       sc_code: '開発・プログラミング', sc_ai: 'AIツール', sc_design: 'デザイン素材',
       sc_money: '投資・相場', sc_job: '就職・転職', sc_learn: '調べ物・学習',
       sc_active: '「{n}」で絞り込み', sc_clear: '解除', sc_n: '件',
+      ed_title: '編集部のおすすめ', ed_note: '編集部が実際に使って気に入ったサイト', ed_cta: '見てみる',
       trend_all: 'すべて', trend_more: 'すべて表示', trend_less: '閉じる',
       trend_heat: '热度', trend_updated: '更新日',
       trend_pts: 'ポイント', trend_cmt: 'コメント', trend_today: '今日',
@@ -479,6 +482,7 @@ window.I18N = (function () {
       sc_code: '개발·코딩', sc_ai: 'AI 도구', sc_design: '디자인·소스',
       sc_money: '투자·시세', sc_job: '취업·구직', sc_learn: '자료·학습',
       sc_active: '"{n}"로 필터링 중', sc_clear: '해제', sc_n: '개',
+      ed_title: '에디터 추천', ed_note: '직접 써보고 계속 찾게 된 사이트', ed_cta: '둘러보기',
       trend_all: '전체', trend_more: '전체 보기', trend_less: '접기',
       trend_heat: '인기', trend_updated: '업데이트',
       trend_pts: '포인트', trend_cmt: '댓글', trend_today: '오늘',
@@ -603,6 +607,9 @@ window.I18N = (function () {
       ['#trendIntro', 'trend_intro'],
       ['.scenes .section-head h2', 'sc_title'],
       ['.scenes .section-note', 'sc_note'],
+      ['.editors .section-head h2', 'ed_title'],
+      ['.editors .section-note', 'ed_note'],
+      ['.editors .ed-cta', 'ed_cta'],
       ['.faq .section-note', 'sec_faq_note'],
       ['.footer p:first-child', null],
       ['.footer p:nth-child(2)', null, 'html'],
@@ -679,6 +686,15 @@ window.I18N = (function () {
     /* Cookie 同意条（存在才填） */
     setEl(document.querySelector('.consent .consent-text'), 'consent_text', 'html');
     setEl(document.querySelector('.consent .consent-btn'), 'consent_ok');
+
+    /* 编辑推荐大卡：推荐理由按当前语言从 data-zh/en/ja/ko 属性取 */
+    (function () {
+      var lang = window.I18N.lang();
+      document.querySelectorAll('.ed-reason').forEach(function (el) {
+        var txt = el.getAttribute('data-' + lang) || el.getAttribute('data-zh') || '';
+        if (txt) el.textContent = txt;
+      });
+    })();
   }
 
   function setLang(code) {
