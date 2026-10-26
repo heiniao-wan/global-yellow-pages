@@ -245,6 +245,13 @@ h1{font-size:25px;margin:0 0 6px}
 .meta{color:#8e8e93;font-size:12.5px;margin:6px 0 0}
 .back{display:inline-block;margin:14px 8px 8px 0;padding:8px 16px;border-radius:999px;background:#0071e3;color:#fff;text-decoration:none;font-size:14px}
 .back.ghost{background:#f5f5f7;color:#1d1d1f}
+.gnav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.88);-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid #e5e5ea}
+.gnav-in{max-width:860px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.gnav-home{color:#0071e3;font-size:14.5px;font-weight:650;text-decoration:none;white-space:nowrap}
+.gnav-home:hover{text-decoration:underline}
+.gnav-links{display:flex;gap:18px}
+.gnav-links a{color:#6e6e73;font-size:13.5px;text-decoration:none;white-space:nowrap}
+.gnav-links a:hover{color:#1d1d1f}
 h2{font-size:18px;margin:34px 0 4px;font-weight:650;letter-spacing:.01em}
 .sec-note{color:#8e8e93;font-size:13px;margin:0 0 6px}
 ol.items{list-style:none;padding:0;margin:10px 0 0;counter-reset:item}
@@ -269,7 +276,7 @@ a.site:hover{text-decoration:underline}
 .related{margin-top:44px;padding-top:18px;border-top:1px solid #e5e5ea}
 .related h2{font-size:15px;margin:0 0 10px}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid #e5e5ea;color:#8e8e93;font-size:13px}
-@media (prefers-color-scheme:dark){body{background:#1c1c1e;color:#f5f5f7}.it-shot{border-color:#3a3a3c;background:#2c2c2e}.desc,.meta,.tags,.gn{color:#98989d}.why{color:#d5d5d8}ol.items li{border-color:#2c2c2e}ol.items li:before{background:#0a2540;color:#6cb3ff}.tags span{background:#2c2c2e}.gcard{border-color:#3a3a3c}.gcard:hover{border-color:#6cb3ff}.gcard h3{color:#f5f5f7}.back.ghost{background:#2c2c2e;color:#f5f5f7}footer{border-color:#3a3a3c}.related{border-color:#3a3a3c}}
+@media (prefers-color-scheme:dark){body{background:#1c1c1e;color:#f5f5f7}.it-shot{border-color:#3a3a3c;background:#2c2c2e}.desc,.meta,.tags,.gn{color:#98989d}.why{color:#d5d5d8}ol.items li{border-color:#2c2c2e}ol.items li:before{background:#0a2540;color:#6cb3ff}.tags span{background:#2c2c2e}.gcard{border-color:#3a3a3c}.gcard:hover{border-color:#6cb3ff}.gcard h3{color:#f5f5f7}.back.ghost{background:#2c2c2e;color:#f5f5f7}footer{border-color:#3a3a3c}.related{border-color:#3a3a3c}.gnav{background:rgba(28,28,30,.88);border-color:#3a3a3c}.gnav-links a{color:#98989d}.gnav-links a:hover{color:#f5f5f7}}
 """
 
 
@@ -301,6 +308,12 @@ def esc(s):
 
 
 def page_shell(title, description, canonical, body, extra_head=""):
+    # 顶部置顶导航：全站统一入口，避免访客（尤其从搜索直接落到子页）找不到回主站的路
+    nav = ('<nav class="gnav"><div class="gnav-in">'
+           '<a class="gnav-home" href="%s/">← 全球黄页</a>'
+           '<span class="gnav-links"><a href="%s/guides.html">主题合辑</a>'
+           '<a href="%s/sites.html">全站索引</a></span>'
+           '</div></nav>' % (BASE, BASE, BASE))
     return """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -321,6 +334,7 @@ def page_shell(title, description, canonical, body, extra_head=""):
 %s
 </head>
 <body>
+%s
 <div class="wrap">
 %s
 <footer>全球黄页 · 主题合辑 · 收录均为各站点官方首页链接 · 与主站 %s 数据同步</footer>
@@ -328,7 +342,7 @@ def page_shell(title, description, canonical, body, extra_head=""):
 </body>
 </html>
 """ % (esc(title), esc(description), canonical, esc(title), esc(description),
-       canonical, BASE, CSS, extra_head, body, BASE)
+       canonical, BASE, CSS, extra_head, nav, body, BASE)
 
 
 def count_sites(col, sites):
