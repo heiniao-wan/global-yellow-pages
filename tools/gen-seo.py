@@ -510,7 +510,7 @@ def bump_asset_versions(text):
     return text
 
 
-def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes=""):
+def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", editors=""):
     block = [
         START,
         '<link rel="canonical" href="%s/">' % base,
@@ -565,6 +565,17 @@ def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes=""):
             if anchor in t:
                 t = t.replace(anchor, scenes + "\n\n    " + anchor, 1)
             css = "<style>\n" + gen_blocks.SCENES_CSS + "</style>"
+            if "</head>" in t:
+                t = t.replace("</head>", css + "\n</head>", 1)
+        # 编辑推荐大卡：插在场景之后、分类栏之前——先给新手几个不会踩坑的锚点
+        if editors:
+            # 幂等：先清掉旧块
+            t = re.sub(re.escape(gen_blocks.EDITORS_START) + r".*?"
+                       + re.escape(gen_blocks.EDITORS_END), "", t, flags=re.S)
+            anchor = '<section class="cat-section" id="catSection">'
+            if anchor in t:
+                t = t.replace(anchor, editors + "\n\n    " + anchor, 1)
+            css = "<style>\n" + gen_blocks.EDITORS_CSS + "</style>"
             if "</head>" in t:
                 t = t.replace("</head>", css + "\n</head>", 1)
         # 主题合辑区块：插在精选块之前（编辑内容优先于索引填充）
@@ -641,7 +652,8 @@ def main():
     print("  生成 首页静态精选块（%d 条）" % (static_feed.count('class="sf-item"') if static_feed else 0))
     guides = gen_collections.guides_block(base, sites) if gen_collections else ""
     scenes = gen_blocks.scenes_block(base, sites) if gen_blocks else ""
-    print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides, scenes))
+    editors = gen_blocks.editors_block(base) if gen_blocks else ""
+    print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides, scenes, editors))
     print("\n完成。把 robots.txt / sitemap.xml / sites.html / assets/img/og-cover.png "
           "一起部署到站点根目录，\n并确保托管方不会对这几个路径做 SPA 回退（否则又返回首页 HTML）。")
     return 0
