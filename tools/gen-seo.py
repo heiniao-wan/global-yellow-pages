@@ -238,6 +238,10 @@ CAT_CSS = (
     '.cat-guide h3{font-size:13px;margin:16px 0 5px;font-weight:600;color:#6e6e73}'
     '.cat-guide p{margin:0 0 8px;color:#3a3a3c;line-height:1.85;font-size:14.5px}'
     '.cat-guide p b{color:#1d1d1f;font-weight:600}'
+    '.cat-guide ul.cg-list{margin:0 0 8px;padding:0;list-style:none}'
+    '.cat-guide ul.cg-list li{border-bottom:none;padding:2px 0 2px 16px;position:relative;'
+    'color:#3a3a3c;font-size:14.5px;line-height:1.8}'
+    '.cat-guide ul.cg-list li:before{content:"›";position:absolute;left:2px;color:#0071e3;font-weight:600}'
     '.cat-guide .cg-note{border-left:3px solid #d8d8dd;padding-left:14px;color:#6e6e73;font-size:13.5px}'
     '.en{font-size:12px;color:#8e8e93;margin-left:8px}'
     '.back{display:inline-block;margin:14px 0 8px;padding:8px 16px;border-radius:999px;'
@@ -250,6 +254,7 @@ CAT_CSS = (
     '@media (prefers-color-scheme:dark){body{background:#1c1c1e;color:#f5f5f7}'
     'li{border-color:#2c2c2e}.desc{color:#c7c7cc}.sub,.meta,.en{color:#98989d}footer{border-color:#3a3a3c}'
     '.cat-guide p{color:#c7c7cc}.cat-guide p b{color:#f5f5f7}'
+    '.cat-guide ul.cg-list li{color:#c7c7cc}'
     '.cat-guide h3{color:#98989d}.cat-guide .cg-note{border-color:#3a3a3c;color:#98989d}}'
 )
 
@@ -337,6 +342,14 @@ def write_cat_pages(base, cats, sites):
             p.append('<p>%s</p>' % ctext["criteria"])
             p.append('<h3>使用建议</h3>')
             p.append('<p>%s</p>' % ctext["guide"])
+            # 「按需求快速定位」：具体需求 → 具体站点，比抽象建议更能说明这一页怎么用
+            if ctext.get("picks"):
+                p.append('<h3>按需求快速定位</h3>')
+                p.append('<ul class="cg-list">%s</ul>' % "".join(
+                    '<li>%s</li>' % x for x in ctext["picks"]))
+            if ctext.get("pitfalls"):
+                p.append('<h3>常见误区</h3>')
+                p.append('<p>%s</p>' % ctext["pitfalls"])
             p.append('<h3>补充说明</h3>')
             p.append('<p class="cg-note">%s</p>' % ctext["notes"])
             p.append('</div>')
@@ -641,7 +654,8 @@ def main():
     sm = [
         (base + "/", 1.0, "daily"),
         (base + "/sites.html", 0.9, "weekly"),
-        (base + "/index-v2.html", 0.6, "monthly"),
+        # index-v2.html 不再进 sitemap：它 308 跳到 /index-v2 且 canonical 指向 /，
+        # 属于首页的重复副本，收进来只会让搜索引擎抓到重定向 URL。
         # 信任页面：AdSense 审核必查项，独立 URL 权重不能低于汇总页
         (base + "/about.html", 0.5, "monthly"),
         (base + "/about-long.html", 0.6, "monthly"),   # 站长长文，E-E-A-T 主要落点
