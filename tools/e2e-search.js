@@ -65,8 +65,19 @@ function getJSON(url) {
     // dev server 不发缓存头，Chrome 启发式缓存会拿到旧 app.js
     await send('Network.setCacheDisabled', { cacheDisabled: true });
 
+    /** 轮询等待条件成立，替代死等固定毫秒（线上首屏慢时死等会读到未渲染的网格） */
+    const waitFor = async (expr, ms = 8000) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        if (await evalJS(expr)) return true;
+        await new Promise(r => setTimeout(r, 120));
+      }
+      return false;
+    };
+
     /** 输入关键词并等防抖跑完，返回结果统计 */
     const search = async (kw) => {
+      const prev = await evalJS(`document.querySelector('#resultCount').textContent`);
       await evalJS(`(() => {
         const i = document.querySelector('#search');
         i.value = ${JSON.stringify(kw)};
@@ -74,7 +85,10 @@ function getJSON(url) {
         i.focus();
         return true;
       })()`);
-      await new Promise(r => setTimeout(r, 450));
+      // 关键：等结果数真的变了再读。不能用「补全项存在」当信号——
+      // 上一次搜索的补全项还留在下拉里，会让人抢在 180ms 防抖之前读到旧网格。
+      await waitFor(`document.querySelector('#resultCount').textContent !== ${JSON.stringify(prev)}`, 6000);
+      await new Promise(r => setTimeout(r, 250));
       return evalJS(`(() => {
         const cards = document.querySelectorAll('#grid .card, #grid .site-card, #grid article');
         const names = [...document.querySelectorAll('#grid h3')].slice(0, 6).map(h => h.textContent.trim());
@@ -85,7 +99,9 @@ function getJSON(url) {
     for (const page2 of ['index.html', 'index-v2.html']) {
       console.log('\n=== ' + page2 + ' ===');
       await send('Page.navigate', { url: BASE + '/' + page2 });
-      await new Promise(r => setTimeout(r, 3200));
+      // 等 JS 真正初始化完成（首屏网格出卡片），否则后续输入会打在未绑定的输入框上
+      await waitFor(`window.SITE_DATA && window.SITE_DATA.length > 300 &&
+        document.querySelectorAll('#grid article').length > 0`, 20000);
 
       const ready = await evalJS(`(() => ({
         sites: window.SITE_DATA.length,
@@ -119,7 +135,7 @@ function getJSON(url) {
         i.focus();
         return true;
       })()`);
-      await new Promise(r => setTimeout(r, 350));
+      await waitFor(`document.querySelectorAll('.sg-hot').length === 6`, 6000);
       const hotInfo = await evalJS(`(() => {
         const box = document.querySelector('#searchSuggest');
         const btns = [...document.querySelectorAll('.sg-hot')].map(b => b.textContent.trim());
@@ -133,7 +149,11 @@ function getJSON(url) {
         document.querySelector('.sg-hot').click();
         return true;
       })()`);
-      await new Promise(r => setTimeout(r, 500));
+      await waitFor(`(() => {
+        const i = document.querySelector('#search');
+        return i.value && document.querySelectorAll('#grid article').length > 0
+          && document.querySelector('#searchSuggest').hidden;
+      })()`, 6000);
       const afterHot = await evalJS(`(() => ({
         kw: document.querySelector('#search').value,
         n: document.querySelectorAll('#grid .card, #grid .site-card, #grid article').length,
