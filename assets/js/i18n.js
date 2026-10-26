@@ -100,6 +100,10 @@ window.I18N = (function () {
       fav_txt_off: '收藏', fav_txt_on: '已收藏',
       trend_title: '最新发现',
       trend_intro: '从公开榜单实时追踪的热门新站点，持续更新。',
+      sc_title: '按你要做的事找', sc_note: '不知道从哪个分类开始？先说你要做什么',
+      sc_code: '写代码开发', sc_ai: '用 AI 工具', sc_design: '做设计找素材',
+      sc_money: '看行情理财', sc_job: '找工作求职', sc_learn: '查资料学习',
+      sc_active: '已按「{n}」筛选', sc_clear: '清除筛选', sc_n: '个站点',
       trend_all: '全部', trend_more: '展开全部', trend_less: '收起',
       trend_heat: '热度', trend_updated: '更新于',
       trend_pts: '分', trend_cmt: '评论', trend_today: '今日',
@@ -205,6 +209,10 @@ window.I18N = (function () {
       fav_txt_off: 'Save', fav_txt_on: 'Saved',
       trend_title: 'Latest Discoveries',
       trend_intro: 'Hot new sites tracked from public trending boards.',
+      sc_title: 'Start from what you need', sc_note: 'Not sure which category? Say what you are doing',
+      sc_code: 'Code & Dev', sc_ai: 'AI Tools', sc_design: 'Design & Assets',
+      sc_money: 'Markets & Money', sc_job: 'Jobs & Hiring', sc_learn: 'Research & Study',
+      sc_active: 'Filtered by "{n}"', sc_clear: 'Clear', sc_n: 'sites',
       trend_all: 'All', trend_more: 'Show all', trend_less: 'Collapse',
       trend_heat: 'Heat', trend_updated: 'Updated',
       trend_pts: 'pts', trend_cmt: 'comments', trend_today: 'today',
@@ -334,6 +342,10 @@ window.I18N = (function () {
       fav_txt_off: '保存', fav_txt_on: '保存済み',
       trend_title: '最新の発見',
       trend_intro: '\u516c\u958b\u30e9\u30f3\u30af\u30ea\u30f3\u30b0\u304b\u3089\u4eba\u6c17\u306e\u65b0\u30b5\u30a4\u30c8\u3092\u8ffd\u8de1\u3002',
+      sc_title: 'やりたいことから探す', sc_note: 'どのカテゴリか迷ったら、やりたいことを先に',
+      sc_code: '開発・プログラミング', sc_ai: 'AIツール', sc_design: 'デザイン素材',
+      sc_money: '投資・相場', sc_job: '就職・転職', sc_learn: '調べ物・学習',
+      sc_active: '「{n}」で絞り込み', sc_clear: '解除', sc_n: '件',
       trend_all: 'すべて', trend_more: 'すべて表示', trend_less: '閉じる',
       trend_heat: '热度', trend_updated: '更新日',
       trend_pts: 'ポイント', trend_cmt: 'コメント', trend_today: '今日',
@@ -463,6 +475,10 @@ window.I18N = (function () {
       fav_txt_off: '저장', fav_txt_on: '저장됨',
       trend_title: '최신 발견',
       trend_intro: '공개 랭킹에서 인기 있는 새 사이트를 추적합니다.',
+      sc_title: '무엇을 할지부터', sc_note: '어느 카테고리인지 고민되면, 하고 싶은 것부터',
+      sc_code: '개발·코딩', sc_ai: 'AI 도구', sc_design: '디자인·소스',
+      sc_money: '투자·시세', sc_job: '취업·구직', sc_learn: '자료·학습',
+      sc_active: '"{n}"로 필터링 중', sc_clear: '해제', sc_n: '개',
       trend_all: '전체', trend_more: '전체 보기', trend_less: '접기',
       trend_heat: '인기', trend_updated: '업데이트',
       trend_pts: '포인트', trend_cmt: '댓글', trend_today: '오늘',
@@ -585,6 +601,8 @@ window.I18N = (function () {
       ['.faq .section-head h2', 'sec_faq'],
       ['#trendTitle', 'trend_title'],
       ['#trendIntro', 'trend_intro'],
+      ['.scenes .section-head h2', 'sc_title'],
+      ['.scenes .section-note', 'sc_note'],
       ['.faq .section-note', 'sec_faq_note'],
       ['.footer p:first-child', null],
       ['.footer p:nth-child(2)', null, 'html'],
@@ -618,6 +636,14 @@ window.I18N = (function () {
       setEl(el, key, m[2]);
     });
 
+    applyGroup('.scene-label', [
+      { key: 'sc_code' }, { key: 'sc_ai' }, { key: 'sc_design' },
+      { key: 'sc_money' }, { key: 'sc_job' }, { key: 'sc_learn' }
+    ]);
+    applyGroup('.scene-nlabel', [
+      { key: 'sc_n' }, { key: 'sc_n' }, { key: 'sc_n' },
+      { key: 'sc_n' }, { key: 'sc_n' }, { key: 'sc_n' }
+    ]);
     applyGroup('.hero-metrics .metric-label', [
       { key: 'm_cats' }, { key: 'm_regions' }, { key: 'm_likes' }, { key: 'm_health' }
     ]);
