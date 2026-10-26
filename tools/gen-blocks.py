@@ -37,21 +37,38 @@ SCENES_END = "<!-- SCENES-BLOCK:END -->"
 
 
 def load_data():
-    """data.js 是 JS 字面量，用 Node 求值后吐 JSON"""
+    """data.js 是 JS 字面量，用 Node 求值后吐 JSON。
+
+    返回 dict：sites（含派生字段）/ scenes / picks / cats / sit_by_domain / cat_by_key
+    派生字段（domain/favicon/brand 等）由 data.js 末尾的 forEach 补，eval 后即存在。
+    """
     script = (
         "const fs=require('fs');global.window={};"
         "eval(fs.readFileSync('%s','utf8'));"
         "console.log(JSON.stringify({"
-        "sites: window.SITE_DATA.map(s=>({domain:s.domain||'',name:s.name})),"
-        "scenes: window.SCENE_DATA||{}"
+        "sites: window.SITE_DATA.map(s=>({domain:s.domain||'',name:s.name,url:s.url||'',"
+        "favicon:s.favicon||'',category:s.category||'',brand:s.brand||'',brandSoft:s.brandSoft||'#'})),"
+        "scenes: window.SCENE_DATA||{},"
+        "picks: window.EDITOR_PICKS||[],"
+        "cats: window.SITE_CATEGORIES||[]"
         "}));" % DATA_FILE.replace("\\", "/")
     )
     r = subprocess.run(["node", "-e", script], capture_output=True, timeout=60)
     if r.returncode != 0:
         print("[失败] Node 解析 data.js：%s" % r.stderr.decode("utf-8", "ignore")[:200])
-        return {}, {}
+        return {"sites": [], "scenes": {}, "picks": [], "cats": [],
+                "sit_by_domain": {}, "cat_by_key": {}}
     d = json.loads(r.stdout.decode("utf-8", "ignore"))
-    return d.get("sites") or [], d.get("scenes") or {}
+    sites = d.get("sites") or []
+    cats = d.get("cats") or []
+    return {
+        "sites": sites,
+        "scenes": d.get("scenes") or {},
+        "picks": d.get("picks") or [],
+        "cats": cats,
+        "sit_by_domain": {s["domain"]: s for s in sites if s.get("domain")},
+        "cat_by_key": {c.get("key"): c for c in cats if c.get("key")},
+    }
 
 
 def i18n_zh():
@@ -80,7 +97,8 @@ SCENE_ORDER = ["code", "ai", "design", "money", "job", "learn"]
 def scenes_block(base, sites=None, scenes=None):
     """生成「按你要做的事找」区块"""
     if sites is None or scenes is None:
-        sites, scenes = load_data()
+        dd = load_data()
+        sites, scenes = dd["sites"], dd["scenes"]
     zh = i18n_zh()
     have = set(s["domain"] for s in sites if s.get("domain"))
 
@@ -129,6 +147,80 @@ SCENES_CSS = """
 .scene-status{margin:14px 0 0;font-size:13.5px;color:var(--text-3,#8e8e93)}
 .scene-status button{font:inherit;font-size:13px;color:var(--accent,#0071e3);background:none;border:none;padding:0 0 0 8px;cursor:pointer;text-decoration:underline}
 @media (max-width:560px){.scene-grid{grid-template-columns:repeat(2,1fr)}}
+"""
+
+EDITORS_START = "<!-- EDITORS-BLOCK:START (由 tools/gen-blocks.py 生成，勿手改) -->"
+EDITORS_END = "<!-- EDITORS-BLOCK:END -->"
+
+
+def editors_block(base, picks=None, sit_by_domain=None, cat_by_key=None):
+    """生成「编辑推荐」大卡区块：站长精选 + 一句推荐理由（trust signal）"""
+    if picks is None or sit_by_domain is None or cat_by_key is None:
+        dd = load_data()
+        picks, sit_by_domain, cat_by_key = dd["picks"], dd["sit_by_domain"], dd["cat_by_key"]
+    zh = i18n_zh()
+    items = []
+    for p in picks:
+        s = sit_by_domain.get(p.get("domain"))
+        if not s:
+            continue
+        reason = p.get("reason") or {}
+        cat = cat_by_key.get(s.get("category"), {}) or {}
+        items.append(
+            '<article class="ed-card" style="--brand:%s;--brand-soft:%s">'
+            '<a class="ed-link" href="%s" target="_blank" rel="noopener noreferrer nofollow">'
+            '<div class="ed-shot" style="background:%s">'
+            '<img loading="lazy" src="assets/img/shots/%s.webp" alt="" '
+            'onerror="this.style.display=\'none\'"></div>'
+            '<div class="ed-body">'
+            '<div class="ed-head"><img class="ed-fav" src="%s" alt="" loading="lazy" '
+            'onerror="this.style.visibility=\'hidden\'">'
+            '<div class="ed-titles"><h3>%s</h3><span class="ed-domain">%s</span></div></div>'
+            '<p class="ed-reason" data-zh="%s" data-en="%s" data-ja="%s" data-ko="%s">%s</p>'
+            '<div class="ed-foot"><span class="ed-cat">%s %s</span>'
+            '<span class="ed-cta">%s</span></div>'
+            '</div></a></article>'
+            % (esc(s.get("brand")), esc(s.get("brandSoft")), esc(s.get("url")),
+               esc(s.get("brandSoft")), esc(s.get("domain")), esc(s.get("favicon")),
+               esc(s.get("name")), esc(s.get("domain")),
+               esc(reason.get("zh", "")), esc(reason.get("en", "")),
+               esc(reason.get("ja", "")), esc(reason.get("ko", "")), esc(reason.get("zh", "")),
+               esc(cat.get("icon", "")), esc(cat.get("zh", "")),
+               esc(zh.get("ed_cta", "去看看")))
+        )
+    if not items:
+        return ""
+    return (
+        EDITORS_START + "\n"
+        '<section class="editors" id="editorsSec" aria-label="编辑精选">'
+        '<div class="wrap">'
+        '<div class="section-head"><h2>%s</h2><span class="section-note">%s</span></div>'
+        '<div class="ed-grid">%s</div>'
+        '</div></section>\n'
+        % (esc(zh.get("ed_title", "")), esc(zh.get("ed_note", "")), "".join(items))
+        + EDITORS_END
+    )
+
+
+EDITORS_CSS = """
+.editors{padding:40px 0 8px}
+.ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
+.ed-card{border:1px solid var(--line,#e8e8ed);border-radius:18px;overflow:hidden;background:var(--bg-elevated,#fff);transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease}
+.ed-card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.08);border-color:var(--accent,#0071e3)}
+.ed-link{display:block;text-decoration:none;color:inherit}
+.ed-shot{height:140px;background:var(--brand-soft,#f2f7ff);position:relative}
+.ed-shot img{width:100%;height:100%;object-fit:cover;display:block}
+.ed-body{padding:14px 16px 16px}
+.ed-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ed-fav{width:28px;height:28px;border-radius:7px;background:#fff;flex:none}
+.ed-titles{min-width:0}
+.ed-titles h3{margin:0;font-size:15.5px;font-weight:650;color:var(--text,#1d1d1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ed-domain{font-size:12px;color:var(--text-3,#8e8e93)}
+.ed-reason{margin:0 0 12px;font-size:13.5px;line-height:1.6;color:var(--text-2,#48484a);min-height:42px}
+.ed-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ed-cat{font-size:12px;color:var(--text-3,#8e8e93)}
+.ed-cta{font-size:13px;font-weight:600;color:var(--accent,#0071e3)}
+@media (max-width:560px){.ed-grid{grid-template-columns:1fr 1fr}.ed-shot{height:96px}.ed-reason{font-size:12.5px;min-height:38px}}
 """
 
 if __name__ == "__main__":
