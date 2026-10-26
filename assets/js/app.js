@@ -331,7 +331,7 @@
       if (state.onlyBroken && !(countsOf(s.id).broken > 0)) return false;
       if (sceneSet && sceneSet.indexOf(s.domain) < 0) return false;
       if (!kw) return true;
-      return (s.name + ' ' + s.url + ' ' + s.desc + ' ' + s.region).toLowerCase().indexOf(kw) >= 0;
+      return haystack(s).indexOf(kw) >= 0;
     });
 
     if (state.sort === 'name') {
@@ -376,20 +376,43 @@
     } catch (e) { return s; }
   }
 
-  /** 搜索相关性打分：名称开头 > 名称包含 > 分类 > 域名 > 网址 > 简介 */
+  /** 取站点所属分类对象 */
+  function catOf(s) {
+    return CATS.find(function (c) { return c.key === s.category; }) || {};
+  }
+  /** 分类的四语名称拼成可搜索文本（搜「设计」能命中「设计与效率工具」类） */
+  function catText(c) {
+    return (c.zh || '') + ' ' + (c.en || '') + ' ' + (c.ja || '') + ' ' + (c.ko || '');
+  }
+  /** 一个站点的完整可搜索文本：名称/域名/网址/简介/地区/分类四语名/拼音 */
+  function haystack(s) {
+    return (s.name + ' ' + s.domain + ' ' + s.url + ' ' + s.desc + ' ' + s.region +
+      ' ' + catText(catOf(s)) + ' ' + (s.py || '')).toLowerCase();
+  }
+
+  /** 搜索相关性打分：名称开头 > 分类 > 名称包含 > 域名 > 拼音 > 网址 > 简介 */
   function relScore(s, kw) {
     const n = (s.name || '').toLowerCase();
     const d = (s.domain || '').toLowerCase();
     const u = (s.url || '').toLowerCase();
     const de = (s.desc || '').toLowerCase();
-    const cat = CATS.find(function (c) { return c.key === s.category; }) || {};
-    const cn = (cat.zh || '').toLowerCase();
+    const cn = catText(catOf(s)).toLowerCase();
+    const py = (s.py || '').toLowerCase().split(' ');
     let score = 0;
     if (n.indexOf(kw) === 0) score += 100;
     else if (n.indexOf(kw) >= 0) score += 60;
     if (cn.indexOf(kw) >= 0) score += 40;
     if (d.indexOf(kw) === 0) score += 50;
     else if (d.indexOf(kw) >= 0) score += 30;
+    // 拼音：全拼开头最准，其次首字母完全相等
+    if (py[0]) {
+      if (py[0].indexOf(kw) === 0) score += 70;
+      else if (py[0].indexOf(kw) >= 0) score += 35;
+    }
+    if (py[1]) {
+      if (py[1] === kw) score += 45;
+      else if (py[1].indexOf(kw) === 0) score += 25;
+    }
     if (u.indexOf(kw) >= 0) score += 20;
     if (de.indexOf(kw) >= 0) score += 10;
     return score;
@@ -1127,23 +1150,34 @@
       if (wrap) wrap.classList.toggle('has-text', has);
     }
 
+    /** 空关键词时展示热门搜索词，点一下直接搜 */
+    function renderHot() {
+      var words = String(t('sg_hots') || '').split('|').filter(function (w) { return w.trim(); });
+      if (!words.length) { suggest.hidden = true; suggest.innerHTML = ''; return; }
+      sgIndex = -1;
+      suggest.innerHTML = '<div class="sg-hot-head">' + esc(t('sg_hot')) + '</div>' +
+        '<div class="sg-hot-list">' + words.map(function (w) {
+          return '<button type="button" class="sg-hot" data-w="' + esc(w) + '">' + esc(w) + '</button>';
+        }).join('') + '</div>';
+      suggest.hidden = false;
+    }
+
     /** 自动补全：取相关性最高的 8 个匹配，渲染为下拉项 */
     function renderSuggest() {
       var kw = state.keyword.trim().toLowerCase();
-      if (!kw) { suggest.hidden = true; suggest.innerHTML = ''; return; }
+      if (!kw) { renderHot(); return; }
       var top = SITES.filter(function (s) {
-        var hay = (s.name + ' ' + s.domain + ' ' + s.url + ' ' + s.desc + ' ' + s.region).toLowerCase();
-        return hay.indexOf(kw) >= 0;
+        return haystack(s).indexOf(kw) >= 0;
       }).sort(function (a, b) { return relScore(b, kw) - relScore(a, kw); }).slice(0, 8);
       if (!top.length) { suggest.hidden = true; suggest.innerHTML = ''; return; }
       sgIndex = -1;
       suggest.innerHTML = top.map(function (s) {
-        var cat = CATS.find(function (c) { return c.key === s.category; }) || { zh: '', icon: '' };
+        var cat = catOf(s);
         return '<div class="sg-item" data-id="' + esc(s.id) + '">' +
           '<img class="sg-fav" src="' + esc(s.favicon) + '" alt="" onerror="this.style.visibility=\'hidden\'">' +
           '<span class="sg-main"><span class="sg-name">' + hl(s.name, kw) + '</span>' +
           '<span class="sg-domain">' + hl(s.domain, kw) + '</span></span>' +
-          '<span class="sg-cat">' + esc(cat.icon + ' ' + cat.zh) + '</span>' +
+          '<span class="sg-cat">' + esc((cat.icon || '') + ' ' + (cat.zh || '')) + '</span>' +
           '</div>';
       }).join('');
       suggest.hidden = false;
@@ -1199,14 +1233,22 @@
     });
 
     if (clearBtn) clearBtn.addEventListener('click', function () {
-      input.value = ''; state.keyword = ''; suggest.hidden = true;
-      toggleClear(); renderGrid(); input.focus();
+      input.value = ''; state.keyword = '';
+      toggleClear(); renderGrid(); input.focus(); renderSuggest();
     });
 
     // 点选建议项（mousedown 阻止默认，避免 input 先 blur 把下拉藏掉）
     if (suggest) {
       suggest.addEventListener('mousedown', function (e) { e.preventDefault(); });
       suggest.addEventListener('click', function (e) {
+        var hot = e.target.closest('.sg-hot');
+        if (hot) {
+          state.keyword = hot.getAttribute('data-w');
+          input.value = state.keyword;
+          toggleClear();
+          run();
+          return;
+        }
         var item = e.target.closest('.sg-item');
         if (!item) return;
         var id = item.getAttribute('data-id');
@@ -1218,10 +1260,8 @@
     // 表单提交（点「搜索」按钮或隐式回车）统一走这里
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); run(); });
 
-    // 聚焦且有内容时重新弹出补全
-    input.addEventListener('focus', function () {
-      if (state.keyword.trim()) renderSuggest();
-    });
+    // 聚焦时弹出：有内容给补全，空则给热门搜索词
+    input.addEventListener('focus', function () { renderSuggest(); });
     // 失焦延迟隐藏，给点击建议留时间
     input.addEventListener('blur', function () {
       setTimeout(function () { suggest.hidden = true; }, 150);
