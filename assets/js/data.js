@@ -67,6 +67,51 @@ window.SCENE_DATA = {
   }
 };
 
+/**
+ * 编辑推荐大卡：站长亲自用过、愿意长期收藏的站点，带着一句推荐理由。
+ * 这是 trust signal——比起「381 个站随便挑」，先给新手几个不会踩坑的锚点。
+ * reason 给四语，生成静态块时写进 data-zh/en/ja/ko，运行时由 i18n 按语言取。
+ * domain 与 site.domain（hostname 去 www）一致，用于回查站点元数据与截图。
+ */
+window.EDITOR_PICKS = [
+  {
+    domain: 'github.com',
+    reason: {
+      zh: '全球开发者协作与代码托管的事实标准，开源项目的第一站',
+      en: 'The de-facto standard for code hosting and developer collaboration',
+      ja: '開発者協力・コードホスティングのデファクト標準',
+      ko: '개발자 협업과 코드 호스팅의 사실상 표준'
+    }
+  },
+  {
+    domain: 'chatgpt.com',
+    reason: {
+      zh: '最易上手的通用 AI 助手，写作、答疑、编程一把抓',
+      en: 'The most approachable general-purpose AI assistant for writing, Q&A, and coding',
+      ja: 'もっとも手軽な汎用 AI アシスタント。文章・質問・コードに対応',
+      ko: '글쓰기·질의응답·코딩을 한 번에, 가장 접근성 높은 범용 AI'
+    }
+  },
+  {
+    domain: 'unsplash.com',
+    reason: {
+      zh: '免费高质感图片素材库，可商用，再也不用为配图发愁',
+      en: 'Free high-quality photos you can use commercially — no more stock-photo hunt',
+      ja: '商用可の高品質写真が無料。素材探しに困らない',
+      ko: '상업적으로 써도 되는 고품질 무료 사진, 소재 걱정 끝'
+    }
+  },
+  {
+    domain: 'coursera.org',
+    reason: {
+      zh: '顶尖大学的系统在线课程，从入门到专业认证一条龙',
+      en: 'Structured online courses from top universities, from intro to professional certs',
+      ja: 'トップ大学の体系的オンライン講座。入門から資格まで',
+      ko: '명문 대학의 체계적 온라인 강좌, 입문부터 전문 자격까지'
+    }
+  }
+];
+
 window.SITE_DATA = [
   // ── 搜索引擎 ──
   { name: 'Google', url: 'https://www.google.com', category: 'search', desc: '全球覆盖面最广的搜索引擎，提供网页、图片、视频等多形态检索服务。', region: '全球', lang: '多语言' },
