@@ -550,8 +550,10 @@ def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", edito
         # 幂等：先删掉历史遗留的同类 noscript（否则每跑一次就多一块）
         t = re.sub(r"\s*<noscript><div[^>]*>本站列表需要 JavaScript 渲染.*?</noscript>", "", t, flags=re.S)
         # 静态资源全部带版本号：URL 一变边缘缓存立即失效，改完不用等缓存过期
-        # data.js 用站点数（直观）；其余 css/js 用内容短哈希（只有真改了才换 URL）
-        t = re.sub(r"assets/js/data\.js(\?v=[^'\"]*)?", "assets/js/data.js?v=%d" % nsites, t)
+        # data.js 用「站点数-内容哈希」：站点数直观，内容一改哈希就变（否则改了数据用户还在吃旧缓存）
+        with open(os.path.join(ROOT, "assets", "js", "data.js"), "rb") as fh:
+            dver = "%d-%s" % (nsites, hashlib.md5(fh.read()).hexdigest()[:8])
+        t = re.sub(r"assets/js/data\.js(\?v=[^'\"]*)?", "assets/js/data.js?v=" + dver, t)
         t = bump_asset_versions(t)
         if "<body" in t:
             t = re.sub(r"(<body[^>]*>)", r"\1\n" + noscript, t, count=1)
