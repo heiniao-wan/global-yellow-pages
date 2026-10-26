@@ -3,6 +3,15 @@
  * 分类体系参考主流搜索引擎与流量分析平台（Similarweb / Ahrefs 类目）的通用行业分类法
  * 每个站点：名称 / 官网 URL / 所属分类 / 中文简介 / 地区 / 语言
  */
+
+/**
+ * 中文站名拼音索引（构建期生成，勿手改）—— 由 tools/gen-pinyin.py 写入
+ * 值格式："全拼 首字母"，让用户能用 tengxun / tx 搜到「腾讯」
+ */
+/* PY-TABLE:START */
+window.PY_NAME = {"2345网址导航":"2345wangzhidaohang 2345wzdh","360导航":"360daohang 360dh","360搜索":"360sousuo 360ss","39健康网":"39jiankangwang 39jkw","BOSS直聘":"bosszhipin bosszp","QQ导航":"qqdaohang qqdh","じゃらん観光":"guanguang gg","ニコニコ動画":"donghua dh","丁香园":"dingxiangyuan dxy","三一重工 SANY":"sanyizhonggongsany syzgsany","三菱重工 MHI":"sanlingzhonggongmhi slzgmhi","东方财富网":"dongfangcaifuwang dfcfw","中国中车 CRRC":"zhongguozhongchecrrc zgzccrrc","中国大学MOOC":"zhongguodaxuemooc zgdxmooc","中国知网":"zhongguozhiwang zgzw","中联重科 Zoomlion":"zhonglianzhongkezoomlion zlzkzoomlion","中集集团 CIMC":"zhongjijituancimc zjjtcimc","久保田 Kubota":"jiubaotiankubota jbtkubota","京东":"jingdong jd","什么值得买":"shenmezhidemai smzdm","优酷":"youku yk","価格.com":"sigecom sgcom","凤凰网":"fenghuangwang fhw","利勃海尔 Liebherr":"libohaierliebherr lbheliebherr","前程无忧":"qianchengwuyou qcwy","剪映":"jianying jy","博世 Bosch":"boshibosch bsbosch","即梦 AI":"jimengai jmai","去哪儿":"qunaer qne","发那科 FANUC":"fanakefanuc fnkfanuc","可灵 AI":"kelingai klai","同程旅行":"tongchenglvxing tclx","同花顺":"tonghuashun ths","哔哩哔哩":"bilibili blbl","国立国会図書館":"guoliguohuitushuguan glghtsg","大众点评":"dazhongdianping dzdp","天工 AI":"tiangongai tgai","夸克":"kuake kk","学堂在线":"xuetangzaixian xtzx","安川电机 Yaskawa":"anchuandianjiyaskawa acdjyaskawa","小松 Komatsu":"xiaosongkomatsu xskomatsu","小红书":"xiaohongshu xhs","少数派":"shaoshupai ssp","山崎马扎克 Mazak":"shanqimazhakemazak sqmzkmazak","库卡 KUKA":"kukakuka kkkuka","徐工集团 XCMG":"xugongjituanxcmg xgjtxcmg","得到":"dedao dd","微博":"weibo wb","快手":"kuaishou ks","扣子 Coze":"kouzicoze kzcoze","抖音":"douyin dy","拉勾招聘":"lagouzhaopin lgzp","振华重工 ZPMC":"zhenhuazhonggongzpmc zhzgzpmc","掘金":"juejin jj","搜狐":"souhu sh","搜狗搜索":"sougousousuo sgss","搜狗网址导航":"sougouwangzhidaohang sgwzdh","携程":"xiecheng xc","斗山 Doosan":"doushandoosan dsdoosan","斯凯孚 SKF":"sikaifuskf skfskf","新东方":"xindongfang xdf","新华网":"xinhuawang xhw","新浪网":"xinlangwang xlw","新浪财经":"xinlangcaijing xlcj","日本経済新聞":"ribenjingjixinwen rbjjxw","日立建机 Hitachi CM":"rilijianjihitachicm rljjhitachicm","日経Health":"rijinghealth rjhealth","智联招聘":"zhilianzhaopin zlzp","智谱清言":"zhipuqingyan zpqy","有道词典":"youdaocidian ydcd","朝日新聞":"zhaorixinwen zrxw","柳工 LiuGong":"liugongliugong lgliugong","楽天トラベル":"letian lt","楽天市場":"letianshichang ltsc","毎日新聞":"meirixinwen mrxw","毒霸":"duba db","沃尔沃建筑设备 Volvo CE":"woerwojianzhushebeivolvoce wewjzsbvolvoce","洋马 Yanmar":"yangmayanmar ymyanmar","海螺 AI":"hailuoai hlai","淘宝":"taobao tb","潍柴动力 Weichai":"weichaidongliweichai wcdlweichai","澎湃新闻":"pengpaixinwen ppxw","爱奇艺":"aiqiyi aqy","猎聘":"liepin lp","现代建设装备 Hyundai CE":"xiandaijianshezhuangbeihyundaice xdjszbhyundaice","百度":"baidu bd","百度地图":"baiduditu bddt","百度文心":"baiduwenxin bdwx","百度百科":"baidubaike bdbk","百度贴吧":"baidutieba bdtb","知乎":"zhihu zh","秘塔 AI 搜索":"mitaaisousuo mtaiss","稿定设计":"gaodingsheji gdsj","穷游网":"qiongyouwang qyw","站酷":"zhanku zk","约翰迪尔 John Deere":"yuehandierjohndeere yhdejohndeere","纳米 AI 搜索":"namiaisousuo nmaiss","网易":"wangyi wy","网易公开课":"wangyigongkaike wygkk","美团":"meituan mt","联合早报":"lianhezaobao lhzb","腾讯云":"tengxunyun txy","腾讯元宝":"tengxunyuanbao txyb","腾讯地图":"tengxunditu txdt","腾讯网":"tengxunwang txw","腾讯视频":"tengxunshipin txsp","舍弗勒 Schaeffler":"shefuleischaeffler sflschaeffler","花瓣网":"huabanwang hbw","西门子 Siemens":"ximenzisiemens xmzsiemens","読売新聞":"dumaixinwen dmxw","讯飞星火":"xunfeixinghuo xfxh","豆包":"doubao db","豆瓣":"douban db","财新网":"caixinwang cxw","通义千问":"tongyiqianwen tyqw","通快 TRUMPF":"tongkuaitrumpf tktrumpf","金山词霸":"jinshanciba jscb","阿特拉斯·科普柯 Atlas Copco":"atelasikepukeatlascopco atlskpkatlascopco","阿里云":"aliyun aly","雪球":"xueqiu xq","食べログ":"shi s","香港01":"xianggang01 xg01","马蜂窝":"mafengwo mfw","高德地图":"gaodeditu gddt"};
+/* PY-TABLE:END */
+
 window.SITE_CATEGORIES = [
   { key: 'search',      zh: '搜索引擎',      en: 'Search Engines',          ja: '検索エンジン',       ko: '검색 엔진',        icon: '🔍', desc: '通用与垂直搜索引擎，各国本土检索入口' },
   { key: 'portal',      zh: '门户与导航',    en: 'Portals & Directories',   ja: 'ポータル・ナビ',     ko: '포털·내비게이션',  icon: '🧭', desc: '综合门户首页与网址导航类站点' },
@@ -555,4 +564,6 @@ window.SITE_DATA.forEach((site, i) => {
   site.hue = h % 360;
   site.brand = 'hsl(' + site.hue + ', 62%, 62%)';
   site.brandSoft = 'hsl(' + site.hue + ', 68%, 96%)';
+  // 拼音索引（仅中文站名有值）
+  site.py = (window.PY_NAME && window.PY_NAME[site.name]) || '';
 });
