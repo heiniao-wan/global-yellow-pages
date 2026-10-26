@@ -23,6 +23,50 @@ window.SITE_CATEGORIES = [
   { key: 'machinery',   zh: '机械制造',      en: 'Machinery & Industrial',  ja: '機械製造',           ko: '기계 제조',        icon: '⚙️', desc: '全球工程机械、机床机器人与重工装备强企官网' }
 ];
 
+/**
+ * 场景化入口：按访客意图（要做什么）分流，而不是按行业分类分流。
+ * 每个场景是一份策展清单——整类倒出来动辄几十个，策展后十几个更准。
+ * domains 用 hostname 去 www 的形式，与下面 site.domain 一致。
+ * 按钮文案在 i18n.js（sc_code / sc_ai / sc_design / sc_money / sc_job / sc_learn）。
+ */
+window.SCENE_DATA = {
+  code: {
+    icon: '💻',
+    domains: ['github.com', 'gitlab.com', 'stackoverflow.com', 'news.ycombinator.com',
+      'developer.mozilla.org', 'npmjs.com', 'pypi.org', 'hub.docker.com',
+      'cloudflare.com', 'vercel.com', 'namecheap.com',
+      'cursor.com', 'copilot.github.com', 'replit.com', 'lovable.dev']
+  },
+  ai: {
+    icon: '🤖',
+    domains: ['chatgpt.com', 'claude.ai', 'gemini.google.com', 'perplexity.ai',
+      'deepseek.com', 'kimi.com', 'midjourney.com', 'gamma.app',
+      'notebooklm.google.com', 'heygen.com', 'deepl.com', 'huggingface.co']
+  },
+  design: {
+    icon: '🎨',
+    domains: ['canva.com', 'figma.com', 'dribbble.com', 'behance.net',
+      'unsplash.com', 'pexels.com', 'pixabay.com', 'freepik.com',
+      'zcool.com.cn', 'huaban.com', 'gaoding.com', 'remove.bg', 'tinypng.com']
+  },
+  money: {
+    icon: '📈',
+    domains: ['bloomberg.com', 'cnbc.com', 'finance.yahoo.com', 'investing.com',
+      'tradingview.com', 'eastmoney.com', '10jqka.com.cn', 'xueqiu.com', 'coinbase.com']
+  },
+  job: {
+    icon: '💼',
+    domains: ['linkedin.com', 'indeed.com', 'glassdoor.com', 'zhipin.com', 'liepin.com',
+      'lagou.com', 'job.rikunabi.com', 'mynavi.jp', 'jobkorea.co.kr', 'wanted.co.kr', 'doda.jp']
+  },
+  learn: {
+    icon: '📚',
+    domains: ['wikipedia.org', 'britannica.com', 'wolframalpha.com', 'scholar.google.com',
+      'coursera.org', 'khanacademy.org', 'cnki.net', 'duolingo.com',
+      'dict.youdao.com', 'merriam-webster.com']
+  }
+};
+
 window.SITE_DATA = [
   // ── 搜索引擎 ──
   { name: 'Google', url: 'https://www.google.com', category: 'search', desc: '全球覆盖面最广的搜索引擎，提供网页、图片、视频等多形态检索服务。', region: '全球', lang: '多语言' },
