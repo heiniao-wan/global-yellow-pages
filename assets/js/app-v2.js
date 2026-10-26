@@ -37,6 +37,8 @@
     keyword: '',
     sort: 'hot',
     onlyBroken: false,
+    // 场景化入口：按意图分流（策展清单见 data.js 的 SCENE_DATA），空串=未选
+    scenario: '',
     counts: loadCounts(),
     voted: {},
     favs: loadFavs(),
@@ -155,15 +157,70 @@
   }
 
   /** 选中分类：两处分类栏（顶部横排 + 左侧竖排）同步高亮 */
+  /** 场景化入口：按访客意图分流。
+      场景是策展清单（data.js 的 SCENE_DATA），点一下切过去、再点一下取消。
+      切换时清掉分类/地区/关键词——旧筛选残留会让交集直接变 0。 */
+  function selectScene(id) {
+    if (!window.SCENE_DATA || !window.SCENE_DATA[id]) return;
+    var same = (state.scenario === id);
+    state.scenario = same ? '' : id;
+    state.category = 'all';
+    state.region = 'all';
+    state.keyword = '';
+    $('#search').value = '';
+    $('#regionSel').value = 'all';
+    $$('.cat-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === 'all'); });
+    paintScenario();
+    renderGrid();
+    var res = document.getElementById('results');
+    if (res) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /** 场景按钮高亮 + 状态条（文案随语言切换，所以每次切语言都要重画） */
+  function paintScenario() {
+    var on = state.scenario;
+    $$('.scene-item').forEach(function (b) {
+      b.classList.toggle('on', !!on && b.dataset.sc === on);
+    });
+    var st = document.getElementById('sceneStatus');
+    if (!st) return;
+    if (!on) { st.hidden = true; st.textContent = ''; return; }
+    st.hidden = false;
+    st.innerHTML = esc(t('sc_active')).replace('{n}', esc(t('sc_' + on))) +
+      ' <button type="button" class="scene-clear">' + esc(t('sc_clear')) + '</button>';
+  }
+
+  function bindScenes() {
+    var grid = document.querySelector('.scene-grid');
+    if (!grid) return;
+    grid.addEventListener('click', function (e) {
+      var btn = e.target.closest('.scene-item');
+      if (!btn) return;
+      selectScene(btn.dataset.sc);
+    });
+    var st = document.getElementById('sceneStatus');
+    if (st) {
+      st.addEventListener('click', function (e) {
+        if (!e.target.closest('.scene-clear')) return;
+        state.scenario = '';
+        paintScenario();
+        renderGrid();
+      });
+    }
+  }
+
   function selectCategory(key) {
     state.category = key;
     // 按钮数字是「该分类全部站点数」，点击后必须清掉其他筛选，
     // 否则旧的地区/关键词残留会让交集变 0（按钮显示 16、列表显示 0 的根因）
     state.region = 'all';
     state.keyword = '';
+    // 场景是另一条筛选轴，选了分类就退掉场景，否则两个清单取交集也是空
+    state.scenario = '';
     $('#search').value = '';
     $('#regionSel').value = 'all';
     $$('.cat-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === key); });
+    paintScenario();
     renderGrid();
     // 定位到「分类栏」而不是结果列表顶部：
     // 结果区上方就是分类栏，若直接跳 #results 会把分类栏顶出视口，
@@ -261,6 +318,10 @@
   /* ───────────────────── 筛选 ───────────────────── */
   function filtered() {
     const kw = state.keyword.trim().toLowerCase();
+    // 场景清单（策展）：命中域名才留下
+    const sceneSet = state.scenario && window.SCENE_DATA
+      ? (window.SCENE_DATA[state.scenario] || {}).domains || null
+      : null;
     let list = SITES.filter(function (s) {
       // 收藏分类：按本机收藏夹过滤（chip 计数是收藏数而非分类总数）
       if (state.category === '__fav__' && !state.favs[s.id]) return false;
@@ -268,6 +329,7 @@
       if (state.region !== 'all' && s.region !== state.region) return false;
       // 问题站点：被标记过「无法访问」的才显示
       if (state.onlyBroken && !(countsOf(s.id).broken > 0)) return false;
+      if (sceneSet && sceneSet.indexOf(s.domain) < 0) return false;
       if (!kw) return true;
       return (s.name + ' ' + s.url + ' ' + s.desc + ' ' + s.region).toLowerCase().indexOf(kw) >= 0;
     });
@@ -1156,11 +1218,15 @@
       state.region = 'all';
       state.keyword = '';
       state.onlyBroken = false;
+      // 场景是另一条筛选轴，不清掉它随机挑的站可能不在场景清单里，
+      // 结果列表里找不到这张卡，脉冲就打不到目标上
+      state.scenario = '';
       $('#search').value = '';
       $('#regionSel').value = 'all';
       var bs = $('#brokenSel');
       if (bs) bs.classList.remove('active');
       $$('.cat-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.cat === 'all'); });
+      paintScenario();
       renderGrid();
       var card = document.querySelector('.site-card[data-id="' + CSS.escape(pick.id) + '"]');
       if (card) {
@@ -1341,6 +1407,7 @@
       renderStats();
       renderProtection();
       renderFaq();
+      paintScenario();
       try {
         if (window.TrendingUI) window.TrendingUI.render();
       } catch (e) { /* 忽略 */ }
@@ -1355,6 +1422,7 @@
     bindFeedback();
     bindLucky();
     bindBrokenFilter();
+    bindScenes();
     renderSideCats();
     bindSideCats();
     renderGrid();
