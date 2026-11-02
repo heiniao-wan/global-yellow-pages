@@ -9,7 +9,7 @@
  * 值格式："全拼 首字母"，让用户能用 tengxun / tx 搜到「腾讯」
  */
 /* PY-TABLE:START */
-window.PY_NAME = {"2345网址导航":"2345wangzhidaohang 2345wzdh","360导航":"360daohang 360dh","360搜索":"360sousuo 360ss","39健康网":"39jiankangwang 39jkw","BOSS直聘":"bosszhipin bosszp","QQ导航":"qqdaohang qqdh","じゃらん観光":"guanguang gg","ニコニコ動画":"donghua dh","丁香园":"dingxiangyuan dxy","三一重工 SANY":"sanyizhonggongsany syzgsany","三菱重工 MHI":"sanlingzhonggongmhi slzgmhi","东方财富网":"dongfangcaifuwang dfcfw","中国中车 CRRC":"zhongguozhongchecrrc zgzccrrc","中国大学MOOC":"zhongguodaxuemooc zgdxmooc","中国知网":"zhongguozhiwang zgzw","中联重科 Zoomlion":"zhonglianzhongkezoomlion zlzkzoomlion","中集集团 CIMC":"zhongjijituancimc zjjtcimc","久保田 Kubota":"jiubaotiankubota jbtkubota","京东":"jingdong jd","什么值得买":"shenmezhidemai smzdm","优酷":"youku yk","価格.com":"sigecom sgcom","凤凰网":"fenghuangwang fhw","利勃海尔 Liebherr":"libohaierliebherr lbheliebherr","前程无忧":"qianchengwuyou qcwy","剪映":"jianying jy","博世 Bosch":"boshibosch bsbosch","即梦 AI":"jimengai jmai","去哪儿":"qunaer qne","发那科 FANUC":"fanakefanuc fnkfanuc","可灵 AI":"kelingai klai","同程旅行":"tongchenglvxing tclx","同花顺":"tonghuashun ths","哔哩哔哩":"bilibili blbl","国立国会図書館":"guoliguohuitushuguan glghtsg","大众点评":"dazhongdianping dzdp","天工 AI":"tiangongai tgai","夸克":"kuake kk","学堂在线":"xuetangzaixian xtzx","安川电机 Yaskawa":"anchuandianjiyaskawa acdjyaskawa","小松 Komatsu":"xiaosongkomatsu xskomatsu","小红书":"xiaohongshu xhs","少数派":"shaoshupai ssp","山崎马扎克 Mazak":"shanqimazhakemazak sqmzkmazak","库卡 KUKA":"kukakuka kkkuka","徐工集团 XCMG":"xugongjituanxcmg xgjtxcmg","得到":"dedao dd","微博":"weibo wb","快手":"kuaishou ks","扣子 Coze":"kouzicoze kzcoze","抖音":"douyin dy","拉勾招聘":"lagouzhaopin lgzp","振华重工 ZPMC":"zhenhuazhonggongzpmc zhzgzpmc","掘金":"juejin jj","搜狐":"souhu sh","搜狗搜索":"sougousousuo sgss","搜狗网址导航":"sougouwangzhidaohang sgwzdh","携程":"xiecheng xc","斗山 Doosan":"doushandoosan dsdoosan","斯凯孚 SKF":"sikaifuskf skfskf","新东方":"xindongfang xdf","新华网":"xinhuawang xhw","新浪网":"xinlangwang xlw","新浪财经":"xinlangcaijing xlcj","日本経済新聞":"ribenjingjixinwen rbjjxw","日立建机 Hitachi CM":"rilijianjihitachicm rljjhitachicm","日経Health":"rijinghealth rjhealth","智联招聘":"zhilianzhaopin zlzp","智谱清言":"zhipuqingyan zpqy","有道词典":"youdaocidian ydcd","朝日新聞":"zhaorixinwen zrxw","柳工 LiuGong":"liugongliugong lgliugong","楽天トラベル":"letian lt","楽天市場":"letianshichang ltsc","毎日新聞":"meirixinwen mrxw","毒霸":"duba db","沃尔沃建筑设备 Volvo CE":"woerwojianzhushebeivolvoce wewjzsbvolvoce","洋马 Yanmar":"yangmayanmar ymyanmar","海螺 AI":"hailuoai hlai","淘宝":"taobao tb","潍柴动力 Weichai":"weichaidongliweichai wcdlweichai","澎湃新闻":"pengpaixinwen ppxw","爱奇艺":"aiqiyi aqy","猎聘":"liepin lp","现代建设装备 Hyundai CE":"xiandaijianshezhuangbeihyundaice xdjszbhyundaice","百度":"baidu bd","百度地图":"baiduditu bddt","百度文心":"baiduwenxin bdwx","百度百科":"baidubaike bdbk","百度贴吧":"baidutieba bdtb","知乎":"zhihu zh","秘塔 AI 搜索":"mitaaisousuo mtaiss","稿定设计":"gaodingsheji gdsj","穷游网":"qiongyouwang qyw","站酷":"zhanku zk","约翰迪尔 John Deere":"yuehandierjohndeere yhdejohndeere","纳米 AI 搜索":"namiaisousuo nmaiss","网易":"wangyi wy","网易公开课":"wangyigongkaike wygkk","美团":"meituan mt","联合早报":"lianhezaobao lhzb","腾讯云":"tengxunyun txy","腾讯元宝":"tengxunyuanbao txyb","腾讯地图":"tengxunditu txdt","腾讯网":"tengxunwang txw","腾讯视频":"tengxunshipin txsp","舍弗勒 Schaeffler":"shefuleischaeffler sflschaeffler","花瓣网":"huabanwang hbw","西门子 Siemens":"ximenzisiemens xmzsiemens","読売新聞":"dumaixinwen dmxw","讯飞星火":"xunfeixinghuo xfxh","豆包":"doubao db","豆瓣":"douban db","财新网":"caixinwang cxw","通义千问":"tongyiqianwen tyqw","通快 TRUMPF":"tongkuaitrumpf tktrumpf","金山词霸":"jinshanciba jscb","阿特拉斯·科普柯 Atlas Copco":"atelasikepukeatlascopco atlskpkatlascopco","阿里云":"aliyun aly","雪球":"xueqiu xq","食べログ":"shi s","香港01":"xianggang01 xg01","马蜂窝":"mafengwo mfw","高德地图":"gaodeditu gddt"};
+window.PY_NAME = {"2345网址导航":"2345wangzhidaohang 2345wzdh","360导航":"360daohang 360dh","360搜索":"360sousuo 360ss","39健康网":"39jiankangwang 39jkw","BOSS直聘":"bosszhipin bosszp","Brave 浏览器":"braveliulanqi bravellq","QQ导航":"qqdaohang qqdh","じゃらん観光":"guanguang gg","ニコニコ動画":"donghua dh","丁香园":"dingxiangyuan dxy","三一重工 SANY":"sanyizhonggongsany syzgsany","三菱重工 MHI":"sanlingzhonggongmhi slzgmhi","东方财富网":"dongfangcaifuwang dfcfw","中国中车 CRRC":"zhongguozhongchecrrc zgzccrrc","中国大学MOOC":"zhongguodaxuemooc zgdxmooc","中国知网":"zhongguozhiwang zgzw","中联重科 Zoomlion":"zhonglianzhongkezoomlion zlzkzoomlion","中集集团 CIMC":"zhongjijituancimc zjjtcimc","久保田 Kubota":"jiubaotiankubota jbtkubota","京东":"jingdong jd","什么值得买":"shenmezhidemai smzdm","优酷":"youku yk","価格.com":"sigecom sgcom","凤凰网":"fenghuangwang fhw","利勃海尔 Liebherr":"libohaierliebherr lbheliebherr","前程无忧":"qianchengwuyou qcwy","剪映":"jianying jy","博世 Bosch":"boshibosch bsbosch","即梦 AI":"jimengai jmai","去哪儿":"qunaer qne","发那科 FANUC":"fanakefanuc fnkfanuc","可灵 AI":"kelingai klai","同程旅行":"tongchenglvxing tclx","同花顺":"tonghuashun ths","哔哩哔哩":"bilibili blbl","国立国会図書館":"guoliguohuitushuguan glghtsg","大众点评":"dazhongdianping dzdp","天工 AI":"tiangongai tgai","夸克":"kuake kk","学堂在线":"xuetangzaixian xtzx","安川电机 Yaskawa":"anchuandianjiyaskawa acdjyaskawa","小松 Komatsu":"xiaosongkomatsu xskomatsu","小红书":"xiaohongshu xhs","少数派":"shaoshupai ssp","山崎马扎克 Mazak":"shanqimazhakemazak sqmzkmazak","库卡 KUKA":"kukakuka kkkuka","徐工集团 XCMG":"xugongjituanxcmg xgjtxcmg","得到":"dedao dd","微博":"weibo wb","快手":"kuaishou ks","扣子 Coze":"kouzicoze kzcoze","抖音":"douyin dy","拉勾招聘":"lagouzhaopin lgzp","振华重工 ZPMC":"zhenhuazhonggongzpmc zhzgzpmc","掘金":"juejin jj","搜狐":"souhu sh","搜狗搜索":"sougousousuo sgss","搜狗网址导航":"sougouwangzhidaohang sgwzdh","携程":"xiecheng xc","斗山 Doosan":"doushandoosan dsdoosan","斯凯孚 SKF":"sikaifuskf skfskf","新东方":"xindongfang xdf","新华网":"xinhuawang xhw","新浪网":"xinlangwang xlw","新浪财经":"xinlangcaijing xlcj","日本経済新聞":"ribenjingjixinwen rbjjxw","日立建机 Hitachi CM":"rilijianjihitachicm rljjhitachicm","日経Health":"rijinghealth rjhealth","智联招聘":"zhilianzhaopin zlzp","智谱清言":"zhipuqingyan zpqy","有道词典":"youdaocidian ydcd","朝日新聞":"zhaorixinwen zrxw","柳工 LiuGong":"liugongliugong lgliugong","楽天トラベル":"letian lt","楽天市場":"letianshichang ltsc","毎日新聞":"meirixinwen mrxw","毒霸":"duba db","沃尔沃建筑设备 Volvo CE":"woerwojianzhushebeivolvoce wewjzsbvolvoce","洋马 Yanmar":"yangmayanmar ymyanmar","海螺 AI":"hailuoai hlai","淘宝":"taobao tb","潍柴动力 Weichai":"weichaidongliweichai wcdlweichai","澎湃新闻":"pengpaixinwen ppxw","爱奇艺":"aiqiyi aqy","猎聘":"liepin lp","现代建设装备 Hyundai CE":"xiandaijianshezhuangbeihyundaice xdjszbhyundaice","百度":"baidu bd","百度地图":"baiduditu bddt","百度文心":"baiduwenxin bdwx","百度百科":"baidubaike bdbk","百度贴吧":"baidutieba bdtb","知乎":"zhihu zh","秘塔 AI 搜索":"mitaaisousuo mtaiss","稿定设计":"gaodingsheji gdsj","穷游网":"qiongyouwang qyw","站酷":"zhanku zk","约翰迪尔 John Deere":"yuehandierjohndeere yhdejohndeere","纳米 AI 搜索":"namiaisousuo nmaiss","网易":"wangyi wy","网易公开课":"wangyigongkaike wygkk","美团":"meituan mt","联合早报":"lianhezaobao lhzb","腾讯云":"tengxunyun txy","腾讯元宝":"tengxunyuanbao txyb","腾讯地图":"tengxunditu txdt","腾讯网":"tengxunwang txw","腾讯视频":"tengxunshipin txsp","舍弗勒 Schaeffler":"shefuleischaeffler sflschaeffler","花瓣网":"huabanwang hbw","西门子 Siemens":"ximenzisiemens xmzsiemens","読売新聞":"dumaixinwen dmxw","讯飞星火":"xunfeixinghuo xfxh","豆包":"doubao db","豆瓣":"douban db","财新网":"caixinwang cxw","通义千问":"tongyiqianwen tyqw","通快 TRUMPF":"tongkuaitrumpf tktrumpf","金山词霸":"jinshanciba jscb","阿特拉斯·科普柯 Atlas Copco":"atelasikepukeatlascopco atlskpkatlascopco","阿里云":"aliyun aly","雪球":"xueqiu xq","食べログ":"shi s","香港01":"xianggang01 xg01","马蜂窝":"mafengwo mfw","高德地图":"gaodeditu gddt"};
 /* PY-TABLE:END */
 
 window.SITE_CATEGORIES = [
@@ -128,7 +128,7 @@ window.SITE_DATA = [
   { name: 'Bing', url: 'https://www.bing.com', category: 'search', desc: '微软旗下搜索引擎，提供网页、图片与人工智能 Copilot 搜索能力。', region: '欧美', lang: '英文' },
   { name: 'Naver', url: 'https://www.naver.com', category: 'search', desc: '韩国占有率最高的搜索门户，集成新闻、地图、购物与博客检索。', region: '韩国', lang: '韩文' },
   { name: 'DuckDuckGo', url: 'https://duckduckgo.com', category: 'search', desc: '主打隐私保护的独立搜索引擎，不追踪用户搜索记录。', region: '欧美', lang: '英文' },
-  { name: 'Yandex', url: 'https://yandex.com', category: 'search', desc: '俄罗斯及东欧地区主导的搜索引擎，附带图片与地图服务。', region: '其他', lang: '多语言' },
+  { name: 'Yandex', url: 'https://yandex.ru', category: 'search', desc: '俄罗斯最大搜索引擎，同时提供地图、翻译、邮箱与云盘等本地化服务。', region: '俄罗斯', lang: '俄文' },
   { name: 'Yahoo! JAPAN', url: 'https://www.yahoo.co.jp', category: 'search', desc: '日本国民级搜索与门户，由 LINE 雅虎运营，本地生态极强。', region: '日本', lang: '日文' },
   { name: ' goo', url: 'https://www.goo.ne.jp', category: 'search', desc: 'NTT 旗下的日本老牌门户搜索引擎，提供词典与转乘换乘工具。', region: '日本', lang: '日文' },
   { name: 'Yahoo!', url: 'https://www.yahoo.com', category: 'search', desc: '美国老牌互联网门户，旗下 Yahoo 搜索现由 Bing 技术提供支持。', region: '欧美', lang: '英文' },
@@ -184,6 +184,8 @@ window.SITE_DATA = [
   { name: '디시인사이드', url: 'https://dcinside.com', category: 'social', desc: '韩国流量最大的匿名社区，设有画廊、即时通讯等独立板块。', region: '韩国', lang: '韩文' },
   { name: 'KakaoTalk', url: 'https://www.kakaotalk.com', category: 'social', desc: '韩国国民级即时通讯工具，衍生出支付、打车与电商等服务。', region: '韩国', lang: '韩文' },
 
+  { name: 'WhatsApp', url: 'https://www.whatsapp.com', category: 'social', desc: 'Meta 旗下端到端加密即时通讯工具，全球用户规模最大的聊天应用之一。', region: '全球', lang: '英文' },
+
   // ── 新闻与媒体 ──
   { name: 'BBC News', url: 'https://www.bbc.com', category: 'news', desc: '英国广播公司新闻站点，国际时政报道以中立严谨著称。', region: '欧美', lang: '英文' },
   { name: 'Reuters', url: 'https://www.reuters.com', category: 'news', desc: '国际顶级财经通讯社，突发快讯与市场数据被全球广泛引用。', region: '欧美', lang: '英文' },
@@ -205,6 +207,9 @@ window.SITE_DATA = [
   { name: '연합뉴스', url: 'https://www.yna.co.kr', category: 'news', desc: '韩国联合通讯社官网，提供全国最快速的韩文新闻更新。', region: '韩国', lang: '韩文' },
   { name: '동아일보', url: 'https://www.donga.com', category: 'news', desc: '韩国主流保守阵营日报，擅长时政分析与深度专题报道。', region: '韩国', lang: '韩文' },
   { name: '조선일보', url: 'https://www.chosun.com', category: 'news', desc: '韩国发行量最大的日报之一，财经与体育内容覆盖面广。', region: '韩国', lang: '韩文' },
+
+  { name: 'The New York Times', url: 'https://www.nytimes.com', category: 'news', desc: '美国老牌严肃媒体，以国际新闻、调查报道与专栏评论著称。', region: '美国', lang: '英文' },
+  { name: 'ESPN', url: 'https://www.espn.com', category: 'news', desc: '美国体育媒体巨头，提供赛事直播入口、实时比分、战报与深度评论。', region: '美国', lang: '英文' },
 
   // ── 视频与流媒体 ──
   { name: 'YouTube', url: 'https://www.youtube.com', category: 'media', desc: '全球最大视频平台，兼具长视频创作者生态与短视频信息流。', region: '全球', lang: '多语言' },
@@ -310,6 +315,9 @@ window.SITE_DATA = [
   { name: '中国知网', url: 'https://www.cnki.net', category: 'reference', desc: '中国最大的学术期刊与学位论文数据库，高校科研检索首选。', region: '中国', lang: '中文' },
   { name: 'Google Scholar', url: 'https://scholar.google.com', category: 'reference', desc: '谷歌学术搜索平台，免费检索全球范围内的学术论文文献。', region: '全球', lang: '多语言' },
 
+  { name: 'IMDb', url: 'https://www.imdb.com', category: 'reference', desc: '亚马逊旗下影视数据库，收录影片资料、演职员表、评分与观众评论。', region: '美国', lang: '英文' },
+  { name: 'Fandom', url: 'https://www.fandom.com', category: 'reference', desc: '全球最大的粉丝维基托管平台，影视、游戏与动漫的设定资料集中地。', region: '欧美', lang: '英文' },
+
   // ── 开发者与技术 ──
   { name: 'GitHub', url: 'https://github.com', category: 'devtools', desc: '全球最大代码托管平台，承载开源项目协作与软件包分发。', region: '全球', lang: '英文' },
   { name: 'GitLab', url: 'https://gitlab.com', category: 'devtools', desc: '覆盖 DevOps 全流程的代码平台，支持自建与公有云仓库托管。', region: '全球', lang: '英文' },
@@ -331,6 +339,8 @@ window.SITE_DATA = [
   { name: 'Qiita', url: 'https://qiita.com', category: 'devtools', desc: '日本程序员技术分享社区，文章以实战经验与代码示例为主。', region: '日本', lang: '日文' },
   { name: 'Zenn', url: 'https://zenn.dev', category: 'devtools', desc: '日本工程师技术写作平台，支持 Markdown 与互动评论。', region: '日本', lang: '日文' },
   { name: 'velog', url: 'https://velog.io', category: 'devtools', desc: '韩国开发者写作与知识分享社区，界面简洁使用门槛低。', region: '韩国', lang: '韩文' },
+
+  { name: 'Microsoft', url: 'https://www.microsoft.com', category: 'devtools', desc: '微软官方站点，Windows、Office、Azure 与开发者工具的统一入口。', region: '美国', lang: '英文' },
 
   // ── 电商与购物 ──
   { name: 'Amazon', url: 'https://www.amazon.com', category: 'shopping', desc: '全球最大综合电商平台，Prime 会员与第三方卖家生态完善。', region: '全球', lang: '多语言' },
@@ -357,6 +367,9 @@ window.SITE_DATA = [
   { name: 'Bukalapak', url: 'https://www.bukalapak.com', category: 'shopping', desc: '印尼本土上市电商，早期主打下沉市场与本地小店数字化。', region: '东南亚', lang: '多语言' },
   { name: 'Blibli', url: 'https://www.blibli.com', category: 'shopping', desc: '印尼中高端定位电商平台，强调品牌正品与品质购物体验。', region: '东南亚', lang: '多语言' },
   { name: 'Carousell', url: 'https://www.carousell.com', category: 'shopping', desc: '起于新加坡的 C2C 二手闲置平台，覆盖东南亚与台湾等市场。', region: '东南亚', lang: '英文' },
+
+  { name: 'Apple', url: 'https://www.apple.com', category: 'shopping', desc: '苹果官方站点，产品线介绍、技术支持与在线商店入口。', region: '美国', lang: '英文' },
+  { name: 'Samsung', url: 'https://www.samsung.com', category: 'shopping', desc: '三星电子官网，手机、家电、显示与半导体的产品信息和官方商城。', region: '韩国', lang: '英文' },
 
   // ── 本地生活与黄页 ──
   { name: 'Yelp', url: 'https://www.yelp.com', category: 'local-life', desc: '美国本地商户点评与黄页网站，餐厅酒吧评价覆盖密度极高。', region: '欧美', lang: '英文' },
@@ -468,6 +481,8 @@ window.SITE_DATA = [
   { name: 'remove.bg', url: 'https://www.remove.bg', category: 'tools', desc: 'AI 自动抠图工具，一键分离人物主体并生成透明背景图。', region: '全球', lang: '多语言' },
   { name: 'Google Workspace', url: 'https://workspace.google.com', category: 'tools', desc: '谷歌企业办公套件，包含邮箱、文档、云盘与视频会议。', region: '全球', lang: '多语言' },
 
+  { name: 'Brave 浏览器', url: 'https://brave.com', category: 'tools', desc: '基于 Chromium 的隐私浏览器，默认拦截广告与跟踪脚本。', region: '欧美', lang: '英文' },
+
   // ── 教育与学习 ──
   { name: 'Coursera', url: 'https://www.coursera.org', category: 'education', desc: '全球最大在线学习平台，与顶尖大学合作提供学分课程与证书。', region: '全球', lang: '多语言' },
   { name: 'edX', url: 'https://www.edx.org', category: 'education', desc: '哈佛与微软联合创办的公开课平台，学位课程与专业证书齐全。', region: '全球', lang: '英文' },
@@ -502,6 +517,8 @@ window.SITE_DATA = [
   { name: 'BuzzFeed', url: 'https://www.buzzfeed.com', category: 'lifestyle', desc: '以轻量化网络内容起家的媒体，趣味清单与生活资讯传播广。', region: '欧美', lang: '英文' },
   { name: 'Vogue', url: 'https://www.vogue.com', category: 'lifestyle', desc: '全球最具影响力的时尚杂志官网，秀场与美妆潮流前沿。', region: '欧美', lang: '英文' },
   { name: '香港01', url: 'https://www.hk01.com', category: 'lifestyle', desc: '中国香港数字媒体平台，新闻生活与财经深度内容更新迅速。', region: '中国', lang: '中文' },
+
+  { name: 'Weather.com', url: 'https://weather.com', category: 'lifestyle', desc: 'The Weather Channel 官方站点，提供全球逐小时预报、雷达图与灾害预警。', region: '美国', lang: '英文' },
 
   // ── 机械制造 ──
   { name: 'Caterpillar', url: 'https://www.cat.com', category: 'machinery', desc: '全球工程机械与矿山设备龙头，挖掘机装载机与柴油动力全系列覆盖。', region: '欧美', lang: '英文' },
