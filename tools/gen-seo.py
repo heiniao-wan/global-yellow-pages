@@ -38,6 +38,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "assets", "js", "data.js")
 DEFAULT_BASE = "https://ypage.ccwu.cc"
 
+# Google Search Console「网址前缀」属性的 HTML 标记验证码。
+# 只放在首页即可——Google 只核对你添加的那个属性 URL（https://ypage.ccwu.cc/）。
+# 留空则该 meta 不生成。
+GSC_VERIFY = "6puw6EgLalTvedYXyqzh4rQ0psf_EcoiZFfqgIg8MN4"
+
 # 主题合辑生成器（文件名带连字符，不能直接 import，走 importlib）
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import importlib
@@ -555,6 +560,54 @@ def inject_css(text, css_text, tag):
     return text.replace("</head>", start + chunk + end + "\n</head>", 1)
 
 
+ANALYTICS_START = "<!-- ANALYTICS:START -->"
+ANALYTICS_END = "<!-- ANALYTICS:END -->"
+
+
+def inject_analytics(text):
+    """给页面注入统计脚本引用，幂等。
+
+    只引用不内联：token 变了改 assets/js/analytics.js 重新部署即可，
+    不必为了换个 token 把几十个页面全重写一遍。
+    cat/分类.html 是自包含页面（无任何外部资源），所以这里必须用
+    以 / 开头的绝对路径，相对路径在 /cat/ 下会解析成 /cat/assets/... 。
+    """
+    text = re.sub(r"\n*[ \t]*" + re.escape(ANALYTICS_START) + r".*?" + re.escape(ANALYTICS_END)
+                  + r"[ \t]*\n*", "\n", text, flags=re.S)
+    if "</head>" not in text:
+        return text
+    block = (ANALYTICS_START + "\n"
+             '<script defer src="/assets/js/analytics.js"></script>\n'
+             + ANALYTICS_END)
+    return text.replace("</head>", block + "\n</head>", 1)
+
+
+def apply_analytics():
+    """遍历全站页面注入统计引用。必须放在 main() 最后：
+    cat/、guides/ 下的页面每次都是重新生成的，先注入会被覆盖。
+
+    返回「最终带统计引用的页面数」。注意不能返回「改动了几个文件」——
+    cat/、guides/ 每轮都重新生成、每轮都要重新注入，改动数永远是那二十几，
+    看起来像没收敛（实际产物 md5 稳定）。
+    """
+    skip_dirs = {"tools", "functions", "node_modules", "__pycache__"}
+    skip_files = {"admin.html"}   # 后台不统计，robots 也已 disallow
+    covered = 0
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        dirnames[:] = [d for d in dirnames if d not in skip_dirs and not d.startswith(".")]
+        for fn in filenames:
+            if not fn.endswith(".html") or fn in skip_files:
+                continue
+            path = os.path.join(dirpath, fn)
+            t = io.open(path, encoding="utf-8").read()
+            t2 = inject_analytics(t)
+            if t2 != t:
+                io.open(path, "w", encoding="utf-8", newline="\n").write(t2)
+            if ANALYTICS_START in t2:
+                covered += 1
+    return covered
+
+
 def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", editors=""):
     block = [
         START,
@@ -577,6 +630,8 @@ def inject_meta(base, nsites, ncats, static_feed="", guides="", scenes="", edito
         '<meta name="twitter:image" content="%s/assets/img/og-cover.png">' % base,
         END,
     ]
+    if GSC_VERIFY:
+        block.insert(1, '<meta name="google-site-verification" content="%s">' % GSC_VERIFY)
     done = []
     for page in ("index.html", "index-v2.html"):
         path = os.path.join(ROOT, page)
@@ -679,6 +734,7 @@ def main():
     scenes = gen_blocks.scenes_block(base, sites) if gen_blocks else ""
     editors = gen_blocks.editors_block(base) if gen_blocks else ""
     print("  改写", inject_meta(base, len(sites), len(cats), static_feed, guides, scenes, editors))
+    print("  注入统计脚本引用（覆盖 %d 个页面）" % apply_analytics())
     print("\n完成。把 robots.txt / sitemap.xml / sites.html / assets/img/og-cover.png "
           "一起部署到站点根目录，\n并确保托管方不会对这几个路径做 SPA 回退（否则又返回首页 HTML）。")
     return 0
