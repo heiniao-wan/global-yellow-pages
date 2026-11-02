@@ -31,3 +31,7 @@
 /RESEARCH-AI-2026.md              /  301
 /RESEARCH-WealthPortal-2026.md    /  301
 /about-long.md                    /  301
+
+# 点文件也会被 Pages 当静态资源发出来（实测 200），一并挡掉
+/.gitignore                       /  301
+/.assetsignore                    /  301
