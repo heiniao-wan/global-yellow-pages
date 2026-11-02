@@ -29,6 +29,8 @@ PAGES = [
     ("免责声明", "/disclaimer.html"),
     ("全部站点索引", "/sites.html"),
     ("主题合辑", "/guides.html"),
+    ("收录标准", "/methodology.html"),
+    ("地区页(日本)", "/region/japan.html"),
     ("分类页(AI)", "/cat/ai.html"),
     ("分类页(工具)", "/cat/tools.html"),
     ("不存在的页面", "/notexist-adsense-check-9871.html"),
