@@ -209,7 +209,8 @@ def write_sites_html(base, cats, sites):
         p.append('<p class="regions">按地区浏览：%s</p>' % " · ".join(
             ['<a href="%s/region/%s.html">%s</a>' % (base, r["slug"], html.escape(r["h1"]))
              for r in gen_regions.REGIONS]
-            + ['<a href="%s/region.html">地区总览</a>' % base]))
+            + ['<a href="%s/region.html">地区总览</a>' % base,
+               '<a href="%s/methodology.html">收录标准</a>' % base]))
 
     for c in cats:
         items = by.get(c["key"], [])
@@ -733,6 +734,7 @@ def main():
         # 信任页面：AdSense 审核必查项，独立 URL 权重不能低于汇总页
         (base + "/about.html", 0.5, "monthly"),
         (base + "/about-long.html", 0.6, "monthly"),   # 站长长文，E-E-A-T 主要落点
+        (base + "/methodology.html", 0.6, "monthly"),  # 收录标准：判断"We are 可信"的落点
         (base + "/privacy.html", 0.5, "monthly"),
         (base + "/contact.html", 0.4, "monthly"),
         (base + "/disclaimer.html", 0.3, "yearly"),
