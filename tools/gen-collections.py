@@ -307,13 +307,16 @@ def esc(s):
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def page_shell(title, description, canonical, body, extra_head=""):
+def page_shell(title, description, canonical, body, extra_head="", footer_text=None):
     # 顶部置顶导航：全站统一入口，避免访客（尤其从搜索直接落到子页）找不到回主站的路
     nav = ('<nav class="gnav"><div class="gnav-in">'
            '<a class="gnav-home" href="%s/">← 全球黄页</a>'
-           '<span class="gnav-links"><a href="%s/guides.html">主题合辑</a>'
+           '<span class="gnav-links"><a href="%s/region.html">按地区</a>'
+           '<a href="%s/guides.html">主题合辑</a>'
            '<a href="%s/sites.html">全站索引</a></span>'
-           '</div></nav>' % (BASE, BASE, BASE))
+           '</div></nav>' % (BASE, BASE, BASE, BASE))
+    if footer_text is None:
+        footer_text = "全球黄页 · 主题合辑 · 收录均为各站点官方首页链接 · 与主站 %s 数据同步" % BASE
     return """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -337,12 +340,12 @@ def page_shell(title, description, canonical, body, extra_head=""):
 %s
 <div class="wrap">
 %s
-<footer>全球黄页 · 主题合辑 · 收录均为各站点官方首页链接 · 与主站 %s 数据同步</footer>
+<footer>%s</footer>
 </div>
 </body>
 </html>
 """ % (esc(title), esc(description), canonical, esc(title), esc(description),
-       canonical, BASE, CSS, extra_head, nav, body, BASE)
+       canonical, BASE, CSS, extra_head, nav, body, esc(footer_text))
 
 
 def count_sites(col, sites):
