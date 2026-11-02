@@ -1,0 +1,33 @@
+# ── 安全：开发脚本 / 文档不对外提供 ─────────────────────────────
+# 背景：Cloudflare Pages 会把仓库根目录原样发布，.bat / .py 会以
+# application/octet-stream 被浏览器当文件下载。Google 安全浏览据此报了
+# 「不常见的下载内容」和「有害的下载内容」，Chrome 可能对访客弹拦截页。
+# .assetsignore 只在 Workers 静态资源生效，Pages 不认，所以用重定向挡。
+#
+# 注意：a13fd5a92a1d63732cedc0fad759e1a7.txt 是 IndexNow 密钥文件，
+# 必须保持可访问，不要加进来。
+#
+# 语法：from  to  status（Pages 只支持 200/301/302/303/307/308）
+
+/tools/*                          /  301
+
+/deploy-gui.py                    /  301
+/github-uploader.py               /  301
+
+/上传GitHub.bat                   /  301
+/每日更新热点.bat                  /  301
+/%E4%B8%8A%E4%BC%A0GitHub.bat     /  301
+/%E6%AF%8F%E6%97%A5%E6%9B%B4%E6%96%B0%E7%83%AD%E7%82%B9.bat  /  301
+
+/README.md                        /  301
+/README-deploy.md                 /  301
+/DEPLOY-GUIDE.md                  /  301
+/CLOUDFLARE-WORKER-GUIDE.md       /  301
+/ADSENSE-APPLY-GUIDE.md           /  301
+/ADSENSE-ASSESSMENT.md            /  301
+/PROMOTION.md                     /  301
+/ZHIHU-ARTICLE.md                 /  301
+/VOTES-DEPLOY-GUIDE.md            /  301
+/RESEARCH-AI-2026.md              /  301
+/RESEARCH-WealthPortal-2026.md    /  301
+/about-long.md                    /  301
