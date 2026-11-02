@@ -32,6 +32,15 @@ window.GypAds = (function () {
   /** 加载 adsbygoogle.js 并推送广告位 */
   var loaded = false;
 
+  /** 把真实发布商 ID 写到广告位上。
+   *  HTML 里刻意不预置 data-ad-client，避免占位的全零 ID 被爬虫读到。 */
+  function applyClient() {
+    var slots = document.querySelectorAll('.ad-slot ins.adsbygoogle');
+    for (var i = 0; i < slots.length; i++) {
+      slots[i].setAttribute('data-ad-client', clientId);
+    }
+  }
+
   function loadAdsenseScript() {
     if (loaded || !enabled || !clientId) return;
     loaded = true;
@@ -61,6 +70,9 @@ window.GypAds = (function () {
     /** 页面加载完成后调用 */
     init: function () {
       if (!this.isEnabled()) return;
+      // .ads-on 是广告位的显示开关（见 style.css：html:not(.ads-on) .ad-wrap 隐藏）
+      document.documentElement.classList.add('ads-on');
+      applyClient();
       loadAdsenseScript();
     }
   };
