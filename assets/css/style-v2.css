@@ -1118,6 +1118,9 @@ mark { background: rgba(34, 211, 238, .22); color: inherit; border-radius: 3px; 
 }
 
 /* ═══════════════ 广告位 ═══════════════ */
+/* 未拿到真实发布商 ID 前整块隐藏：空盒子会被审核员和访客当成"坏掉的广告"，
+   比没有广告位更糟。ads-config.js 拿到 ID 后给 <html> 加 .ads-on 再显示。 */
+html:not(.ads-on) .ad-wrap { display: none; }
 /* 容器始终渲染（AdSense 审核看得到版位），但预留固定高度，
    避免广告填充前后产生布局跳动（CLS）。 */
 .ad-wrap {
