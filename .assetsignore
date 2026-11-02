@@ -4,6 +4,10 @@
 # 会以 application/octet-stream 被浏览器当成文件下载，Google 安全浏览据此
 # 判定「不常见的下载内容」，严重时升级为「有害的下载内容」并在 Chrome 弹拦截页。
 #
+# 注意：截至 2026-11，Cloudflare Pages 并不识别本文件（实测无效），
+# 真正生效的拦截在 _redirects 里。保留此文件是为了将来 Pages 迁移到
+# Workers 静态资源后能自动接上。
+#
 # 注意：a13fd5a92a1d63732cedc0fad759e1a7.txt 是 IndexNow 的密钥文件，
 # 必须保持公开可访问，绝对不要加进忽略列表。
 
