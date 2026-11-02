@@ -56,6 +56,11 @@ try:
 except Exception as _e:      # 首页区块模块缺失不影响其余 SEO 基建
     gen_blocks = None
     print("[警告] 载入 gen-blocks 失败：%s" % _e)
+try:
+    gen_regions = importlib.import_module("gen-regions")
+except Exception as _e:      # 地区页模块缺失不影响其余 SEO 基建
+    gen_regions = None
+    print("[警告] 载入 gen-regions 失败：%s" % _e)
 
 START = "<!-- SEO:START (由 tools/gen-seo.py 生成，勿手改) -->"
 END = "<!-- SEO:END -->"
@@ -180,6 +185,8 @@ def write_sites_html(base, cats, sites):
          'h2{font-size:19px;margin:32px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e5ea}',
         'a.cat-page{float:right;font-size:12px;font-weight:400;color:#0071e3;text-decoration:none}',
         'a.cat-page:hover{text-decoration:underline}',
+        '.regions{margin:-14px 0 26px;font-size:14px;color:#6e6e73}',
+        '.regions a{color:#0071e3;text-decoration:none}',
          '.cat-en{font-size:12px;color:#8e8e93;font-weight:400;margin-left:8px}',
          'ul{list-style:none;padding:0;margin:0}',
          'li{padding:10px 0;border-bottom:1px solid #f2f2f7}',
@@ -196,6 +203,13 @@ def write_sites_html(base, cats, sites):
          '<p class="sub">%d 个精选网站的官网直达链接，按 %d 个行业分类整理。'
          '本页为纯静态索引，无需 JavaScript。</p>' % (len(sites), len(cats)),
          '<a class="back" href="%s/">← 回到带截图与投票的主站</a>' % base]
+
+    # 地区入口：给爬虫一条从汇总页通往 region/*.html 的实心链接路径
+    if gen_regions:
+        p.append('<p class="regions">按地区浏览：%s</p>' % " · ".join(
+            ['<a href="%s/region/%s.html">%s</a>' % (base, r["slug"], html.escape(r["h1"]))
+             for r in gen_regions.REGIONS]
+            + ['<a href="%s/region.html">地区总览</a>' % base]))
 
     for c in cats:
         items = by.get(c["key"], [])
@@ -706,6 +720,11 @@ def main():
         guide_pages = gen_collections.write_guides(base, sites)
         print("  生成 主题合辑页 guides/*.html（%d 页）" % len(guide_pages))
 
+    region_pages = []
+    if gen_regions:
+        region_pages = gen_regions.write_regions(base, cats, sites)
+        print("  生成 地区页 region/*.html（%d 页）" % len(region_pages))
+
     sm = [
         (base + "/", 1.0, "daily"),
         (base + "/sites.html", 0.9, "weekly"),
@@ -725,6 +744,9 @@ def main():
     # 主题合辑页：原创编辑内容，权重与分类页同级
     for rel, _n in guide_pages:
         sm.append((base + "/" + rel, 0.8, "weekly"))
+    # 地区页：内容随站点增减变化，但不是每天变，给 monthly
+    for rel, _n in region_pages:
+        sm.append((base + "/" + rel, 0.7, "monthly"))
     print("  生成", write_sitemap(base, sm))
     print("  生成", write_sites_html(base, cats, sites))
     print("  生成", write_og_image(len(sites), len(cats)))
