@@ -23,3 +23,13 @@ tools/.*-ud*/
 .local-votes.json
 .valid-ids.txt
 .trending-history.json
+
+# ── 以下为本地开发文件，2026-11-03 起不入库 ──────────────────
+# 原因：Cloudflare Pages 会把仓库根目录原样当静态资源发布，.py / .bat / .md
+# 会以 application/octet-stream 被下载，被 Google 判为「不常见的下载内容」。
+# 从仓库移除后 Pages 返回 404，判定才会清掉。
+# 本地文件仍在，脚本照常运行；需要历史版本时用 git 找 2026-11-03 之前的提交。
+*.bat
+*.py
+*.md
+tools/*.py
