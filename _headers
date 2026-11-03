@@ -23,6 +23,10 @@
 /sitemap.xml
   Cache-Control: public, max-age=0, must-revalidate
 
+# robots.txt 同样不能缓存 4 小时：改完规则后搜索引擎要能立刻读到新版本
+/robots.txt
+  Cache-Control: public, max-age=0, must-revalidate
+
 /sites.html
   Cache-Control: public, max-age=0, must-revalidate
 
