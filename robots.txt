@@ -3,7 +3,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /functions/
-Disallow: /tools/
 
 # Bing 站长验证文件：必须允许抓取，否则无法完成所有权验证
 Allow: /BingSiteAuth.xml
