@@ -81,6 +81,37 @@
 .gc-more a{color:var(--accent,#0071e3);text-decoration:none;font-weight:600}
 .gc-more a:hover{text-decoration:underline}
 </style><!-- GUIDES-CSS:END -->
+<!-- TOOLS-CSS:START --><style>
+
+.tools-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
+.tool-grid{margin-top:16px}
+.tool-card{
+  display:flex;align-items:center;gap:18px;
+  background:var(--bg-elevated,#fff);border:1px solid var(--line,#e8e8ed);
+  border-radius:16px;padding:20px 24px;text-decoration:none;color:inherit;
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.tool-card:hover{border-color:var(--accent,#0071e3);box-shadow:0 6px 22px rgba(0,113,227,.12)}
+.tool-ico{
+  flex:0 0 52px;width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,#eaf2ff,#f6f9ff);
+  display:flex;align-items:center;justify-content:center;font-size:25px;
+}
+.tool-body{flex:1;min-width:0}
+.tool-k{margin:0 0 4px;font-size:11.5px;font-weight:650;letter-spacing:.04em;color:var(--accent,#0071e3)}
+.tool-body h3{margin:0 0 5px;font-size:16.5px;font-weight:650}
+.tool-body p{margin:0;font-size:13px;line-height:1.7;color:var(--text-3,#8e8e93)}
+.tool-go{flex:0 0 auto;font-size:13.5px;font-weight:650;color:var(--accent,#0071e3);white-space:nowrap}
+@media (max-width:560px){
+  .tool-card{flex-direction:column;align-items:flex-start;gap:12px;padding:18px}
+  .tool-ico{width:44px;height:44px;flex:0 0 44px;font-size:21px}
+  .tool-go{align-self:flex-end}
+}
+@media (prefers-color-scheme:dark){
+  .tool-ico{background:linear-gradient(135deg,#1b2436,#151a2e)}
+}
+:root[data-theme="dark"] .tool-ico{background:linear-gradient(135deg,#1b2436,#151a2e)}
+</style><!-- TOOLS-CSS:END -->
 <!-- STATIC-CSS:START --><style>
 
 /* 静态精选：给爬虫与无 JS 环境看的实心内容，JS 网格渲染后会被隐藏 */
@@ -330,6 +361,25 @@ html.js-on .static-feed{display:none}
     
 
     
+    <!-- TOOLS-BLOCK:START -->
+<section class="tools-sec" aria-label="免费工具">
+  <div class="wrap">
+    <div class="section-head"><h2>免费工具</h2><span class="section-note">导航之外，有些数直接算给你看</span></div>
+    <div class="tool-grid">
+      <a class="tool-card" href="https://ypage.ccwu.cc/calc/ai-margin.html">
+        <span class="tool-ico" aria-hidden="true">📊</span>
+        <div class="tool-body">
+          <p class="tool-k">免费 · 不用注册 · 数据不出浏览器</p>
+          <h3>AI 产品毛利率计算器</h3>
+          <p>填客户数、月收入、API 账单，看清混合毛利率背后藏着几个正在亏现金的账号、单靠涨价要提多少、这个动作能承受多少流失。</p>
+        </div>
+        <span class="tool-go">打开计算器 →</span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- TOOLS-BLOCK:END -->
+
     <!-- GUIDES-BLOCK:START (由 tools/gen-collections.py 生成，勿手改) -->
 <section class="guides-sec" aria-label="主题合辑"><div class="wrap"><div class="section-head"><h2>主题合辑</h2><span class="section-note">5 份编辑精选 · 按任务串联的网站动线</span></div><div class="gc-grid"><a class="gc-card" href="https://ypage.ccwu.cc/guides/indie-hacker.html"><p class="gc-k">从写下第一行代码，到收到第一笔美元</p><h3>独立开发者出海工具箱</h3><p>一个人做产品出海，中间隔着建站、开发、设计、文案、合规好几道坎。这份合辑把这条动线上的关键站点串成一条线…</p><p class="gc-n">14 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/ai-content.html"><p class="gc-k">从选题脚本到成片发布，一条线走完</p><h3>AI 内容创作流水线</h3><p>做自媒体的都知道，瓶颈从来不是「不会剪」，是每条内容都要重新想选题、写脚本、找素材、配音轨。这份合辑按创…</p><p class="gc-n">15 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/mech-engineer.html"><p class="gc-k">选型、样本、行业动态，一条检索动线</p><h3>机械工程师每日工具箱</h3><p>机械工程师的日常，大半时间花在「找资料」上：这个轴承的额定载荷多少、这家主机的液压系统什么参数、行业里又…</p><p class="gc-n">18 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/job-hunt.html"><p class="gc-k">找工作不从投简历开始，从研究公司开始</p><h3>求职跳槽情报站</h3><p>多数人找工作的顺序错了：先海投简历，再被动等待。高效的动线是反过来的——先在招聘平台看机会分布，摸清哪些…</p><p class="gc-n">13 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/deep-research.html"><p class="gc-k">从检索、验证到沉淀，完整的工具链</p><h3>一个人做深度研究</h3><p>深度研究的难点不在找资料，在交叉验证和信息沉淀。这份合辑按流程排：先用 AI 搜索快速建立全貌，再回到权…</p><p class="gc-n">14 个站点 →</p></a></div><p class="gc-more"><a href="https://ypage.ccwu.cc/guides.html">查看全部合辑 →</a></p></div></section>
 <!-- GUIDES-BLOCK:END -->
@@ -742,6 +792,7 @@ html.js-on .static-feed{display:none}
     <p class="muted">共收录 <b id="year">—</b> 站点数据 · 分类体系参考主流流量分析平台通用行业分类</p>
     <p class="muted small">所有网站版权归各自所有者所有 · 本页仅作导航索引与用户评价参考</p>
     <nav class="foot-links">
+      <a href="calc/ai-margin.html">毛利率计算器</a>
       <a href="about.html">关于本站</a>
       <a href="methodology.html">收录标准</a>
       <a href="privacy.html">隐私政策</a>
