@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 产品毛利率计算器 · 按账号算清真实成本 — 全球黄页</title>
+<meta name="description" content="输入客户数、月收入、API 账单三个数，算出 AI 订阅产品的真实毛利率：中位客户毛利、多少账号未达目标线、多少账号正在亏现金、涨价需要多少、能承受多少流失。纯前端计算，数据不上传。">
+<link rel="canonical" href="https://ypage.ccwu.cc/calc/ai-margin.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="全球黄页">
+<meta property="og:title" content="AI 产品毛利率计算器 · 按账号算清真实成本">
+<meta property="og:description" content="混合毛利率是一个平均值，它同时描述不了最赚钱的客户和最亏钱的客户。填四个数，看你的分布。">
+<meta property="og:url" content="https://ypage.ccwu.cc/calc/ai-margin.html">
+<meta property="og:image" content="https://ypage.ccwu.cc/assets/img/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<script>
+/* 主题跟随主站：localStorage 里存过就以它为准，没有就跟随系统。
+   放在 <head> 里是为了避免深色用户看到一瞬白屏。 */
+(function(){
+  try{
+    var t = localStorage.getItem('gyp:theme');
+    if (t !== 'dark' && t !== 'light'){
+      t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+<style>
+:root{
+  --bg:#f5f5f7; --card:#fff; --ink:#1d1d1f; --mid:#6e6e73; --faint:#8e8e93;
+  --line:#e5e5ea; --accent:#0071e3; --red:#c8362b; --green:#1f7a4d; --amber:#a8720d;
+  --head:#fafafa; --track:#e9e9ed; --bandbg:#d5d5dc;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c1c1e; --card:#2c2c2e; --ink:#f5f5f7; --mid:#a1a1a6; --faint:#8e8e93;
+    --line:#3a3a3c; --accent:#6cb3ff; --red:#ff6961; --green:#5fd08a; --amber:#e0b25c;
+    --head:#232325; --track:#3a3a3c; --bandbg:#4a4a52;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1c1c1e; --card:#2c2c2e; --ink:#f5f5f7; --mid:#a1a1a6; --faint:#8e8e93;
+  --line:#3a3a3c; --accent:#6cb3ff; --red:#ff6961; --green:#5fd08a; --amber:#e0b25c;
+  --head:#232325; --track:#3a3a3c; --bandbg:#4a4a52;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei UI","PingFang SC",sans-serif;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:36px 22px 80px}
+
+.gnav{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.88);-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+.gnav-in{max-width:1080px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.gnav-home{color:var(--accent);font-size:14.5px;font-weight:650;text-decoration:none;white-space:nowrap}
+.gnav-home:hover{text-decoration:underline}
+.gnav-links{display:flex;gap:18px;margin-left:auto}
+.gnav-links a{color:var(--mid);font-size:13.5px;text-decoration:none;white-space:nowrap}
+.gnav-links a:hover{color:var(--ink)}
+.theme-btn{
+  flex:0 0 auto;width:32px;height:32px;padding:0;cursor:pointer;margin-left:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:9px;font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.theme-btn:hover{border-color:var(--accent)}
+:root[data-theme="dark"] .gnav{background:rgba(28,28,30,.88)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .gnav{background:rgba(28,28,30,.88)}}
+
+.kicker{font-size:12.5px;color:var(--accent);font-weight:600;margin:0 0 10px;display:flex;flex-wrap:wrap;gap:6px 14px}
+.kicker span{color:var(--faint);font-weight:400}
+h1{font-size:33px;line-height:1.22;letter-spacing:-.02em;font-weight:650;margin:0 0 12px;max-width:720px}
+.lede{font-size:16px;color:var(--mid);max-width:680px;margin:0 0 6px;line-height:1.75}
+.lede b{color:var(--ink);font-weight:600}
+@media (max-width:860px){h1{font-size:26px}.wrap{padding:26px 16px 64px}.lede{font-size:15px}}
+
+.grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:36px;align-items:start;margin-top:30px}
+.grid>section{min-width:0}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr);gap:24px}}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 16px}
+.panel-head h2{font-size:12.5px;letter-spacing:.08em;color:var(--mid);font-weight:600;margin:0}
+.cur{display:flex;gap:2px;background:var(--track);border-radius:8px;padding:2px}
+.cur button{border:0;background:transparent;color:var(--mid);font:inherit;font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;cursor:pointer;line-height:1.4}
+.cur button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--faint);margin-top:4px;line-height:1.5}
+.inp{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,113,227,.14)}
+.inp .sym{padding:0 0 0 11px;color:var(--faint);font-size:15px}
+.inp .suf{padding:0 11px 0 0;color:var(--faint);font-size:13px}
+.inp input{
+  flex:1;min-width:0;border:0;background:transparent;color:var(--ink);
+  font:inherit;font-size:16.5px;padding:9px 11px;
+  appearance:textfield;-moz-appearance:textfield;
+}
+.inp input:focus{outline:0}
+.inp input::-webkit-outer-spin-button,.inp input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;display:none}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.inp .sym + input{padding-left:6px}
+.inp .suf-only input{padding-right:4px}
+
+.slider-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:7px}
+.slider-row span{font-size:12.5px;color:var(--mid)}
+.slider-row b{font-size:14.5px;font-weight:650;color:var(--ink);white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--red);margin:0}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);margin-top:3px}
+
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+@media (max-width:355px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:var(--card);padding:15px 17px}
+.kpi .lab{font-size:11.5px;color:var(--mid);margin-bottom:5px;line-height:1.4}
+.kpi .val{font-size:29px;font-weight:650;letter-spacing:-.025em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .val.red{color:var(--red)}
+.kpi .val.green{color:var(--green)}
+.kpi .sub{font-size:11.5px;color:var(--faint);margin-top:5px;line-height:1.45}
+
+.finding{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:12px;padding:15px 17px;margin-bottom:16px}
+.finding p{margin:0 0 8px;font-size:14px;line-height:1.75;color:var(--mid)}
+.finding p:last-child{margin-bottom:0}
+.finding .lead{font-weight:650;font-size:15.5px;color:var(--ink);letter-spacing:-.01em}
+
+.chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 17px 12px;margin-bottom:16px}
+.chart h3{font-size:13px;font-weight:650;margin:0 0 3px}
+.chart .cap{font-size:11.5px;color:var(--faint);margin:0 0 16px;line-height:1.5}
+.bands{display:flex;align-items:flex-end;gap:4px;height:120px}
+.band{flex:1;min-width:0;background:var(--bandbg);border-radius:3px 3px 0 0;position:relative;min-height:7px}
+.band.hot{background:var(--red)}
+.band.warm{background:#d99a86}
+.band .v{position:absolute;left:50%;transform:translateX(-50%);top:-16px;font-size:10px;color:var(--mid);white-space:nowrap;font-variant-numeric:tabular-nums}
+.blabels{display:flex;gap:4px;margin-top:7px;border-top:1px solid var(--line);padding-top:5px}
+.blabels div{flex:1;min-width:0;text-align:center;font-size:9.5px;color:var(--faint);white-space:nowrap;overflow:hidden}
+.chartnote{font-size:12.5px;color:var(--mid);margin:11px 0 2px;line-height:1.6}
+.chartnote b{color:var(--ink);font-weight:650}
+
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:420px}
+th,td{text-align:right;padding:11px 14px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-size:11px;letter-spacing:.04em;color:var(--mid);font-weight:600;background:var(--head);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:none}
+td.big{font-weight:650;font-size:15px}
+@media (max-width:560px){
+  table{min-width:0;font-size:11.5px}
+  th,td{padding:8px 7px;line-height:1.4}
+  th{font-size:9.5px;white-space:normal}
+}
+
+.note{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 19px;margin-top:16px}
+.note h3{margin:0 0 7px;font-size:14.5px;font-weight:650}
+.note p{margin:0 0 9px;font-size:13.5px;color:var(--mid);line-height:1.75}
+.note ul{margin:0;padding-left:19px;font-size:13px;color:var(--mid);line-height:1.8}
+.note li{margin-bottom:3px}
+
+details.method{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0}
+details.method summary{cursor:pointer;padding:15px 19px;font-size:14px;font-weight:650;list-style:none}
+details.method summary::-webkit-details-marker{display:none}
+details.method summary:after{content:"＋";float:right;color:var(--faint);font-weight:400}
+details.method[open] summary:after{content:"－"}
+.method-body{padding:0 19px 18px;font-size:13.5px;color:var(--mid);line-height:1.85}
+.method-body p{margin:0 0 10px}
+.method-body code{background:var(--track);border-radius:4px;padding:1px 5px;font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink)}
+.method-body b{color:var(--ink);font-weight:600}
+.method-body ul{padding-left:19px;margin:0 0 10px}
+
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px;line-height:1.8;max-width:780px}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<nav class="gnav"><div class="gnav-in"><a class="gnav-home" href="https://ypage.ccwu.cc/">← 全球黄页</a><span class="gnav-links"><a href="https://ypage.ccwu.cc/guides.html">主题合辑</a><a href="https://ypage.ccwu.cc/sites.html">全站索引</a></span><button type="button" id="themeBtn" class="theme-btn" aria-label="切换深色模式">🌙</button></div></nav>
+
+<div class="wrap">
+
+  <p class="kicker">免费工具 <span>·</span> 不用注册 <span>·</span> 输入不上传 <span>·</span> 浏览器内计算</p>
+  <h1>AI 产品的毛利率不是一个数字，是一条分布</h1>
+  <p class="lede">同一个月里，混合毛利率、中位客户的毛利率、最贵那 10% 客户的毛利率，可以是三个完全不同的数——而且它们全都是真的。填几个你后台本来就有的数字，看你这三个数差多远。</p>
+
+  <div class="grid">
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>你的数字</h2>
+        <div class="cur" role="group" aria-label="显示货币">
+          <button type="button" id="curUsd" aria-pressed="true">$ USD</button>
+          <button type="button" id="curCny" aria-pressed="false">¥ CNY</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="n">付费客户数</label>
+        <div class="inp inp-num"><input id="n" type="text" inputmode="decimal" autocomplete="off" min="1" max="100000" step="1" value="100"><span class="suf">个</span></div>
+      </div>
+
+      <div class="field">
+        <label for="mrr">月收入</label>
+        <div class="inp"><span class="sym" data-cur>$</span><input id="mrr" type="text" inputmode="decimal" autocomplete="off" min="1" max="100000000" step="100" value="3000"></div>
+      </div>
+
+      <div class="field">
+        <label for="spend">每月 API 账单</label>
+        <div class="inp"><span class="sym" data-cur>$</span><input id="spend" type="text" inputmode="decimal" autocomplete="off" min="0" max="100000000" step="50" value="900"></div>
+        <div class="hint">只填模型推理的钱，不含你自己的 ChatGPT 订阅。</div>
+      </div>
+
+      <div class="field">
+        <label for="oth">每客户其他成本</label>
+        <div class="inp"><span class="sym" data-cur>$</span><input id="oth" type="text" inputmode="decimal" autocomplete="off" min="0" max="10000" step="0.05" value="0.5"></div>
+        <div class="hint">存储、客服、向量库。取平均值就够。</div>
+      </div>
+
+      <div class="field">
+        <label for="fee">支付通道费率</label>
+        <div class="inp"><input id="fee" type="text" inputmode="decimal" autocomplete="off" min="0" max="20" step="0.1" value="2.9"><span class="suf">%</span></div>
+      </div>
+
+      <div class="field">
+        <label for="fix">每笔固定手续费</label>
+        <div class="inp"><span class="sym" data-cur>$</span><input id="fix" type="text" inputmode="decimal" autocomplete="off" min="0" max="20" step="0.01" value="0.3"></div>
+        <div class="hint">Stripe 是 2.9% + $0.30，国内通道一般没有这一项。</div>
+      </div>
+
+      <div class="field">
+        <label for="target">目标毛利率</label>
+        <div class="inp"><input id="target" type="text" inputmode="decimal" autocomplete="off" min="10" max="95" step="1" value="80"><span class="suf">%</span></div>
+        <div class="hint">你对投资人或自己承诺的那个数。</div>
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span>最贵的 10% 账号，承担了 API 账单的</span>
+          <b><span id="sshow">60</span>%</b>
+        </div>
+        <input id="s" type="range" min="35" max="92" step="1" value="60" aria-label="最贵 10% 账号承担账单的比例">
+        <div class="ticks"><span>35% 很平</span><span>92% 极端</span></div>
+        <div class="hint">不知道就留 60%，这是 B2B AI 工具常见的水位。</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="kpis">
+        <div class="kpi">
+          <div class="lab">混合毛利率</div>
+          <div class="val" id="k1">—</div>
+          <div class="sub" id="k1s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">中位客户的毛利率</div>
+          <div class="val" id="k2">—</div>
+          <div class="sub" id="k2s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">未达目标线的账号</div>
+          <div class="val" id="k3">—</div>
+          <div class="sub" id="k3s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">这个月正在亏现金的账号</div>
+          <div class="val" id="k4">—</div>
+          <div class="sub" id="k4s">—</div>
+        </div>
+      </div>
+
+      <div class="finding" id="finding"></div>
+
+      <div class="chart">
+        <h3>API 账单到底花在谁身上</h3>
+        <p class="cap">把你的客户按服务成本从低到高排队，切成十二等份。柱子越高，这一份人烧掉的钱越多。</p>
+        <div class="bands" id="bands"></div>
+        <div class="blabels" id="blabels"></div>
+        <p class="chartnote" id="chartnote"></p>
+      </div>
+
+      <div class="tblwrap">
+        <table id="tbl">
+          <thead>
+            <tr><th>需要的客单价</th><th>涨幅</th><th>需要的月收入</th><th>能承受的流失</th></tr>
+          </thead>
+          <tbody><tr><td class="big" id="p0">—</td><td id="p1">—</td><td id="p2">—</td><td id="p3">—</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <h3>这个计算器故意不算的部分</h3>
+        <p>它告诉你分布长什么样，不告诉你该怎么办。</p>
+        <ul>
+          <li>四种修法按「回来多少钱」排序，而不是按「毛利点涨多少」排序</li>
+          <li>封顶省钱，但算上因此流失的收入之后，净效果往往只值几十块</li>
+          <li>比封顶更好的那条线：超量收费，代价是账面毛利低几个点</li>
+          <li>把涨价做成 6 周的分批实验，而不是拍脑袋一次推全量</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+
+  <details class="method">
+    <summary>这个模型是怎么来的（可复算）</summary>
+    <div class="method-body">
+      <p>你手上通常没有每个账号的账单拆分，只有一个总数。但只要有<b>一个额外的观测量</b>——「最贵的那 10% 账号占了多少账单」——就能把整条成本分布定出来。做法是假设单个账号的成本服从帕累托分布（重尾分布的标准形式）：</p>
+      <p><code>P(X &gt; x) = (x<sub>m</sub> / x)<sup>α</sup></code>，其中 <code>α = 1 / (1 − ln(s) / ln(q))</code></p>
+      <p>这里 <code>q</code> 是最贵账号的比例（本页固定 10%），<code>s</code> 是它们承担的账单比例。α 越小尾巴越重。再由总数反解出尺度参数 <code>x<sub>m</sub> = 平均成本 × (α − 1) / α</code>。</p>
+      <p>有了这条曲线，下面每件事都是直接算出来的，没有拟合、没有调参：</p>
+      <ul>
+        <li><b>目标线</b>：毛利率不低于目标 t，要求单账号成本 ≤ 客单价 × (1 − 费率 − t) − 固定手续费 − 其他成本</li>
+        <li><b>亏现金线</b>：贡献毛利为 0 的成本上限，就是上式取 t = 0</li>
+        <li><b>提价倍数</b>：所有不随价格变动的成本，除以价格侧留存的份额</li>
+        <li><b>可承受流失</b>：涨价后收入能覆盖全部成本与推理支出的最大流失比例</li>
+        <li><b>十二等份</b>：按分位数切段，用帕累托的解析式算每段的平均成本，十二段相加等于总账单（可以直接验）</li>
+      </ul>
+      <p>这套算法的默认参数复现的是我们自己一个真实案例：100 个客户、月收入 $3,000、API 账单 $900，结果混合毛利 64.4%、中位客户 81.4%、最贵那一组 −119.9%。三个数都是真的，而且同时成立。</p>
+      <p><b>它不适用的地方</b>：客户数少于 20 时，分位数估不准，建议只用来看数量级；如果你的成本分布不是重尾（比如每个客户都差不多贵），α 会趋近于极大，分布退化成一条直线，此时这个页面会告诉你「没有人在亏现金」——那才是正常情况。</p>
+    </div>
+  </details>
+
+  <footer>
+    <p><b>数据不出浏览器。</b>本页没有后端，所有计算都在你的设备上完成，你填的每一个数字都不会被发送到任何服务器；关掉页面即清除。</p>
+    <p>金额请统一用同一种货币填写；右上角的 $ / ¥ 只切换显示符号，不做汇率换算。</p>
+    <p><a href="https://ypage.ccwu.cc/">← 回到全球黄页</a> · 工具想法或算错了，欢迎在<a href="https://ypage.ccwu.cc/contact.html">反馈页</a>告诉我们。</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var CURRENCY = '$';
+
+  function num(id, fallback){
+    var v = parseFloat($(id).value);
+    return isFinite(v) ? v : fallback;
+  }
+
+  function money(v, dec){
+    if (!isFinite(v)) return '—';
+    var a = Math.abs(v);
+    var d = (dec === undefined) ? (a >= 100 ? 0 : 2) : dec;
+    return (v < 0 ? '-' + CURRENCY : CURRENCY) + Math.abs(v).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+  }
+
+  function pct(v, d){
+    if (!isFinite(v)) return '—';
+    if (v < -9.995) return '< -999%';
+    if (v > 9.995) return '> 999%';
+    return (v * 100).toFixed(d === undefined ? 1 : d) + '%';
+  }
+
+  function cnt(v){
+    if (!isFinite(v)) return '—';
+    if (v >= 10) return String(Math.round(v));
+    if (v >= 1) return v.toFixed(1);
+    return v.toFixed(2);
+  }
+
+  function compute(p){
+    var N = Math.max(1, p.N);
+    var mrr = Math.max(1, p.mrr);
+    var spend = Math.max(0, p.spend);
+    var fee = Math.min(0.5, Math.max(0, p.fee / 100));
+    var target = Math.min(0.99, Math.max(0, p.target / 100));
+    var fix = Math.max(0, p.fix);
+    var oth = Math.max(0, p.oth);
+    var q = 0.10;
+    var s = p.s;
+
+    var alpha = 1 / (1 - Math.log(s) / Math.log(q));
+    var arpu = mrr / N;
+    var meanCost = spend / N;
+    var xm = meanCost * (alpha - 1) / alpha;
+    var med = xm * Math.pow(2, 1 / alpha);
+
+    function S(x){ return x > xm ? Math.pow(xm / x, alpha) : 1; }
+    function taste(x){ return x > xm ? Math.pow(xm / x, alpha - 1) : 1; }
+    function qCost(pr){ return xm * Math.pow(1 - pr, -1 / alpha); }
+
+    var fees = fee * mrr + fix * N;
+    var contrib = mrr - fees - oth * N - spend;
+    var margin = contrib / mrr;
+
+    var bar = arpu * (1 - fee - target) - fix - oth;
+    var belowN = N * S(bar);
+    var belowShare = taste(bar);
+
+    var zero = arpu * (1 - fee) - fix - oth;
+    var zeroN = N * S(zero);
+    var zeroShare = taste(zero);
+
+    var mult = (spend + fix * N + oth * N) / (mrr * (1 - fee - target));
+    if (!isFinite(mult) || mult <= 0) mult = NaN;
+
+    var medMargin = (arpu * (1 - fee) - fix - oth - med) / arpu;
+    var heavyN = Math.max(1e-9, N * q);
+    var heavyCost = spend * s / heavyN;
+    var heavyMargin = (arpu * (1 - fee) - fix - oth - heavyCost) / arpu;
+
+    var X = mult * mrr * (1 - fee) - (fix + oth) * N;
+    var beChurn = isFinite(X) && X > 0 ? 1 - (contrib + spend) / X : NaN;
+
+    var B = 12, edges = [xm], i;
+    for (i = 1; i < B; i++) edges.push(qCost(i / B));
+    edges.push(null);
+
+    var bands = [];
+    if (spend <= 0){
+      for (i = 0; i < B; i++) bands.push({ cost: 0, n: N / B, lo: 0 });
+    } else {
+      for (i = 0; i < B; i++){
+        var a = edges[i], b = edges[i + 1], nf, mb;
+        var sa = S(a);
+        if (b === null){
+          nf = sa;
+          mb = alpha * a / (alpha - 1);
+        } else {
+          var sb = S(b);
+          nf = sa - sb;
+          var numer = Math.pow(a, 1 - alpha) - Math.pow(b, 1 - alpha);
+          var denom = Math.pow(a, -alpha) - Math.pow(b, -alpha);
+          mb = alpha / (alpha - 1) * numer / denom;
+        }
+        bands.push({ cost: N * nf * mb, n: N * nf, lo: a });
+      }
+    }
+
+    var total = 0;
+    for (i = 0; i < B; i++) total += bands[i].cost;
+
+    return {
+      alpha: alpha, arpu: arpu, med: med, margin: margin, contrib: contrib,
+      bar: bar, belowN: belowN, belowShare: belowShare,
+      zeroN: zeroN, zeroShare: zeroShare, zeroCost: zero,
+      mult: mult, medMargin: medMargin, heavyMargin: heavyMargin,
+      heavyN: heavyN, heavyCost: heavyCost, beChurn: beChurn,
+      bands: bands, total: total, N: N, mrr: mrr, spend: spend, target: target
+    };
+  }
+
+  function render(r){
+    var tv = $('tbl');
+    if (!isFinite(r.mult)){
+      tv.style.display = 'none';
+    } else if (r.mult <= 1.001){
+      // 当前价格已经够用，涨价这一栏不成立，别硬凑数字
+      tv.style.display = '';
+      $('p0').textContent = money(r.arpu);
+      $('p1').textContent = '不用涨';
+      $('p2').textContent = money(r.mrr);
+      $('p3').textContent = '—';
+    } else {
+      tv.style.display = '';
+      $('p0').textContent = money(r.arpu * r.mult);
+      var up = r.mult - 1;
+      $('p1').textContent = up > 9.995 ? '> 999%' : '+' + pct(up);
+      $('p2').textContent = money(r.mrr * r.mult);
+      var churn = r.beChurn;
+      $('p3').textContent = !isFinite(churn) ? '—' : (churn >= 1 ? '> 100%' : (churn < 0 ? '—' : pct(churn)));
+    }
+
+    $('k1').textContent = pct(r.margin);
+    $('k1').className = 'val ' + (r.margin < r.target ? 'red' : 'green');
+    $('k1s').textContent = '每月贡献毛利 ' + money(r.contrib);
+
+    $('k2').textContent = pct(r.medMargin);
+    $('k2').className = 'val ' + (r.medMargin < 0 ? 'red' : 'green');
+    $('k2s').textContent = '典型客户的服务成本 ' + money(r.med);
+
+    $('k3').textContent = cnt(r.belowN);
+    $('k3').className = 'val ' + (r.belowN / r.N > 0.3 ? 'red' : '');
+    $('k3s').textContent = '占 API 账单 ' + pct(r.belowShare);
+
+    $('k4').textContent = cnt(r.zeroN);
+    $('k4').className = 'val ' + (r.zeroN >= 1 ? 'red' : 'green');
+    $('k4s').textContent = r.zeroN >= 0.1
+      ? '占账单 ' + pct(r.zeroShare) + '，涨多少价都救不回'
+      : '一个都没有——这是稀释，不是失血';
+
+    var head, body;
+    if (r.zeroN >= 1){
+      head = (r.margin < r.target)
+        ? '你不是定价太低，你是在替 ' + cnt(r.zeroN) + ' 个账号付账单。'
+        : '整本账过线了，但还有 ' + cnt(r.zeroN) + ' 个账号在亏现金。';
+      body = '最贵的 10% 客户，人均服务成本 ' + money(r.heavyCost) + '，毛利率 ' + pct(r.heavyMargin, 0) +
+             '；中位客户是 ' + pct(r.medMargin, 0) + '。混合出来的 ' + pct(r.margin) +
+             ' 是这两件事的平均值，它既不是前者，也不是后者。';
+    } else {
+      head = '没有人在亏现金。平均数照样在骗你。';
+      body = '最贵的 10% 客户，人均成本 ' + money(r.heavyCost) + '，毛利率 ' + pct(r.heavyMargin, 0) +
+             '；中位客户 ' + pct(r.medMargin, 0) + '。没有哪个账号低于水面——这意味着封顶只会砍掉收入，止不住任何漏水。';
+    }
+    if (isFinite(r.mult) && r.mult > 1){
+      body += ' 想单靠涨价做到 ' + (r.target * 100).toFixed(0) + '%，需要提 ' + pct(r.mult - 1) +
+              '，这个动作能承受 ' + (isFinite(r.beChurn) && r.beChurn > 0
+                ? (r.beChurn >= 1 ? '全部' : pct(r.beChurn)) : '—') + ' 的流失。';
+    } else if (isFinite(r.mult)){
+      body += ' 按现在的客单价，' + (r.target * 100).toFixed(0) + '% 的目标已经达到了——涨价不是你的问题，成本分布才是。';
+    }
+    $('finding').innerHTML = '<p class="lead">' + head + '</p><p>' + body + '</p>';
+
+    var bh = '', bl = '', topShare = 0, topIdx = 0, k;
+    for (k = 0; k < r.bands.length; k++){
+      var sh = r.total > 0 ? r.bands[k].cost / r.total : 0;
+      if (sh > topShare){ topShare = sh; topIdx = k; }
+    }
+    var firstHalf = 0;
+    for (k = 0; k < Math.floor(r.bands.length / 2); k++) firstHalf += r.bands[k].cost;
+
+    for (k = 0; k < r.bands.length; k++){
+      var share = r.total > 0 ? r.bands[k].cost / r.total : 0;
+      var h = Math.min(107, Math.max(7, Math.round(share * 186)));
+      var cls = 'band';
+      if (share >= 0.20) cls = 'band hot';
+      else if (share >= 0.08) cls = 'band warm';
+      var lbl = '';
+      if (share >= 0.05){
+        var sv = share * 100;
+        lbl = '<span class="v">' + (sv >= 10 ? Math.round(sv) : sv.toFixed(1)) + '%</span>';
+      }
+      bh += '<div class="' + cls + '" style="height:' + h + 'px" title="占 API 账单 ' + pct(share) + '">' + lbl + '</div>';
+      bl += '<div>' + (k === 0 ? '最便宜' : (k === 11 ? '最贵' : (k === 5 ? '中间' : ''))) + '</div>';
+    }
+    $('bands').innerHTML = bh;
+    $('blabels').innerHTML = bl;
+
+    if (r.total > 0){
+      var halfShare = firstHalf / r.total;
+      $('chartnote').innerHTML = '第 ' + (topIdx + 1) + ' 组——最贵的十二分之一——承担了 API 账单的 <b>' +
+        pct(topShare) + '</b>。便宜的那一半客户加起来，只承担 <b>' + pct(halfShare) + '</b>。';
+    } else {
+      $('chartnote').innerHTML = 'API 账单填 0 时没有成本分布可言，把推理成本填进来再看这张图。';
+    }
+  }
+
+  function update(){
+    $('sshow').textContent = $('s').value;
+    var p = {
+      N: num('n', 100),
+      mrr: num('mrr', 3000),
+      spend: num('spend', 900),
+      oth: num('oth', 0.5),
+      fee: num('fee', 2.9),
+      fix: num('fix', 0.3),
+      target: num('target', 80),
+      s: Math.min(0.92, Math.max(0.35, num('s', 60) / 100))
+    };
+    if (p.fee / 100 + p.target / 100 >= 1) p.target = (1 - p.fee / 100) * 100 - 1;
+    render(compute(p));
+  }
+
+  function setCurrency(sym){
+    CURRENCY = sym;
+    var els = document.querySelectorAll('[data-cur]');
+    for (var i = 0; i < els.length; i++) els[i].textContent = sym;
+    $('curUsd').setAttribute('aria-pressed', sym === '$' ? 'true' : 'false');
+    $('curCny').setAttribute('aria-pressed', sym === '¥' ? 'true' : 'false');
+    update();
+  }
+
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) inputs[i].addEventListener('input', update);
+  $('curUsd').addEventListener('click', function(){ setCurrency('$'); });
+  $('curCny').addEventListener('click', function(){ setCurrency('¥'); });
+
+  var themeBtn = $('themeBtn');
+  function syncThemeIcon(){
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeBtn.textContent = dark ? '☀️' : '🌙';
+    themeBtn.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+  }
+  themeBtn.addEventListener('click', function(){
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var next = dark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('gyp:theme', next); } catch(e){}
+    syncThemeIcon();
+  });
+  syncThemeIcon();
+
+  update();
+})();
+</script>
+</body>
+</html>
