@@ -107,9 +107,8 @@
   .tool-ico{width:44px;height:44px;flex:0 0 44px;font-size:21px}
   .tool-go{align-self:flex-end}
 }
-@media (prefers-color-scheme:dark){
-  .tool-ico{background:linear-gradient(135deg,#1b2436,#151a2e)}
-}
+/* 图标底色只跟随站点的 data-theme，不要用 prefers-color-scheme：
+   站点浅色主题下系统的深色偏好会让图标变成深底，与页面脱节 */
 :root[data-theme="dark"] .tool-ico{background:linear-gradient(135deg,#1b2436,#151a2e)}
 </style><!-- TOOLS-CSS:END -->
 <!-- STATIC-CSS:START --><style>
