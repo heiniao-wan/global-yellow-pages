@@ -83,7 +83,8 @@
 </style><!-- GUIDES-CSS:END -->
 <!-- TOOLS-CSS:START --><style>
 
-.tools-sec{padding:52px 0 8px;background:var(--bg-alt,#fafafc)}
+/* 位置上移到 hero 之后：去掉原来的浅灰底带，避免紧贴首屏形成一条灰条 */
+.tools-sec{padding:6px 0 4px;background:transparent}
 .tool-grid{margin-top:16px}
 .tool-card{
   display:flex;align-items:center;gap:18px;
@@ -210,6 +211,25 @@ html.js-on .static-feed{display:none}
   </div>
 </section>
 
+<!-- TOOLS-BLOCK:START -->
+<section class="tools-sec" aria-label="免费工具">
+  <div class="wrap">
+    <div class="section-head"><h2>免费工具</h2><span class="section-note">导航之外，有些数直接算给你看</span></div>
+    <div class="tool-grid">
+      <a class="tool-card" href="https://ypage.ccwu.cc/calc/ai-margin">
+        <span class="tool-ico" aria-hidden="true">📊</span>
+        <div class="tool-body">
+          <p class="tool-k">免费 · 不用注册 · 数据不出浏览器</p>
+          <h3>AI 产品毛利率计算器</h3>
+          <p>填客户数、月收入、API 账单，看清混合毛利率背后藏着几个正在亏现金的账号、单靠涨价要提多少、这个动作能承受多少流失。</p>
+        </div>
+        <span class="tool-go">打开计算器 →</span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- TOOLS-BLOCK:END -->
+
 <!-- ── 分类栏 ── -->
 <!-- ── 最新发现（热点追踪，持续自动更新） ── -->
 <section class="trend" id="trendSection">
@@ -284,100 +304,6 @@ html.js-on .static-feed{display:none}
         <button id="brokenSel" class="filter-toggle" type="button">⚠ 仅看问题站点</button>
       </div>
     </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <!-- TOOLS-BLOCK:START -->
-<section class="tools-sec" aria-label="免费工具">
-  <div class="wrap">
-    <div class="section-head"><h2>免费工具</h2><span class="section-note">导航之外，有些数直接算给你看</span></div>
-    <div class="tool-grid">
-      <a class="tool-card" href="https://ypage.ccwu.cc/calc/ai-margin">
-        <span class="tool-ico" aria-hidden="true">📊</span>
-        <div class="tool-body">
-          <p class="tool-k">免费 · 不用注册 · 数据不出浏览器</p>
-          <h3>AI 产品毛利率计算器</h3>
-          <p>填客户数、月收入、API 账单，看清混合毛利率背后藏着几个正在亏现金的账号、单靠涨价要提多少、这个动作能承受多少流失。</p>
-        </div>
-        <span class="tool-go">打开计算器 →</span>
-      </a>
-    </div>
-  </div>
-</section>
-<!-- TOOLS-BLOCK:END -->
 
     <!-- GUIDES-BLOCK:START (由 tools/gen-collections.py 生成，勿手改) -->
 <section class="guides-sec" aria-label="主题合辑"><div class="wrap"><div class="section-head"><h2>主题合辑</h2><span class="section-note">5 份编辑精选 · 按任务串联的网站动线</span></div><div class="gc-grid"><a class="gc-card" href="https://ypage.ccwu.cc/guides/indie-hacker.html"><p class="gc-k">从写下第一行代码，到收到第一笔美元</p><h3>独立开发者出海工具箱</h3><p>一个人做产品出海，中间隔着建站、开发、设计、文案、合规好几道坎。这份合辑把这条动线上的关键站点串成一条线…</p><p class="gc-n">14 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/ai-content.html"><p class="gc-k">从选题脚本到成片发布，一条线走完</p><h3>AI 内容创作流水线</h3><p>做自媒体的都知道，瓶颈从来不是「不会剪」，是每条内容都要重新想选题、写脚本、找素材、配音轨。这份合辑按创…</p><p class="gc-n">15 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/mech-engineer.html"><p class="gc-k">选型、样本、行业动态，一条检索动线</p><h3>机械工程师每日工具箱</h3><p>机械工程师的日常，大半时间花在「找资料」上：这个轴承的额定载荷多少、这家主机的液压系统什么参数、行业里又…</p><p class="gc-n">18 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/job-hunt.html"><p class="gc-k">找工作不从投简历开始，从研究公司开始</p><h3>求职跳槽情报站</h3><p>多数人找工作的顺序错了：先海投简历，再被动等待。高效的动线是反过来的——先在招聘平台看机会分布，摸清哪些…</p><p class="gc-n">13 个站点 →</p></a><a class="gc-card" href="https://ypage.ccwu.cc/guides/deep-research.html"><p class="gc-k">从检索、验证到沉淀，完整的工具链</p><h3>一个人做深度研究</h3><p>深度研究的难点不在找资料，在交叉验证和信息沉淀。这份合辑按流程排：先用 AI 搜索快速建立全貌，再回到权…</p><p class="gc-n">14 个站点 →</p></a></div><p class="gc-more"><a href="https://ypage.ccwu.cc/guides.html">查看全部合辑 →</a></p></div></section>
