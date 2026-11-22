@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your AI product's real gross margin</title>
+<meta name="description" content="Enter four numbers you already have. See what your AI product actually earns per customer, which accounts are cash-negative, and how much you would have to raise prices to hit your target.">
+<link rel="canonical" href="https://ypage.ccwu.cc/calc/ai-margin-en">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Global Yellow Pages">
+<meta property="og:title" content="Your AI product's real gross margin">
+<meta property="og:description" content="Four numbers in, and you see the margin of your median customer, how many accounts are cash-negative, and what a price rise would have to be.">
+<meta property="og:url" content="https://ypage.ccwu.cc/calc/ai-margin-en">
+<meta property="og:image" content="https://ypage.ccwu.cc/assets/img/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  --paper:#FCFCFA; --card:#FFFFFF; --ink:#17170F; --mid:#6E6E63; --faint:#9A9A8E;
+  --line:#E2E1D8; --red:#B3382C; --green:#2F7A4F; --amber:#A87A12;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:44px 24px 90px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:600;margin:0 0 14px}
+h1{font-size:34px;line-height:1.18;letter-spacing:-.02em;font-weight:600;margin:0 0 14px;max-width:760px}
+.lede{font-size:16px;color:var(--mid);max-width:660px;margin:0 0 8px}
+.lede b{color:var(--ink);font-weight:500}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:44px;align-items:start;margin-top:38px}
+.grid>section{min-width:0}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr);gap:28px}h1{font-size:27px}.wrap{padding:28px 18px 70px}}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.panel h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);font-weight:600;margin:0 0 16px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--faint);margin-top:3px}
+.field input[type=number]{
+  width:100%;font:inherit;font-size:17px;padding:9px 12px;color:var(--ink);
+  background:#fff;border:1px solid var(--line);border-radius:9px;
+  appearance:textfield;-moz-appearance:textfield;
+}
+.field input[type=number]::-webkit-outer-spin-button,
+.field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.field input[type=number]:focus{outline:2px solid #C9C7B8;outline-offset:-1px;border-color:#C9C7B8}
+.slider-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.slider-row span{font-size:12.5px;color:var(--mid)}
+.slider-row b{font-size:15px;font-weight:600;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--red);margin:2px 0 0}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);margin-top:2px}
+
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:18px}
+@media(max-width:520px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:#fff;padding:16px 18px}
+.kpi .lab{font-size:11.5px;color:var(--mid);margin-bottom:6px;line-height:1.35}
+.kpi .val{font-size:29px;font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.kpi .sub{font-size:11.5px;color:var(--faint);margin-top:5px}
+.kpi .val.red{color:var(--red)}
+.kpi .val.green{color:var(--green)}
+
+.finding{background:#fff;border:1px solid var(--line);border-left:3px solid var(--red);border-radius:10px;padding:16px 18px;margin-bottom:18px}
+.finding p{margin:0 0 8px;font-size:14.5px}
+.finding p:last-child{margin-bottom:0}
+.finding .lead{font-weight:600;font-size:15px;letter-spacing:-.01em}
+
+.chart{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 12px;margin-bottom:18px}
+.chart h3{font-size:12.5px;font-weight:600;color:var(--mid);margin:0 0 4px}
+.chart .cap{font-size:11.5px;color:var(--faint);margin:0 0 16px}
+.bands{display:flex;align-items:flex-end;gap:5px;height:132px}
+.band{flex:1;min-width:0;background:#D9D7CC;border-radius:3px 3px 0 0;position:relative;min-height:8px}
+.band.hot{background:var(--red)}
+.band.warm{background:#D9967E}
+.band .v{position:absolute;left:50%;transform:translateX(-50%);top:-15px;font-size:10px;color:var(--mid);white-space:nowrap}
+.blabels{display:flex;gap:5px;margin-top:7px;border-top:1px solid #EFEEE6;padding-top:5px}
+.blabels div{flex:1;min-width:0;text-align:center;font-size:9.5px;color:var(--faint);white-space:nowrap;overflow:hidden}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;min-width:430px}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid #EFEEE6}
+@media(max-width:520px){
+  table{font-size:11px;min-width:0}
+  th,td{padding:7px 6px;line-height:1.35}
+  th{font-size:9.5px;letter-spacing:.03em}
+}
+.chartnote{font-size:12.5px;color:var(--mid);margin:12px 0 2px;line-height:1.5}
+.chartnote b{color:var(--ink);font-weight:600}
+
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);font-weight:600;background:#FAFAF6}
+tbody tr:last-child td{border-bottom:none}
+td.neg{color:var(--red);font-weight:500}
+td.pos{color:var(--green);font-weight:500}
+
+.foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--faint);max-width:760px}
+.foot b{color:var(--mid);font-weight:500}
+.cta{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:26px}
+.cta h3{margin:0 0 8px;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.cta p{margin:0 0 10px;font-size:13.5px;color:var(--mid);max-width:640px}
+.cta ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--mid)}
+.cta li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p style="margin:0 0 26px;font-size:13px;color:var(--faint)">
+    <a href="https://ypage.ccwu.cc/" style="color:var(--mid);text-decoration:none;border-bottom:1px solid var(--line)">← Global Yellow Pages</a>
+    &nbsp;·&nbsp;
+    <a href="https://ypage.ccwu.cc/calc/ai-margin" style="color:var(--mid);text-decoration:none;border-bottom:1px solid var(--line)">中文版</a>
+  </p>
+  <p class="eyebrow">Free calculator · no signup · runs in your browser</p>
+  <h1>Your AI product's gross margin is probably a number you cannot repeat next month.</h1>
+  <p class="lede">Every AI SaaS reports one blended margin. That number assumes each customer costs roughly the same to serve. <b>They don't.</b> Enter four things you already have in your Stripe and OpenAI dashboards and you'll see the spread underneath the average.</p>
+
+  <div class="grid">
+
+    <section class="panel">
+      <h2>Your numbers</h2>
+
+      <div class="field">
+        <label for="n">Paying customers</label>
+        <input id="n" type="number" min="1" max="100000" step="1" value="100">
+      </div>
+
+      <div class="field">
+        <label for="mrr">Monthly revenue</label>
+        <input id="mrr" type="number" min="1" max="100000000" step="100" value="3000">
+      </div>
+
+      <div class="field">
+        <label for="spend">Monthly API bill</label>
+        <input id="spend" type="number" min="0" max="100000000" step="50" value="900">
+        <div class="hint">Inference only. Not your own ChatGPT subscription.</div>
+      </div>
+
+      <div class="field">
+        <label for="oth">Other cost per customer</label>
+        <input id="oth" type="number" min="0" max="10000" step="0.05" value="0.5">
+        <div class="hint">Storage, support, vector DB. Average is fine.</div>
+      </div>
+
+      <div class="field">
+        <label for="fee">Payment processing</label>
+        <input id="fee" type="number" min="0" max="20" step="0.1" value="2.9">
+        <div class="hint">Percent. Stripe is 2.9% + $0.30.</div>
+      </div>
+
+      <div class="field">
+        <label for="target">Target gross margin</label>
+        <input id="target" type="number" min="10" max="95" step="1" value="80">
+        <div class="hint">Percent. What you'd report to an investor.</div>
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span>Top 10% of accounts carry</span>
+          <b><span id="sshow">60</span>% of the bill</b>
+        </div>
+        <input id="s" type="range" min="35" max="92" step="1" value="60">
+        <div class="ticks"><span>35% flat</span><span>92% brutal</span></div>
+        <div class="hint">60% is a typical answer for B2B AI tools.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="kpis">
+        <div class="kpi">
+          <div class="lab">Blended gross margin</div>
+          <div class="val" id="k1">—</div>
+          <div class="sub" id="k1s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Median customer's margin</div>
+          <div class="val" id="k2">—</div>
+          <div class="sub" id="k2s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Accounts below your target</div>
+          <div class="val" id="k3">—</div>
+          <div class="sub" id="k3s">—</div>
+        </div>
+        <div class="kpi">
+          <div class="lab">Accounts losing cash this month</div>
+          <div class="val" id="k4">—</div>
+          <div class="sub" id="k4s">—</div>
+        </div>
+      </div>
+
+      <div class="finding" id="finding"></div>
+
+      <div class="chart">
+        <h3>Where the API bill actually goes</h3>
+        <p class="cap">Your customers, cut into twelve equal groups from cheapest to most expensive to serve.</p>
+        <div class="bands" id="bands"></div>
+        <div class="blabels" id="blabels"></div>
+        <p class="chartnote" id="chartnote"></p>
+      </div>
+
+      <div class="tblwrap">
+        <table id="tbl">
+          <thead>
+            <tr><th>Price you would need</th><th>Increase</th><th>Revenue needed</th><th>Churn it can absorb</th></tr>
+          </thead>
+          <tbody><tr><td id="p0">—</td><td id="p1">—</td><td id="p2">—</td><td id="p3">—</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="cta">
+        <h3>What this calculator deliberately leaves out</h3>
+        <p>It shows the spread. It does not tell you what to do about it.</p>
+        <ul>
+          <li>Four repairs ranked by dollars returned, not by margin points</li>
+          <li>What a usage cap actually saves once you count the revenue it removes</li>
+          <li>The overage price that beats the cap, and the margin it costs you</li>
+          <li>How to run the price change as a 6-week cohort test instead of a guess</li>
+        </ul>
+      </div>
+
+      <div class="foot">
+        <b>How this works.</b> The cost distribution is fitted to a Pareto curve from two observations you can estimate without exporting anything: the share of your bill carried by your top 10% of accounts, and the total bill. Everything is computed in your browser — nothing you type leaves the page. The server records an anonymous page view and nothing else: no cookies, no account, no ad script.
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  function num(id, fallback){
+    var v = parseFloat($(id).value);
+    return isFinite(v) ? v : fallback;
+  }
+
+  function money(v){
+    if (!isFinite(v)) return '—';
+    var a = Math.abs(v);
+    var d = a >= 100 ? 0 : 2;
+    return (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+  }
+
+  function pct(v, d){ return (v * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+
+  function compute(p){
+    var N = Math.max(1, p.N);
+    var mrr = Math.max(1, p.mrr);
+    var spend = Math.max(0, p.spend);
+    var fee = p.fee / 100;
+    var target = p.target / 100;
+    var q = 0.10;
+    var s = p.s;
+
+    var alpha = 1 / (1 - Math.log(s) / Math.log(q));
+    var arpu = mrr / N;
+    var meanCost = spend / N;
+    var xm = meanCost * (alpha - 1) / alpha;
+    var med = xm * Math.pow(2, 1 / alpha);
+
+    function S(x){ return x > xm ? Math.pow(xm / x, alpha) : 1; }
+    function taste(x){ return x > xm ? Math.pow(xm / x, alpha - 1) : 1; }
+    function qCost(pr){ return xm * Math.pow(1 - pr, -1 / alpha); }
+
+    var fees = fee * mrr + 0.30 * N;
+    var contrib = mrr - fees - p.oth * N - spend;
+    var margin = contrib / mrr;
+
+    var bar = arpu * (1 - fee - target) - 0.30 - p.oth;
+    var belowN = N * S(bar);
+    var belowShare = taste(bar);
+
+    var zero = arpu * (1 - fee) - 0.30 - p.oth;
+    var zeroN = N * S(zero);
+    var zeroShare = taste(zero);
+
+    var mult = (spend + 0.30 * N + p.oth * N) / (mrr * (1 - fee - target));
+    if (!isFinite(mult) || mult <= 0) mult = NaN;
+
+    var medMargin = (arpu * (1 - fee) - 0.30 - p.oth - med) / arpu;
+    var heavyN = N * q;
+    var heavyCost = spend * s / heavyN;
+    var heavyMargin = (arpu * (1 - fee) - 0.30 - p.oth - heavyCost) / arpu;
+
+    var X = mult * mrr * (1 - fee) - (0.30 + p.oth) * N;
+    var beChurn = isFinite(X) ? 1 - (contrib + spend) / X : NaN;
+
+    var B = 12, edges = [xm], i;
+    for (i = 1; i < B; i++) edges.push(qCost(i / B));
+    edges.push(null);
+
+    var bands = [];
+    if (spend <= 0){
+      for (i = 0; i < B; i++) bands.push({ cost: 0, n: N / B, lo: 0 });
+    } else {
+      for (i = 0; i < B; i++){
+        var a = edges[i], b = edges[i + 1], nf, mb;
+        var sa = S(a);
+        if (b === null){
+          nf = sa;
+          mb = alpha * a / (alpha - 1);
+        } else {
+          var sb = S(b);
+          nf = sa - sb;
+          var numer = Math.pow(a, 1 - alpha) - Math.pow(b, 1 - alpha);
+          var denom = Math.pow(a, -alpha) - Math.pow(b, -alpha);
+          mb = alpha / (alpha - 1) * numer / denom;
+        }
+        bands.push({ cost: N * nf * mb, n: N * nf, lo: a });
+      }
+    }
+
+    var total = 0;
+    for (i = 0; i < B; i++) total += bands[i].cost;
+
+    return {
+      alpha: alpha, arpu: arpu, med: med, margin: margin, contrib: contrib,
+      bar: bar, belowN: belowN, belowShare: belowShare,
+      zeroN: zeroN, zeroShare: zeroShare, zeroCost: zero,
+      mult: mult, medMargin: medMargin, heavyMargin: heavyMargin,
+      heavyN: heavyN, heavyCost: heavyCost, beChurn: beChurn,
+      bands: bands, total: total, N: N, mrr: mrr, spend: spend, target: target
+    };
+  }
+
+  function render(r){
+    var tv = $('tbl');
+    if (!isFinite(r.mult)){
+      tv.style.display = 'none';
+    } else {
+      tv.style.display = '';
+      $('p0').textContent = money(r.arpu * r.mult);
+      $('p1').textContent = '+' + pct(r.mult - 1);
+      $('p2').textContent = money(r.mrr * r.mult);
+      $('p3').textContent = isFinite(r.beChurn) ? pct(r.beChurn) : '—';
+    }
+
+    $('k1').textContent = pct(r.margin);
+    $('k1').className = 'val ' + (r.margin < r.target ? 'red' : 'green');
+    $('k1s').textContent = money(r.contrib) + ' contribution per month';
+
+    $('k2').textContent = pct(r.medMargin);
+    $('k2').className = 'val ' + (r.medMargin < 0 ? 'red' : 'green');
+    $('k2s').textContent = 'the typical customer costs ' + money(r.med) + ' to serve';
+
+    $('k3').textContent = r.belowN >= 10 ? Math.round(r.belowN) : r.belowN.toFixed(1);
+    $('k3').className = 'val ' + (r.belowN / r.N > 0.3 ? 'red' : '');
+    $('k3s').textContent = 'holding ' + pct(r.belowShare) + ' of the API bill';
+
+    $('k4').textContent = r.zeroN >= 10 ? Math.round(r.zeroN) : r.zeroN.toFixed(1);
+    $('k4').className = 'val ' + (r.zeroN >= 1 ? 'red' : 'green');
+    $('k4s').textContent = r.zeroN >= 0.1
+      ? 'holding ' + pct(r.zeroShare) + ' of the bill, at any price'
+      : 'none — this is dilution, not bleeding';
+
+    var head, body;
+    if (r.zeroN >= 1){
+      head = 'You are not undercharging. You are funding ' + (r.zeroN >= 10 ? Math.round(r.zeroN) : r.zeroN.toFixed(1)) + ' accounts.';
+      body = 'Your top 10% of accounts cost ' + money(r.heavyCost) + ' each to serve and return ' + pct(r.heavyMargin, 0) +
+             ' margin. Your median customer returns ' + pct(r.medMargin, 0) + '. The blended ' + pct(r.margin) +
+             ' is the average of those two facts, and it describes neither of them.';
+    } else {
+      head = 'Nobody is losing you cash. The average is still lying to you.';
+      body = 'Your most expensive 10% of accounts cost ' + money(r.heavyCost) + ' each and return ' + pct(r.heavyMargin, 0) +
+             ', against ' + pct(r.medMargin, 0) + ' for the median customer. No single account is underwater — ' +
+             'which means a cap would cost you revenue without stopping a leak.';
+    }
+    if (isFinite(r.mult) && r.mult > 1){
+      body += ' To actually reach ' + (r.target * 100).toFixed(0) + '% by price alone you would need +' +
+              pct(r.mult - 1) + ', and it survives up to ' + (isFinite(r.beChurn) ? pct(r.beChurn) : '—') + ' churn.';
+    }
+    $('finding').innerHTML = '<p class="lead">' + head + '</p><p>' + body + '</p>';
+
+    var bh = '', bl = '', topShare = 0, topIdx = 0, k;
+    for (k = 0; k < r.bands.length; k++){
+      var sh = r.total > 0 ? r.bands[k].cost / r.total : 0;
+      if (sh > topShare){ topShare = sh; topIdx = k; }
+    }
+    var firstHalf = 0;
+    for (k = 0; k < Math.floor(r.bands.length / 2); k++) firstHalf += r.bands[k].cost;
+
+    for (k = 0; k < r.bands.length; k++){
+      var share = r.total > 0 ? r.bands[k].cost / r.total : 0;
+      var h = Math.min(118, Math.max(8, Math.round(share * 170)));
+      var cls = 'band';
+      if (share >= 0.20) cls = 'band hot';
+      else if (share >= 0.08) cls = 'band warm';
+      var lbl = share >= 0.05 ? '<span class="v">' + Math.round(share * 100) + '%</span>' : '';
+      bh += '<div class="' + cls + '" style="height:' + h + 'px" title="' + pct(share) + ' of the API bill">' + lbl + '</div>';
+      bl += '<div>' + (k === 0 ? 'cheapest' : (k === 11 ? 'worst' : (k === 5 ? 'middle' : ''))) + '</div>';
+    }
+    $('bands').innerHTML = bh;
+    $('blabels').innerHTML = bl;
+
+    var halfShare = r.total > 0 ? firstHalf / r.total : 0;
+    $('chartnote').innerHTML = 'Group ' + (topIdx + 1) + ' — the most expensive twelfth — carries <b>' +
+      pct(topShare) + '</b> of the API bill. The cheaper half of your customers carries <b>' + pct(halfShare) + '</b>.';
+  }
+
+  function update(){
+    $('sshow').textContent = $('s').value;
+    var p = {
+      N: num('n', 100),
+      mrr: num('mrr', 3000),
+      spend: num('spend', 900),
+      oth: num('oth', 0.5),
+      fee: num('fee', 2.9),
+      target: num('target', 80),
+      s: Math.min(0.92, Math.max(0.35, num('s', 60) / 100))
+    };
+    if (p.fee / 100 + p.target / 100 >= 1) p.target = (1 - p.fee / 100) * 100 - 1;
+    render(compute(p));
+  }
+
+  var inputs = document.querySelectorAll('input');
+  for (var i = 0; i < inputs.length; i++) inputs[i].addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>
